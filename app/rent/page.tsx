@@ -3,7 +3,7 @@ import { EmptyState } from "@/components/marketplace/empty-state";
 import { FilterBar } from "@/components/marketplace/filter-bar";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { Section } from "@/components/site/section";
-import { getCitiesForIntent, getListings } from "@/lib/marketplace-data";
+import { getCitiesForIntent, getListings, type ListingSummary } from "@/lib/marketplace-data";
 
 type RentPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -18,11 +18,21 @@ function valueFromParam(param: string | string[] | undefined): string {
   return Array.isArray(param) ? param[0] ?? "" : param ?? "";
 }
 
+const propertyTypes: Array<ListingSummary["propertyType"]> = ["Apartment", "Condo", "Villa", "Shophouse", "Land"];
+
+function getPropertyType(value: string): ListingSummary["propertyType"] | "any" | undefined {
+  if (!value) return undefined;
+  if (value === "any") return "any";
+  return propertyTypes.includes(value as ListingSummary["propertyType"])
+    ? (value as ListingSummary["propertyType"])
+    : undefined;
+}
+
 export default async function RentPage({ searchParams }: RentPageProps) {
   const params = await searchParams;
   const q = valueFromParam(params.q);
   const city = valueFromParam(params.city);
-  const propertyType = valueFromParam(params.propertyType);
+  const propertyType = getPropertyType(valueFromParam(params.propertyType));
   const bedroomsRaw = valueFromParam(params.bedrooms);
   const bedrooms = bedroomsRaw ? Number(bedroomsRaw) : undefined;
 
@@ -46,7 +56,7 @@ export default async function RentPage({ searchParams }: RentPageProps) {
           intent="rent"
           cities={getCitiesForIntent("rent")}
           selectedCity={city || "any"}
-          selectedPropertyType={propertyType || "any"}
+          selectedPropertyType={propertyType ?? "any"}
           selectedBedrooms={bedroomsRaw}
           query={q}
         />
