@@ -28,7 +28,11 @@ export const valuationSchema = z.object({
 export const contactSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email().max(200),
-  phone: z.string().min(6).max(30).optional(),
+  phone: z.string().min(6).max(30).optional().or(z.literal("")),
+  company: z.string().max(120).optional(),
+  listingsRequired: z.coerce.number().int().positive().max(5000).optional(),
+  inquiryType: z.string().max(80).optional(),
+  selectedPlan: z.string().max(80).optional(),
   subject: z.string().min(3).max(160),
   message: safeText
 });

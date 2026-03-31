@@ -25,7 +25,7 @@ export type ListingSummary = {
   coverImageUrl: string;
   gallery: string[];
   description: string;
-  videoTourUrl?: string;
+  videoTourUrls?: string[];
   virtualTourUrl?: string;
   ownerName: string;
   ownerRole: "Owner" | "Agent" | "Developer";
@@ -58,7 +58,7 @@ export type ListingFilters = {
 
 const LISTINGS: ListingSummary[] = [
   {
-    id: "l1", slug: "modern-2br-condo-bkk1-phnom-penh", title: "Modern 2BR Condo with Balcony in BKK1", intent: "buy", propertyType: "Condo", city: "Phnom Penh", district: "BKK1", neighborhood: "Tonle Bassac", addressLine: "Street 294, BKK1", priceUsd: 148000, bedrooms: 2, bathrooms: 2, floorAreaSqm: 86, landAreaSqm: null, furnishing: "Furnished", amenities: ["balcony", "gym", "parking", "pool"], isVerified: true, isFeatured: true, isNew: true, source: "agent", coverImageUrl: "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1200&q=80", gallery: ["https://images.unsplash.com/photo-1560185007-5f0bb1866cab?auto=format&fit=crop&w=1200&q=80", "https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1200&q=80"], description: "Turn-key condo in central BKK1 with secure parking, gym access, and strong rental demand from expat tenants.", videoTourUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", ownerName: "Sokha Realty", ownerRole: "Agent", ownerPhone: "+855 12 888 210"
+    id: "l1", slug: "modern-2br-condo-bkk1-phnom-penh", title: "Modern 2BR Condo with Balcony in BKK1", intent: "buy", propertyType: "Condo", city: "Phnom Penh", district: "BKK1", neighborhood: "Tonle Bassac", addressLine: "Street 294, BKK1", priceUsd: 148000, bedrooms: 2, bathrooms: 2, floorAreaSqm: 86, landAreaSqm: null, furnishing: "Furnished", amenities: ["balcony", "gym", "parking", "pool"], isVerified: true, isFeatured: true, isNew: true, source: "agent", coverImageUrl: "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1200&q=80", gallery: ["https://images.unsplash.com/photo-1560185007-5f0bb1866cab?auto=format&fit=crop&w=1200&q=80", "https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1200&q=80"], description: "Turn-key condo in central BKK1 with secure parking, gym access, and strong rental demand from expat tenants.", videoTourUrls: ["https://www.youtube.com/embed/dQw4w9WgXcQ"], ownerName: "Sokha Realty", ownerRole: "Agent", ownerPhone: "+855 12 888 210"
   },
   {
     id: "l2", slug: "riverside-shophouse-daun-penh", title: "Riverside Shophouse Near Night Market", intent: "buy", propertyType: "Shophouse", city: "Phnom Penh", district: "Daun Penh", neighborhood: "Riverside", addressLine: "Sisowath Quay", priceUsd: 395000, bedrooms: 4, bathrooms: 5, floorAreaSqm: 260, landAreaSqm: 95, furnishing: "Unfurnished", amenities: ["balcony", "parking"], isVerified: true, isFeatured: false, isNew: false, source: "owner", coverImageUrl: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=1200&q=80", gallery: ["https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"], description: "Mixed-use shophouse positioned for F&B, boutique retail, or serviced apartment conversion.", ownerName: "Dara Chhun", ownerRole: "Owner", ownerPhone: "+855 11 330 812"
@@ -79,6 +79,15 @@ const LISTINGS: ListingSummary[] = [
 
 export const MARKET_STATS = { verifiedListings: 1482, averageResponseHours: 3, managedDistricts: 24 } as const;
 
+
+
+function applyMediaCaps(listing: ListingSummary): ListingSummary {
+  return {
+    ...listing,
+    gallery: listing.gallery.slice(0, 10),
+    videoTourUrls: (listing.videoTourUrls ?? []).slice(0, 2)
+  };
+}
 export function getListings(filters: ListingFilters): ListingSummary[] {
   let rows = LISTINGS.filter((listing) => {
     if (listing.intent !== filters.intent) return false;
@@ -106,11 +115,14 @@ export function getListings(filters: ListingFilters): ListingSummary[] {
     case "featured": rows = [...rows].sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured)); break;
   }
 
-  return rows;
+  return rows.map(applyMediaCaps);
 }
 
-export const getListingBySlug = (slug: string) => LISTINGS.find((listing) => listing.slug === slug) ?? null;
-export const getRelatedListings = (listing: ListingSummary) => LISTINGS.filter((candidate) => candidate.slug !== listing.slug && candidate.intent === listing.intent && candidate.city === listing.city).slice(0, 3);
-export const getFeaturedListings = () => LISTINGS.filter((listing) => listing.isFeatured).slice(0, 4);
+export const getListingBySlug = (slug: string) => {
+  const listing = LISTINGS.find((row) => row.slug === slug);
+  return listing ? applyMediaCaps(listing) : null;
+};
+export const getRelatedListings = (listing: ListingSummary) => LISTINGS.filter((candidate) => candidate.slug !== listing.slug && candidate.intent === listing.intent && candidate.city === listing.city).slice(0, 3).map(applyMediaCaps);
+export const getFeaturedListings = () => LISTINGS.filter((listing) => listing.isFeatured).slice(0, 4).map(applyMediaCaps);
 export const getCitiesForIntent = (intent: ListingIntent) => Array.from(new Set(LISTINGS.filter((l) => l.intent === intent).map((l) => l.city)));
-export const getAllListings = () => LISTINGS;
+export const getAllListings = () => LISTINGS.map(applyMediaCaps);

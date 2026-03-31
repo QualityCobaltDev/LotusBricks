@@ -12,14 +12,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid contact payload", issues: parsed.error.flatten() }, { status: 400 });
   }
 
+  const planContext = [
+    parsed.data.selectedPlan ? `Plan: ${parsed.data.selectedPlan}` : null,
+    parsed.data.inquiryType ? `Inquiry: ${parsed.data.inquiryType}` : null,
+    parsed.data.company ? `Company: ${parsed.data.company}` : null,
+    parsed.data.listingsRequired ? `Listings required: ${parsed.data.listingsRequired}` : null
+  ]
+    .filter(Boolean)
+    .join(" | ");
+
   leads.unshift({
     id: createId("lead"),
     type: "contact",
     sourcePage: "/contact",
     name: parsed.data.name,
     email: parsed.data.email,
-    phone: parsed.data.phone,
-    message: `${parsed.data.subject}: ${parsed.data.message}`,
+    phone: parsed.data.phone || undefined,
+    message: `${parsed.data.subject}: ${parsed.data.message}${planContext ? `\n${planContext}` : ""}`,
     status: "new",
     createdAt: new Date().toISOString()
   });
@@ -27,7 +36,7 @@ export async function POST(request: Request) {
   await sendEmail({
     to: OFFICIAL_CONTACT.email,
     subject: `New contact form: ${parsed.data.subject}`,
-    html: genericConfirmationTemplate({ name: "Admin", title: "New contact form submission", summary: `${parsed.data.name} sent a ${parsed.data.subject} message.` }),
+    html: genericConfirmationTemplate({ name: "Admin", title: "New contact form submission", summary: `${parsed.data.name} sent a ${parsed.data.subject} message.${planContext ? ` ${planContext}` : ""}` }),
     type: "contact_admin"
   });
 
