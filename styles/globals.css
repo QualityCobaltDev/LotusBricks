@@ -4,6 +4,22 @@
 
 :root {
   color-scheme: light;
+  --color-primary: #1f4ecf;
+  --color-primary-hover: #173faa;
+  --color-secondary: #cf2146;
+  --color-accent: #ef3b5d;
+  --color-background: #f8f9fc;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f1f4f9;
+  --color-border: #e3e8f2;
+  --color-text: #151f34;
+  --color-text-muted: #53607a;
+  --color-focus-ring: #3f6ef2;
+  --color-success: #13875a;
+  --color-warning: #c86d0d;
+  --color-error: #a9163a;
+  --color-info: #106cbf;
+  --color-overlay: rgb(21 31 52 / 0.56);
 }
 
 html {
@@ -11,11 +27,11 @@ html {
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-neutral-50 text-neutral-900 antialiased;
 }
 
 a {
-  @apply transition-colors;
+  @apply text-primary-700 transition-colors hover:text-primary-800;
 }
 
 img {
@@ -23,8 +39,18 @@ img {
 }
 
 :focus-visible {
-  outline: 2px solid #275dff;
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  @apply border-neutral-300 bg-white text-neutral-900 placeholder:text-neutral-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-200;
+}
+
+button:disabled {
+  @apply cursor-not-allowed opacity-60;
 }
 
 .skip-link {
@@ -33,7 +59,7 @@ img {
   top: -3rem;
   z-index: 100;
   border-radius: 0.75rem;
-  background: #0f172a;
+  background: #162f6f;
   color: white;
   padding: 0.75rem 1rem;
 }

@@ -2,18 +2,21 @@ import { cn } from "@/lib/utils";
 
 type BadgeProps = {
   children: React.ReactNode;
-  tone?: "neutral" | "success" | "brand" | "default";
+  tone?: "draft" | "verified" | "featured" | "success" | "warning" | "error" | "info";
 };
 
-export function Badge({ children, tone = "neutral" }: BadgeProps) {
+export function Badge({ children, tone = "draft" }: BadgeProps) {
   return (
     <span
       className={cn(
         "inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
-        tone === "success" && "bg-emerald-100 text-emerald-800",
-        tone === "brand" && "bg-brand-100 text-brand-700",
-        tone === "default" && "bg-amber-100 text-amber-800",
-        tone === "neutral" && "bg-slate-100 text-slate-700"
+        tone === "verified" && "bg-primary-100 text-primary-800",
+        tone === "featured" && "bg-secondary-100 text-secondary-700",
+        tone === "success" && "bg-success-100 text-success-800",
+        tone === "warning" && "bg-warning-100 text-warning-800",
+        tone === "error" && "bg-secondary-100 text-secondary-800",
+        tone === "info" && "bg-info-100 text-info-800",
+        tone === "draft" && "bg-neutral-100 text-neutral-700"
       )}
     >
       {children}

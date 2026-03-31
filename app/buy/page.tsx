@@ -55,10 +55,10 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   return (
     <Section className="py-10">
       <header className="max-w-3xl">
-        <h1 className="text-3xl font-bold text-slate-900 md:text-4xl">Buy property in Cambodia</h1>
-        <p className="mt-2 text-slate-600">Search verified for-sale inventory across Phnom Penh and key growth cities.</p>
+        <h1 className="text-3xl font-bold text-neutral-900 md:text-4xl">Buy property in Cambodia</h1>
+        <p className="mt-2 text-neutral-600">Search verified for-sale inventory across Phnom Penh and key growth cities.</p>
       </header>
-      <p className="mt-3 text-sm text-slate-600">{listings.length} listings found</p>
+      <p className="mt-3 text-sm text-neutral-600">{listings.length} listings found</p>
 
       <div className="mt-6">
         <FilterBar
@@ -87,7 +87,7 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
         </div>
       ) : (
         <div className="mt-8 flex justify-center">
-          <button className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700" type="button">
+          <button className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700" type="button">
             Load more listings
           </button>
         </div>
