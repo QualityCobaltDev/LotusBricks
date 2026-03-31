@@ -34,14 +34,22 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   const city = valueFromParam(params.city);
   const propertyType = getPropertyType(valueFromParam(params.propertyType));
   const bedroomsRaw = valueFromParam(params.bedrooms);
+  const bathroomsRaw = valueFromParam(params.bathrooms);
   const bedrooms = bedroomsRaw ? Number(bedroomsRaw) : undefined;
+  const bathrooms = bathroomsRaw ? Number(bathroomsRaw) : undefined;
 
   const listings = getListings({
     intent: "buy",
     q: q || undefined,
     city: city || undefined,
     propertyType: propertyType || undefined,
-    bedrooms
+    bedrooms,
+    bathrooms,
+    verifiedOnly: valueFromParam(params.verifiedOnly) === "1",
+    featuredOnly: valueFromParam(params.featuredOnly) === "1",
+    newOnly: valueFromParam(params.newOnly) === "1",
+    pool: valueFromParam(params.pool) === "1",
+    gym: valueFromParam(params.gym) === "1"
   });
 
   return (
@@ -50,6 +58,7 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
         <h1 className="text-3xl font-bold text-slate-900 md:text-4xl">Buy property in Cambodia</h1>
         <p className="mt-2 text-slate-600">Search verified for-sale inventory across Phnom Penh and key growth cities.</p>
       </header>
+      <p className="mt-3 text-sm text-slate-600">{listings.length} listings found</p>
 
       <div className="mt-6">
         <FilterBar
@@ -58,6 +67,7 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
           selectedCity={city || "any"}
           selectedPropertyType={propertyType ?? "any"}
           selectedBedrooms={bedroomsRaw}
+          selectedBathrooms={bathroomsRaw}
           query={q}
         />
       </div>

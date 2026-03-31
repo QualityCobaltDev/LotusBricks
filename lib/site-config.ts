@@ -1,3 +1,5 @@
+import { OFFICIAL_CONTACT } from "@/lib/contact";
+
 export const siteConfig = {
   name: "RightBricks",
   shortName: "RightBricks",
@@ -7,16 +9,17 @@ export const siteConfig = {
   domain: "https://www.rightbricks.online",
   locale: "en_US",
   themeColor: "#275DFF",
-  contactEmail: "hello@rightbricks.online",
-  contactPhoneDisplay: "+855 12 888 210",
-  contactPhoneHref: "+85512888210",
+  contactEmail: OFFICIAL_CONTACT.email,
+  contactPhoneDisplay: OFFICIAL_CONTACT.phoneDisplay,
+  contactPhoneHref: OFFICIAL_CONTACT.phoneHref,
   nav: [
     { href: "/buy", label: "Buy" },
     { href: "/rent", label: "Rent" },
     { href: "/sell", label: "Sell" },
     { href: "/landlords", label: "Landlords" },
     { href: "/developers", label: "Developers" },
-    { href: "/pricing", label: "Pricing" }
+    { href: "/pricing", label: "Pricing" },
+    { href: "/contact", label: "Contact" }
   ] as const,
   social: {
     ogImage: "/og-image.png"
