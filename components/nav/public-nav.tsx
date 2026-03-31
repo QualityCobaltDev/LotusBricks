@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ButtonLink } from "@/components/site/button-link";
 import { siteConfig } from "@/lib/site-config";
+import { getCurrentUser } from "@/lib/auth";
 
-export function PublicNav() {
+export async function PublicNav() {
+  const user = await getCurrentUser();
   return (
     <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur">
       <nav className="mx-auto max-w-7xl px-4 py-3 md:px-6" aria-label="Primary">
@@ -23,9 +25,7 @@ export function PublicNav() {
 
           <div className="hidden items-center gap-2 md:flex">
             <a href={`tel:${siteConfig.contactPhoneHref}`} className="text-sm text-neutral-700 hover:text-primary-700">{siteConfig.contactPhoneDisplay}</a>
-            <Link href="/auth/login" className="text-sm text-neutral-700 hover:text-primary-700">
-              Sign in
-            </Link>
+            {user ? <Link href={user.role === "ADMIN" || user.role === "OPS" ? "/admin" : "/account"} className="text-sm text-neutral-700 hover:text-primary-700">Account</Link> : <Link href="/auth/login" className="text-sm text-neutral-700 hover:text-primary-700">Sign in</Link>}
             <ButtonLink href="/request-valuation">List your property</ButtonLink>
           </div>
         </div>
@@ -46,9 +46,7 @@ export function PublicNav() {
             </ul>
             <div className="mt-4 flex flex-col gap-2">
               <a href={`mailto:${siteConfig.contactEmail}`} className="text-sm text-neutral-700 hover:text-primary-700">{siteConfig.contactEmail}</a>
-              <Link href="/auth/login" className="text-sm text-neutral-700 hover:text-primary-700">
-                Sign in
-              </Link>
+              {user ? <Link href={user.role === "ADMIN" || user.role === "OPS" ? "/admin" : "/account"} className="text-sm text-neutral-700 hover:text-primary-700">Account</Link> : <Link href="/auth/login" className="text-sm text-neutral-700 hover:text-primary-700">Sign in</Link>}
               <ButtonLink href="/request-valuation">List your property</ButtonLink>
             </div>
           </div>

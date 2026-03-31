@@ -1,16 +1,18 @@
-import { leads, emailLogs } from "@/lib/server-store";
+export const dynamic = "force-dynamic";
 
-export default function AdminHomePage() {
-  const newLeads = leads.filter((l) => l.status === "new").length;
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-neutral-900">Admin Control Center</h1>
-      <p className="mt-2 text-neutral-600">Manage listings, leads, communication reliability, and contact settings.</p>
-      <div className="mt-5 grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-neutral-200 bg-white p-4"><p className="text-sm text-neutral-500">Total leads</p><p className="text-2xl font-bold">{leads.length}</p></div>
-        <div className="rounded-xl border border-neutral-200 bg-white p-4"><p className="text-sm text-neutral-500">New leads</p><p className="text-2xl font-bold">{newLeads}</p></div>
-        <div className="rounded-xl border border-neutral-200 bg-white p-4"><p className="text-sm text-neutral-500">Email logs</p><p className="text-2xl font-bold">{emailLogs.length}</p></div>
-      </div>
-    </div>
-  );
+import { prisma } from "@/lib/prisma";
+
+export default async function AdminHomePage() {
+  const [users, listings, saved, requests, reports] = await Promise.all([
+    prisma.user.count(), prisma.managedListing.count(), prisma.savedListing.count(), prisma.viewingRequest.count(), prisma.listingReport.count()
+  ]);
+  const cards = [
+    ["Total users", users],
+    ["Managed listings", listings],
+    ["Saved properties", saved],
+    ["Viewing requests", requests],
+    ["Listing reports", reports]
+  ];
+
+  return <div><h1 className="text-2xl font-bold text-neutral-900">Admin Control Center</h1><p className="mt-2 text-neutral-600">Operational overview of customer and marketplace activity.</p><div className="mt-5 grid gap-4 md:grid-cols-3">{cards.map(([label, val]) => <div key={String(label)} className="rounded-xl border border-neutral-200 bg-white p-4"><p className="text-sm text-neutral-500">{label}</p><p className="text-2xl font-bold">{val}</p></div>)}</div></div>;
 }
