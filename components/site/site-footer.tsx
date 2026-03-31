@@ -7,13 +7,14 @@ const footerLinks = {
     { href: "/buy", label: "Buy" },
     { href: "/rent", label: "Rent" },
     { href: "/sell", label: "Sell" },
-    { href: "/pricing", label: "Pricing" }
+    { href: "/pricing", label: "Pricing" },
+    { href: "/contact", label: "Contact" }
   ],
-  partners: [
-    { href: "/landlords", label: "Landlords" },
-    { href: "/developers", label: "Developers" },
-    { href: "/dashboard", label: "Seller Dashboard" },
-    { href: "/admin", label: "Admin" }
+  support: [
+    { href: "/help", label: "Help Center" },
+    { href: "/about", label: "About" },
+    { href: "/legal/privacy", label: "Privacy Policy" },
+    { href: "/legal/terms", label: "Terms" }
   ]
 } as const;
 
@@ -43,9 +44,9 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900">For Partners</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900">Support</h2>
             <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              {footerLinks.partners.map((link) => (
+              {footerLinks.support.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-brand-700">
                     {link.label}
@@ -58,16 +59,9 @@ export function SiteFooter() {
           <div>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900">Contact</h2>
             <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li>
-                <a href={`tel:${siteConfig.contactPhoneHref}`} className="hover:text-brand-700">
-                  {siteConfig.contactPhoneDisplay}
-                </a>
-              </li>
-              <li>
-                <a href={`mailto:${siteConfig.contactEmail}`} className="hover:text-brand-700">
-                  {siteConfig.contactEmail}
-                </a>
-              </li>
+              <li><a href={`tel:${siteConfig.contactPhoneHref}`} className="hover:text-brand-700">{siteConfig.contactPhoneDisplay}</a></li>
+              <li><a href={`mailto:${siteConfig.contactEmail}`} className="hover:text-brand-700">{siteConfig.contactEmail}</a></li>
+              <li>Support: Mon-Sat, 8:00 AM - 8:00 PM</li>
             </ul>
           </div>
         </div>

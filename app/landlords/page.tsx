@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ButtonLink } from "@/components/site/button-link";
 import { Section } from "@/components/site/section";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Landlord Tools",
@@ -26,6 +27,14 @@ export default function LandlordsPage() {
         <ButtonLink href="/dashboard" variant="secondary">
           View dashboard
         </ButtonLink>
+      </div>
+          <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="text-xl font-semibold text-slate-900">FAQs</h2>
+        <ul className="mt-3 space-y-2 text-sm text-slate-700">
+          <li>• How quickly can RightBricks launch my listings? Usually within 24-48 hours after verification.</li>
+          <li>• How do leads work? Leads are captured, tracked, and surfaced in admin workflows with statuses.</li>
+          <li>• Need direct support? <a href={`tel:${siteConfig.contactPhoneHref}`} className="text-brand-700">{siteConfig.contactPhoneDisplay}</a> or <a href={`mailto:${siteConfig.contactEmail}`} className="text-brand-700">{siteConfig.contactEmail}</a></li>
+        </ul>
       </div>
     </Section>
   );

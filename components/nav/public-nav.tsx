@@ -22,6 +22,7 @@ export function PublicNav() {
           </ul>
 
           <div className="hidden items-center gap-2 md:flex">
+            <a href={`tel:${siteConfig.contactPhoneHref}`} className="text-sm text-slate-700 hover:text-brand-700">{siteConfig.contactPhoneDisplay}</a>
             <Link href="/auth/login" className="text-sm text-slate-700 hover:text-brand-700">
               Sign in
             </Link>
@@ -44,6 +45,7 @@ export function PublicNav() {
               ))}
             </ul>
             <div className="mt-4 flex flex-col gap-2">
+              <a href={`mailto:${siteConfig.contactEmail}`} className="text-sm text-slate-700 hover:text-brand-700">{siteConfig.contactEmail}</a>
               <Link href="/auth/login" className="text-sm text-slate-700 hover:text-brand-700">
                 Sign in
               </Link>
