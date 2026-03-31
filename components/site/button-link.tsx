@@ -1,8 +1,9 @@
+import type { ComponentProps } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 type ButtonLinkProps = {
-  href: string;
+  href: ComponentProps<typeof Link>["href"];
   children: React.ReactNode;
   variant?: "primary" | "secondary";
   className?: string;

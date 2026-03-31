@@ -1,23 +1,34 @@
+import type { Metadata } from "next";
+import { ButtonLink } from "@/components/site/button-link";
+
 const plans = [
   {
     name: "Starter",
     price: "$29",
     description: "For individual sellers testing demand.",
-    features: ["1 active listing", "Lead inbox", "Basic analytics"]
+    features: ["1 active listing", "Lead inbox", "Basic analytics"],
+    ctaHref: "/request-valuation"
   },
   {
     name: "Growth",
     price: "$79",
     description: "For serious landlords and multi-unit owners.",
-    features: ["10 active listings", "Viewing scheduler", "Offer tracking"]
+    features: ["10 active listings", "Viewing scheduler", "Offer tracking"],
+    ctaHref: "/landlords"
   },
   {
     name: "Pro Partner",
     price: "$199",
     description: "For agents and developers who need scale.",
-    features: ["Unlimited listings", "Partner CRM", "Priority support"]
+    features: ["Unlimited listings", "Partner CRM", "Priority support"],
+    ctaHref: "/developers"
   }
-];
+] as const;
+
+export const metadata: Metadata = {
+  title: "Pricing",
+  description: "Compare seller, landlord, and developer plans on RightBricks."
+};
 
 export default function PricingPage() {
   return (
@@ -38,9 +49,9 @@ export default function PricingPage() {
                 <li key={feature}>• {feature}</li>
               ))}
             </ul>
-            <button className="mt-5 w-full rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+            <ButtonLink href={plan.ctaHref} className="mt-5 w-full">
               Choose {plan.name}
-            </button>
+            </ButtonLink>
           </article>
         ))}
       </section>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/marketplace/badge";
 import type { ListingSummary } from "@/lib/marketplace-data";
@@ -7,16 +8,16 @@ type ListingCardProps = {
 };
 
 function formatPrice(listing: ListingSummary): string {
-  if (listing.intent === "rent") {
-    return `$${listing.priceUsd.toLocaleString()} / month`;
-  }
+  if (listing.intent === "rent") return `$${listing.priceUsd.toLocaleString()} / month`;
   return `$${listing.priceUsd.toLocaleString()}`;
 }
 
 export function ListingCard({ listing }: ListingCardProps) {
   return (
-    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <img src={listing.coverImageUrl} alt={listing.title} className="h-52 w-full object-cover" />
+    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative h-52 w-full">
+        <Image src={listing.coverImageUrl} alt={listing.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+      </div>
       <div className="space-y-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge>{listing.propertyType}</Badge>
@@ -30,7 +31,11 @@ export function ListingCard({ listing }: ListingCardProps) {
         </div>
         <p className="text-xl font-bold text-brand-700">{formatPrice(listing)}</p>
         <p className="text-sm text-slate-700">
-          {[listing.bedrooms ? `${listing.bedrooms} bed` : null, listing.bathrooms ? `${listing.bathrooms} bath` : null, listing.floorAreaSqm ? `${listing.floorAreaSqm} sqm` : null]
+          {[
+            listing.bedrooms ? `${listing.bedrooms} bed` : null,
+            listing.bathrooms ? `${listing.bathrooms} bath` : null,
+            listing.floorAreaSqm ? `${listing.floorAreaSqm} sqm` : null
+          ]
             .filter(Boolean)
             .join(" • ")}
         </p>

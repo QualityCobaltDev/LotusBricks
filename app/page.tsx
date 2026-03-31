@@ -3,10 +3,14 @@ import { ListingCard } from "@/components/marketplace/listing-card";
 import { ButtonLink } from "@/components/site/button-link";
 import { Section } from "@/components/site/section";
 import { MARKET_STATS, getFeaturedListings } from "@/lib/marketplace-data";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Cambodia Property Marketplace",
-  description: "Search verified Cambodia listings to buy or rent and connect directly with trusted owners and agents."
+  description: "Search verified Cambodia listings to buy or rent and connect directly with trusted owners and agents.",
+  alternates: {
+    canonical: "/"
+  }
 };
 
 const quickPaths = [
@@ -18,8 +22,20 @@ const quickPaths = [
 export default function HomePage() {
   const featuredListings = getFeaturedListings();
 
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: siteConfig.name,
+    url: siteConfig.domain,
+    email: siteConfig.contactEmail,
+    telephone: siteConfig.contactPhoneDisplay,
+    description: siteConfig.description
+  };
+
   return (
     <div className="pb-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+
       <Section className="py-12 md:py-16">
         <div className="grid gap-10 md:grid-cols-2 md:items-center">
           <div className="space-y-5">

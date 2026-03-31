@@ -1,27 +1,44 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/marketplace/badge";
 import { ListingCard } from "@/components/marketplace/listing-card";
+import { ButtonLink } from "@/components/site/button-link";
 import { Section } from "@/components/site/section";
-import { getListingBySlug, getRelatedListings } from "@/lib/marketplace-data";
+import { getAllListings, getListingBySlug, getRelatedListings } from "@/lib/marketplace-data";
+import { siteConfig } from "@/lib/site-config";
 
 type ListingDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateStaticParams() {
+  return getAllListings().map((listing) => ({ slug: listing.slug }));
+}
 
 export async function generateMetadata({ params }: ListingDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const listing = getListingBySlug(slug);
 
   if (!listing) {
-    return {
-      title: "Listing not found"
-    };
+    return { title: "Listing not found" };
   }
 
+  const title = `${listing.title} in ${listing.city}`;
+  const description = `${listing.propertyType} in ${listing.district}, ${listing.city}. ${listing.intent === "rent" ? "Rent" : "Buy"} at $${listing.priceUsd.toLocaleString()}.`;
+  const canonical = `/listings/${listing.slug}`;
+
   return {
-    title: listing.title,
-    description: `${listing.propertyType} in ${listing.district}, ${listing.city}. ${listing.intent === "rent" ? "Rent" : "Buy"} at $${listing.priceUsd.toLocaleString()}.`
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      images: [{ url: listing.coverImageUrl }]
+    }
   };
 }
 
@@ -29,24 +46,51 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
   const { slug } = await params;
   const listing = getListingBySlug(slug);
 
-  if (!listing) {
-    notFound();
-  }
+  if (!listing) notFound();
 
   const related = getRelatedListings(listing);
+  const contactPhoneHref = listing.ownerPhone.replace(/\s+/g, "");
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Residence",
+    name: listing.title,
+    description: listing.description,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: listing.city,
+      addressRegion: listing.district,
+      streetAddress: listing.addressLine,
+      addressCountry: "KH"
+    },
+    image: [listing.coverImageUrl, ...listing.gallery],
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "USD",
+      price: listing.priceUsd,
+      availability: "https://schema.org/InStock",
+      url: `${siteConfig.domain}/listings/${listing.slug}`
+    }
+  };
 
   return (
     <Section className="py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+
       <article className="space-y-8">
         <header className="grid gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-4">
-            <img src={listing.coverImageUrl} alt={listing.title} className="h-[380px] w-full rounded-2xl object-cover" />
+            <div className="relative h-[380px] w-full overflow-hidden rounded-2xl">
+              <Image src={listing.coverImageUrl} alt={listing.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 66vw" priority />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               {listing.gallery.map((imageUrl) => (
-                <img key={imageUrl} src={imageUrl} alt={`${listing.title} gallery`} className="h-40 w-full rounded-xl object-cover" />
+                <div key={imageUrl} className="relative h-40 w-full overflow-hidden rounded-xl">
+                  <Image src={imageUrl} alt={`${listing.title} gallery`} fill className="object-cover" sizes="(max-width: 1024px) 50vw, 33vw" />
+                </div>
               ))}
             </div>
           </div>
+
           <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap gap-2">
               <Badge>{listing.propertyType}</Badge>
@@ -73,6 +117,10 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
                 <dt>Floor area</dt>
                 <dd>{listing.floorAreaSqm ? `${listing.floorAreaSqm} sqm` : "N/A"}</dd>
               </div>
+              <div className="flex justify-between">
+                <dt>Land area</dt>
+                <dd>{listing.landAreaSqm ? `${listing.landAreaSqm} sqm` : "N/A"}</dd>
+              </div>
             </dl>
           </aside>
         </header>
@@ -93,31 +141,23 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
               </ul>
             </div>
           </div>
+
           <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">Enquire now</h2>
-            <p className="mt-1 text-sm text-slate-600">Send your viewing request directly to the listing owner.</p>
-            <form className="mt-4 space-y-3">
-              <input aria-label="Your name" placeholder="Your name" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-              <input
-                aria-label="Email"
-                type="email"
-                placeholder="Email"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <textarea
-                aria-label="Message"
-                placeholder="I want to schedule a viewing this week"
-                rows={4}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-              <button type="button" className="w-full rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
-                Send enquiry
-              </button>
-            </form>
+            <p className="mt-1 text-sm text-slate-600">This lead form is still MVP-stage, so use the direct owner contact actions below for live traffic.</p>
+            <div className="mt-4 space-y-3">
+              <ButtonLink href={`tel:${contactPhoneHref}`}>Call owner</ButtonLink>
+              <ButtonLink href={`mailto:${siteConfig.contactEmail}?subject=${encodeURIComponent(`Property enquiry: ${listing.title}`)}`} variant="secondary">
+                Email RightBricks
+              </ButtonLink>
+            </div>
             <p className="mt-4 text-sm text-slate-700">
               Contact: {listing.ownerName} ({listing.ownerRole})
             </p>
             <p className="text-sm text-slate-700">Phone: {listing.ownerPhone}</p>
+            <Link href="/request-valuation" className="mt-4 inline-flex text-sm font-medium text-brand-700 hover:text-brand-500">
+              Want to list a similar property? →
+            </Link>
           </aside>
         </section>
 

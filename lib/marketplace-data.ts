@@ -51,7 +51,8 @@ const LISTINGS: ListingSummary[] = [
     landAreaSqm: null,
     isVerified: true,
     isFeatured: true,
-    coverImageUrl: "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1200&q=80",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1200&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1560185007-5f0bb1866cab?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1200&q=80"
@@ -78,11 +79,13 @@ const LISTINGS: ListingSummary[] = [
     landAreaSqm: 95,
     isVerified: true,
     isFeatured: false,
-    coverImageUrl: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=1200&q=80",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=1200&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
     ],
-    description: "Mixed-use shophouse positioned for F&B, boutique retail, or serviced apartment conversion.",
+    description:
+      "Mixed-use shophouse positioned for F&B, boutique retail, or serviced apartment conversion.",
     ownerName: "Dara Chhun",
     ownerRole: "Owner",
     ownerPhone: "+855 11 330 812"
@@ -103,11 +106,13 @@ const LISTINGS: ListingSummary[] = [
     landAreaSqm: 310,
     isVerified: false,
     isFeatured: true,
-    coverImageUrl: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1572120360610-d971b9b63956?auto=format&fit=crop&w=1200&q=80"
     ],
-    description: "Quiet residential villa with private garden and parking, suitable for local families and retirees.",
+    description:
+      "Quiet residential villa with private garden and parking, suitable for local families and retirees.",
     ownerName: "Angkor Habitat",
     ownerRole: "Agent",
     ownerPhone: "+855 92 551 990"
@@ -128,11 +133,13 @@ const LISTINGS: ListingSummary[] = [
     landAreaSqm: null,
     isVerified: true,
     isFeatured: false,
-    coverImageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80"
     ],
-    description: "Affordable, fully furnished studio with weekly cleaning, ideal for professionals and digital nomads.",
+    description:
+      "Affordable, fully furnished studio with weekly cleaning, ideal for professionals and digital nomads.",
     ownerName: "Urban Living KH",
     ownerRole: "Agent",
     ownerPhone: "+855 10 667 122"
@@ -153,11 +160,13 @@ const LISTINGS: ListingSummary[] = [
     landAreaSqm: null,
     isVerified: true,
     isFeatured: true,
-    coverImageUrl: "https://images.unsplash.com/photo-1616594039964-3f63b43e6b1f?auto=format&fit=crop&w=1200&q=80",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1616594039964-3f63b43e6b1f?auto=format&fit=crop&w=1200&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80"
     ],
-    description: "Premium penthouse with river views, fitness center access, and 24/7 security concierge.",
+    description:
+      "Premium penthouse with river views, fitness center access, and 24/7 security concierge.",
     ownerName: "Mekong Prime Estates",
     ownerRole: "Agent",
     ownerPhone: "+855 97 770 450"
@@ -178,11 +187,13 @@ const LISTINGS: ListingSummary[] = [
     landAreaSqm: 420,
     isVerified: false,
     isFeatured: false,
-    coverImageUrl: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1576941089067-2de3c901e126?auto=format&fit=crop&w=1200&q=80"
     ],
-    description: "Peaceful villa with mature garden and pet-friendly policy, built for long-stay families.",
+    description:
+      "Peaceful villa with mature garden and pet-friendly policy, built for long-stay families.",
     ownerName: "Sreypov Lim",
     ownerRole: "Owner",
     ownerPhone: "+855 61 421 904"
@@ -228,4 +239,8 @@ export function getFeaturedListings(): ListingSummary[] {
 
 export function getCitiesForIntent(intent: ListingIntent): string[] {
   return Array.from(new Set(LISTINGS.filter((l) => l.intent === intent).map((l) => l.city)));
+}
+
+export function getAllListings(): ListingSummary[] {
+  return LISTINGS;
 }
