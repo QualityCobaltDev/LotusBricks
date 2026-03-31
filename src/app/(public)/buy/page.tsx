@@ -1,12 +1,6 @@
 import { ListingGrid } from "@/components/marketplace/listing-grid";
-import { getListingsByMode } from "@/lib/db";
+import { getListings } from "@/lib/marketplace";
 
 export default function BuyPage() {
-  return (
-    <section>
-      <h1>Buy Properties</h1>
-      <p>Explore market-ready homes with transparent pricing and guided support.</p>
-      <ListingGrid listings={getListingsByMode("buy")} ctaLabel="Book tour" />
-    </section>
-  );
+  return <div className="grid" style={{ gap: "1rem" }}><h1>Buy Properties</h1><ListingGrid listings={getListings("buy")} /></div>;
 }

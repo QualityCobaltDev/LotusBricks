@@ -27,15 +27,9 @@ export function RegisterForm() {
         router.push(routes.account);
       }}
     >
-      <FormField label="Full name" error={error ?? undefined}>
-        <Input name="name" required />
-      </FormField>
-      <FormField label="Email">
-        <Input name="email" type="email" required />
-      </FormField>
-      <FormField label="Password" help="At least 8 characters.">
-        <Input name="password" type="password" minLength={8} required />
-      </FormField>
+      <FormField label="Full name" error={error ?? undefined}><Input name="name" required /></FormField>
+      <FormField label="Email"><Input name="email" type="email" required /></FormField>
+      <FormField label="Password" help="At least 8 characters."><Input name="password" type="password" minLength={8} required /></FormField>
       <Button type="submit">Create account</Button>
     </form>
   );

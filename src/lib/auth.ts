@@ -3,15 +3,24 @@ export type AuthPayload = {
   password: string;
 };
 
+export type AuthResult = { ok: boolean; message?: string; role?: "admin" | "customer" };
+
 export const validateEmail = (email: string): boolean => /\S+@\S+\.\S+/.test(email);
 
-export const login = async ({ email, password }: AuthPayload): Promise<{ ok: boolean; message?: string }> => {
-  if (!validateEmail(email)) return { ok: false, message: "Please provide a valid email." };
-  if (password.length < 8) return { ok: false, message: "Password must be at least 8 characters." };
-  return { ok: true };
-};
+export async function login(payload: AuthPayload): Promise<AuthResult> {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return response.json();
+}
 
-export const register = async (payload: AuthPayload & { name: string }) => {
-  if (!payload.name.trim()) return { ok: false, message: "Name is required." };
-  return login(payload);
-};
+export async function register(payload: AuthPayload & { name: string }): Promise<AuthResult> {
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return response.json();
+}

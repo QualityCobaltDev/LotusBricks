@@ -5,6 +5,7 @@ const links = [
   { label: "Overview", href: routes.admin },
   { label: "Listings", href: routes.adminListings },
   { label: "Users", href: routes.adminUsers },
+  { label: "Inquiries", href: routes.adminInquiries },
   { label: "Reports", href: routes.adminReports }
 ];
 

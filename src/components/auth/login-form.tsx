@@ -28,15 +28,12 @@ export function LoginForm() {
         const result = await login({ email, password });
         setLoading(false);
         if (!result.ok) return setError(result.message ?? "Login failed.");
-        router.push(next as Route);
+        const destination = result.role === "admin" && next === routes.account ? routes.admin : next;
+        router.push(destination as Route);
       }}
     >
-      <FormField label="Email" error={error ?? undefined}>
-        <Input name="email" type="email" required />
-      </FormField>
-      <FormField label="Password">
-        <Input name="password" type="password" minLength={8} required />
-      </FormField>
+      <FormField label="Email" error={error ?? undefined}><Input name="email" type="email" required /></FormField>
+      <FormField label="Password"><Input name="password" type="password" minLength={8} required /></FormField>
       <Button type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</Button>
     </form>
   );
