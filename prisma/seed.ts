@@ -15,7 +15,18 @@ function hashPassword(raw: string) {
 async function main() {
   const existing = await prisma.user.findFirst({ where: { OR: [{ username }, { email }] } });
   if (existing) {
-    await prisma.user.update({ where: { id: existing.id }, data: { username, role: "ADMIN", isActive: true } });
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        username,
+        email,
+        passwordHash: hashPassword(password),
+        role: "ADMIN",
+        isActive: true,
+        isVerified: true,
+        profile: { upsert: { create: { fullName: "Quality Cobalt Dev" }, update: { fullName: "Quality Cobalt Dev" } } }
+      }
+    });
   } else {
     await prisma.user.create({ data: { username, email, passwordHash: hashPassword(password), role: "ADMIN", isVerified: true, profile: { create: { fullName: "Quality Cobalt Dev" } } } });
   }

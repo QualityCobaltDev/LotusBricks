@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Section } from "@/components/site/section";
 import { LoginForm } from "@/components/auth/login-form";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Sign In", description: "Sign in to your RightBricks account." };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const user = await getCurrentUser();
+  if (user?.role === "ADMIN" || user?.role === "OPS") redirect("/admin");
+  if (user) redirect("/account");
+
   return (
     <Section className="py-12">
       <div className="mx-auto max-w-md rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">

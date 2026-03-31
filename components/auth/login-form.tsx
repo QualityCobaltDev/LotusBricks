@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 export function LoginForm() {
-  const router = useRouter();
   const search = useSearchParams();
   const [state, setState] = useState<{ loading: boolean; error?: string }>({ loading: false });
 

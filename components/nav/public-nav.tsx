@@ -25,7 +25,7 @@ export async function PublicNav() {
 
           <div className="hidden items-center gap-2 md:flex">
             <a href={`tel:${siteConfig.contactPhoneHref}`} className="text-sm text-neutral-700 hover:text-primary-700">{siteConfig.contactPhoneDisplay}</a>
-            {user ? <Link href={user.role === "ADMIN" || user.role === "OPS" ? "/admin" : "/account"} className="text-sm text-neutral-700 hover:text-primary-700">Account</Link> : <Link href="/auth/login" className="text-sm text-neutral-700 hover:text-primary-700">Sign in</Link>}
+            {user ? <Link href={user.role === "ADMIN" || user.role === "OPS" ? "/admin" : "/account"} className="text-sm text-neutral-700 hover:text-primary-700">{user.role === "ADMIN" || user.role === "OPS" ? "Admin" : "Account"}</Link> : <Link href="/auth/login" className="text-sm text-neutral-700 hover:text-primary-700">Sign in</Link>}
             <ButtonLink href="/request-valuation">List your property</ButtonLink>
           </div>
         </div>
@@ -46,7 +46,7 @@ export async function PublicNav() {
             </ul>
             <div className="mt-4 flex flex-col gap-2">
               <a href={`mailto:${siteConfig.contactEmail}`} className="text-sm text-neutral-700 hover:text-primary-700">{siteConfig.contactEmail}</a>
-              {user ? <Link href={user.role === "ADMIN" || user.role === "OPS" ? "/admin" : "/account"} className="text-sm text-neutral-700 hover:text-primary-700">Account</Link> : <Link href="/auth/login" className="text-sm text-neutral-700 hover:text-primary-700">Sign in</Link>}
+              {user ? <Link href={user.role === "ADMIN" || user.role === "OPS" ? "/admin" : "/account"} className="text-sm text-neutral-700 hover:text-primary-700">{user.role === "ADMIN" || user.role === "OPS" ? "Admin" : "Account"}</Link> : <Link href="/auth/login" className="text-sm text-neutral-700 hover:text-primary-700">Sign in</Link>}
               <ButtonLink href="/request-valuation">List your property</ButtonLink>
             </div>
           </div>
