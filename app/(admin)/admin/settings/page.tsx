@@ -17,8 +17,8 @@ export default function AdminSettingsPage() {
     <div>
       <h1 className="text-2xl font-bold">Contact & Email Settings</h1>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm"><p><strong>Phone:</strong> {siteConfig.contactPhoneDisplay}</p><p><strong>Email:</strong> {siteConfig.contactEmail}</p><p className="mt-2 text-slate-600">Managed globally across header, footer, listing pages, help, and legal pages.</p></div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4"><h2 className="font-semibold">SMTP Health Check</h2><p className="mt-2 text-sm text-slate-600">Host: mail.spacemail.com · Port: 465/587 · Secure SSL</p><div className="mt-3 flex gap-2"><input value={recipient} onChange={(e) => setRecipient(e.target.value)} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm" /><button onClick={sendTestEmail} className="rounded-lg bg-brand-500 px-3 py-2 text-sm text-white">Send test</button></div>{result ? <p className="mt-2 text-sm">{result}</p> : null}</div>
+        <div className="rounded-xl border border-neutral-200 bg-white p-4 text-sm"><p><strong>Phone:</strong> {siteConfig.contactPhoneDisplay}</p><p><strong>Email:</strong> {siteConfig.contactEmail}</p><p className="mt-2 text-neutral-600">Managed globally across header, footer, listing pages, help, and legal pages.</p></div>
+        <div className="rounded-xl border border-neutral-200 bg-white p-4"><h2 className="font-semibold">SMTP Health Check</h2><p className="mt-2 text-sm text-neutral-600">Host: mail.spacemail.com · Port: 465/587 · Secure SSL</p><div className="mt-3 flex gap-2"><input value={recipient} onChange={(e) => setRecipient(e.target.value)} className="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-sm" /><button onClick={sendTestEmail} className="rounded-lg bg-primary-600 px-3 py-2 text-sm text-white">Send test</button></div>{result ? <p className="mt-2 text-sm">{result}</p> : null}</div>
       </div>
     </div>
   );

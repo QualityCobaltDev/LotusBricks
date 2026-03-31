@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 export default function RequestValuationPage() {
   return (
     <Section className="py-12">
-      <div className="mx-auto max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-slate-900">Request a valuation</h1>
-        <p className="mt-2 text-sm text-slate-600">Share property details and our team will send a pricing recommendation and listing plan.</p>
+      <div className="mx-auto max-w-2xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+        <h1 className="text-2xl font-semibold text-neutral-900">Request a valuation</h1>
+        <p className="mt-2 text-sm text-neutral-600">Share property details and our team will send a pricing recommendation and listing plan.</p>
         <ValuationForm />
-        <p className="mt-4 text-xs text-slate-500">Need immediate support? <a href={`tel:${siteConfig.contactPhoneHref}`}>{siteConfig.contactPhoneDisplay}</a> or <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a>.</p>
+        <p className="mt-4 text-xs text-neutral-500">Need immediate support? <a href={`tel:${siteConfig.contactPhoneHref}`}>{siteConfig.contactPhoneDisplay}</a> or <a href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a>.</p>
       </div>
     </Section>
   );
