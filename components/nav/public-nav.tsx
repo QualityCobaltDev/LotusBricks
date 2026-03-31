@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ButtonLink } from "@/components/site/button-link";
 
 const links = [
   { href: "/buy", label: "Buy" },
@@ -7,11 +8,11 @@ const links = [
   { href: "/landlords", label: "Landlords" },
   { href: "/developers", label: "Developers" },
   { href: "/pricing", label: "Pricing" }
-];
+] as const;
 
 export function PublicNav() {
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
         <Link href="/" className="text-lg font-semibold text-brand-700">
           RightBricks
@@ -27,16 +28,13 @@ export function PublicNav() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link href="/auth/login" className="text-sm text-slate-700 hover:text-brand-700">
             Sign in
           </Link>
-          <Link
-            href="/request-valuation"
-            className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          >
+          <ButtonLink href="/request-valuation" className="hidden sm:inline-flex">
             List your property
-          </Link>
+          </ButtonLink>
         </div>
       </nav>
     </header>
