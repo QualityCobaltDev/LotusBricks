@@ -8,6 +8,7 @@ const footerLinks = {
     { href: "/rent", label: "Rent" },
     { href: "/sell", label: "Sell" },
     { href: "/pricing", label: "Pricing" },
+    { href: "/contact?plan=custom&inquiry=more-than-10-listings", label: "Custom Tier" },
     { href: "/contact", label: "Contact" }
   ],
   support: [

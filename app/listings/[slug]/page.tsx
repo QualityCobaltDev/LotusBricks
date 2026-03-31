@@ -36,7 +36,7 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
           <div className="space-y-4">
             <div className="relative h-[380px] w-full overflow-hidden rounded-2xl"><Image src={listing.coverImageUrl} alt={listing.title} fill className="object-cover" priority /></div>
             <div className="grid grid-cols-2 gap-3">{listing.gallery.map((imageUrl) => <div key={imageUrl} className="relative h-40 overflow-hidden rounded-xl"><Image src={imageUrl} alt={`${listing.title} gallery`} fill className="object-cover" /></div>)}</div>
-            {listing.videoTourUrl ? <iframe title="Video tour" className="h-72 w-full rounded-2xl border border-neutral-200" src={listing.videoTourUrl} /> : null}
+            {(listing.videoTourUrls ?? []).length ? <div className="grid gap-3 md:grid-cols-2">{listing.videoTourUrls?.map((url) => <iframe key={url} title="Video tour" className="h-72 w-full rounded-2xl border border-neutral-200" src={url} />)}</div> : null}
           </div>
 
           <aside className="h-fit rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
