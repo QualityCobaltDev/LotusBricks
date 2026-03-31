@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { PublicNav } from "@/components/nav/public-nav";
+import { SiteFooter } from "@/components/site/site-footer";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.rightbricks.online"),
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <PublicNav />
         <main>{children}</main>
+        <SiteFooter />
       </body>
     </html>
   );
