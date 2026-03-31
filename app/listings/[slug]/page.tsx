@@ -6,6 +6,7 @@ import { Badge } from "@/components/marketplace/badge";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { LeadForm } from "@/components/forms/lead-form";
 import { Section } from "@/components/site/section";
+import { ListingActions } from "@/components/marketplace/listing-actions";
 import { getAllListings, getListingBySlug, getRelatedListings } from "@/lib/marketplace-data";
 import { siteConfig } from "@/lib/site-config";
 
@@ -56,7 +57,7 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
             <div><h2 className="text-xl font-semibold text-neutral-900">Amenities</h2><ul className="mt-2 flex flex-wrap gap-2">{listing.amenities.map((a) => <li key={a} className="rounded-full bg-neutral-100 px-3 py-1 text-sm">{a}</li>)}</ul></div>
             <div><h2 className="text-xl font-semibold text-neutral-900">Neighborhood overview</h2><p className="mt-2 text-neutral-700">Located in {listing.neighborhood}, with access to retail, schools, and transport hubs across {listing.district}.</p></div>
           </div>
-          <aside className="h-fit rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"><h2 className="text-lg font-semibold text-neutral-900">Actions</h2><div className="mt-3 space-y-2 text-sm"><Link href="/contact" className="block text-primary-700">Schedule viewing</Link><button className="block">Save listing</button><button className="block">Share listing</button><button className="block text-secondary-700">Report listing</button></div></aside>
+          <ListingActions listingSlug={listing.slug} />
         </section>
 
         <section><h2 className="text-xl font-semibold text-neutral-900">Similar listings</h2><div className="mt-3 grid gap-4 md:grid-cols-3">{related.map((relatedListing) => <ListingCard key={relatedListing.id} listing={relatedListing} />)}</div></section>

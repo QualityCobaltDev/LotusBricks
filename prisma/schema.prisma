@@ -28,30 +28,29 @@ enum ListingStatus {
   ARCHIVED
 }
 
-enum LeadStatus {
+enum RequestStatus {
   NEW
-  CONTACTED
-  QUALIFIED
-  VIEWING_BOOKED
-  OFFER_MADE
-  CLOSED_WON
-  CLOSED_LOST
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
 model User {
-  id            String      @id @default(cuid())
-  email         String      @unique
-  passwordHash  String
-  role          UserRole
-  isVerified    Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  profile       Profile?
-  listings      Listing[]
-  leadsOwned    Lead[]      @relation("LeadOwner")
-  offers        Offer[]
-  notifications Notification[]
-  auditLogs     AuditLog[]  @relation("AuditActor")
+  id                String               @id @default(cuid())
+  email             String               @unique
+  username          String               @unique
+  passwordHash      String
+  role              UserRole             @default(BUYER)
+  isVerified        Boolean              @default(false)
+  isActive          Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  profile           Profile?
+  savedListings     SavedListing[]
+  viewingRequests   ViewingRequest[]
+  listingReports    ListingReport[]
+  shares            ListingShare[]
+  passwordResets    PasswordReset[]
 }
 
 model Profile {
@@ -66,117 +65,92 @@ model Profile {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Area {
-  id          String     @id @default(cuid())
-  city        String
-  district    String
-  slug        String     @unique
-  seoTitle    String?
-  seoDesc     String?
-  listings    Listing[]
-  createdAt   DateTime   @default(now())
-}
-
-model Listing {
-  id               String        @id @default(cuid())
-  ownerId          String
-  areaId           String
-  title            String
-  slug             String        @unique
-  description      String
-  propertyType     String
-  intent           String
-  price            Decimal       @db.Decimal(14, 2)
-  currency         String        @default("USD")
-  bedrooms         Int?
-  bathrooms        Int?
-  floorAreaSqm     Decimal?      @db.Decimal(8, 2)
-  landAreaSqm      Decimal?      @db.Decimal(8, 2)
-  status           ListingStatus @default(DRAFT)
-  publishedAt      DateTime?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  deletedAt        DateTime?
-  owner            User          @relation(fields: [ownerId], references: [id])
-  area             Area          @relation(fields: [areaId], references: [id])
-  media            ListingMedia[]
-  leads            Lead[]
-  offers           Offer[]
-
-  @@index([status, updatedAt])
-  @@index([intent, propertyType, price])
-  @@index([areaId, status])
-}
-
-model ListingMedia {
+model ListingActionBase {
   id          String   @id @default(cuid())
-  listingId   String
-  url         String
-  mimeType    String
-  sizeBytes   Int
-  sortOrder   Int      @default(0)
+  listingSlug String
   createdAt   DateTime @default(now())
-  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-
-  @@index([listingId, sortOrder])
 }
 
-model Lead {
-  id            String     @id @default(cuid())
-  listingId      String
-  ownerId        String
-  name           String
-  email          String
-  phone          String?
-  message        String?
-  status         LeadStatus @default(NEW)
-  source         String      @default("property_detail")
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  listing        Listing     @relation(fields: [listingId], references: [id])
-  owner          User        @relation("LeadOwner", fields: [ownerId], references: [id])
-
-  @@index([ownerId, status, createdAt])
-}
-
-model Offer {
-  id            String   @id @default(cuid())
-  listingId      String
-  userId         String
-  amount         Decimal  @db.Decimal(14, 2)
-  currency       String   @default("USD")
-  status         String   @default("PENDING")
-  note           String?
-  createdAt      DateTime @default(now())
-  listing        Listing  @relation(fields: [listingId], references: [id])
-  user           User     @relation(fields: [userId], references: [id])
-
-  @@index([listingId, status])
-}
-
-model Notification {
+model SavedListing {
   id          String   @id @default(cuid())
   userId      String
-  type        String
-  title       String
-  body        String
-  readAt      DateTime?
+  listingSlug String
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingSlug])
+  @@index([listingSlug])
+}
+
+model ViewingRequest {
+  id             String        @id @default(cuid())
+  userId         String?
+  listingSlug    String
+  fullName       String
+  email          String
+  phone          String
+  preferredDate  DateTime
+  notes          String?
+  status         RequestStatus @default(NEW)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([listingSlug, createdAt])
+}
+
+model ListingReport {
+  id          String        @id @default(cuid())
+  userId      String?
+  listingSlug String
+  reason      String
+  notes       String?
+  status      RequestStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([listingSlug, createdAt])
+}
+
+model ListingShare {
+  id          String   @id @default(cuid())
+  userId      String?
+  listingSlug String
+  channel     String
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([listingSlug, createdAt])
+}
+
+model PasswordReset {
+  id          String   @id @default(cuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }
 
-model AuditLog {
-  id          String   @id @default(cuid())
-  actorId     String?
-  action      String
-  targetType  String
-  targetId    String
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  actor       User?    @relation("AuditActor", fields: [actorId], references: [id])
+model ManagedListing {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String
+  priceUsd    Int
+  city        String
+  district    String
+  propertyType String
+  intent      String
+  status      ListingStatus @default(DRAFT)
+  featured    Boolean       @default(false)
+  imageUrl    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  @@index([targetType, targetId])
-  @@index([createdAt])
+  @@index([status, createdAt])
 }

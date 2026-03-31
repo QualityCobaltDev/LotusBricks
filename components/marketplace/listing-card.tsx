@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/marketplace/badge";
+import { SaveButton } from "@/components/marketplace/save-button";
 import type { ListingSummary } from "@/lib/marketplace-data";
 
 type ListingCardProps = { listing: ListingSummary };
@@ -31,7 +32,7 @@ export function ListingCard({ listing }: ListingCardProps) {
         <p className="line-clamp-2 text-sm text-neutral-600">{listing.description}</p>
         <div className="flex items-center justify-between">
           <Link href={`/listings/${listing.slug}`} className="inline-flex text-sm font-medium text-primary-700 hover:text-primary-600">View details →</Link>
-          <button type="button" className="text-xs font-medium text-neutral-500 hover:text-primary-700">Save</button>
+          <SaveButton listingSlug={listing.slug} compact />
         </div>
       </div>
     </article>
