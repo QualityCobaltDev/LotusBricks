@@ -1,34 +1,33 @@
 import Link from "next/link";
-import { Card, CardBody } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/routes";
 
-const tiers = [
-  { name: "Tier 1", listings: "1 listing", monthly: "$99" },
-  { name: "Tier 2", listings: "3 listings", monthly: "$249" },
-  { name: "Tier 3", listings: "10 listings", monthly: "$699" },
-  { name: "Custom", listings: "Unlimited", monthly: "Contact us" }
+const plans = [
+  { name: "Tier 1", listings: 1, price: 150 },
+  { name: "Tier 2", listings: 3, price: 225 },
+  { name: "Tier 3", listings: 10, price: 450 }
 ];
 
 export default function PricingPage() {
   return (
-    <section>
-      <h1>Pricing</h1>
-      <p>Every plan includes a one-time $50 signup fee and 10 photos + 2 videos per listing.</p>
-      <div className="grid cards">
-        {tiers.map((tier) => (
-          <Card key={tier.name}>
-            <CardBody>
-              <h3>{tier.name}</h3>
-              <p>{tier.listings}</p>
-              <p><strong>{tier.monthly}</strong> / month</p>
-              <Link href={`${routes.contact}?plan=${encodeURIComponent(tier.name)}&inquiry=pricing`}>
-                <Button>{tier.name === "Custom" ? "Contact sales" : "Choose plan"}</Button>
-              </Link>
-            </CardBody>
-          </Card>
+    <div className="grid" style={{ gap: "1rem" }}>
+      <h1>Listing Pricing</h1>
+      <p>All plans include a mandatory one-time account setup fee of <strong>$50</strong>.</p>
+      <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+        {plans.map((plan) => (
+          <article key={plan.name} className="card card-body">
+            <h2>{plan.name}</h2>
+            <p><strong>${plan.price}</strong> / month</p>
+            <p>{plan.listings} active listing{plan.listings > 1 ? "s" : ""}</p>
+            <small>Each listing includes up to 10 photos and 2 videos.</small>
+            <Link href={`${routes.contact}?plan=${encodeURIComponent(plan.name)}`}>Start this plan</Link>
+          </article>
         ))}
+        <article className="card card-body">
+          <h2>Custom Tier</h2>
+          <p>More than 10 listings with variable pricing and enterprise support.</p>
+          <Link href={`${routes.contact}?inquiry=custom-tier`}>Contact sales</Link>
+        </article>
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,11 +1,11 @@
 import { ListingGrid } from "@/components/marketplace/listing-grid";
-import { getListingsByMode } from "@/lib/db";
+import { getListings } from "@/lib/marketplace";
 
 export default function SavedPage() {
   return (
     <section>
       <h1>Saved properties</h1>
-      <ListingGrid listings={[...getListingsByMode("buy"), ...getListingsByMode("rent")]} ctaLabel="Resume inquiry" />
+      <ListingGrid listings={[...getListings("buy"), ...getListings("rent")]} />
     </section>
   );
 }

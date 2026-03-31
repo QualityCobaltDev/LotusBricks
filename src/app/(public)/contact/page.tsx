@@ -3,12 +3,10 @@ import { ContactForm } from "@/components/ui/contact-form";
 
 export default function ContactPage() {
   return (
-    <section className="card card-body">
-      <h1>Contact us</h1>
-      <p>Send your inquiry to sales, support, or partnerships.</p>
-      <Suspense fallback={<p>Loading contact form...</p>}>
-        <ContactForm />
-      </Suspense>
-    </section>
+    <div className="grid" style={{ gap: "1rem" }}>
+      <h1>Contact RightBricks</h1>
+      <p>Call +855 23 000 000 or send a request below and our team will respond quickly.</p>
+      <section className="card card-body"><Suspense fallback={<p>Loading form...</p>}><ContactForm /></Suspense></section>
+    </div>
   );
 }

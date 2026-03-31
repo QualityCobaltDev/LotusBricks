@@ -3,9 +3,14 @@ export const routes = {
   buy: "/buy",
   rent: "/rent",
   sell: "/sell",
+  landlords: "/landlords",
   developers: "/developers",
-  contact: "/contact",
   pricing: "/pricing",
+  contact: "/contact",
+  about: "/about",
+  help: "/help",
+  privacy: "/legal/privacy",
+  terms: "/legal/terms",
   login: "/login",
   register: "/register",
   forgotPassword: "/forgot-password",
@@ -16,7 +21,8 @@ export const routes = {
   admin: "/admin",
   adminListings: "/admin/listings",
   adminUsers: "/admin/users",
-  adminReports: "/admin/reports"
+  adminReports: "/admin/reports",
+  adminInquiries: "/admin/inquiries"
 } as const;
 
 export type AppRoute = (typeof routes)[keyof typeof routes];
