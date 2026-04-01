@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import { getSession } from "@/lib/auth";
+import { getSession, roleToRedirect } from "@/lib/auth";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { getContactSettings } from "@/lib/site-settings";
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   const contact = await getContactSettings();
-  const dashboardHref = session ? (session.role === "ADMIN" ? "/admin" : "/account") : "/sign-in";
+  const dashboardHref = session ? roleToRedirect(session.role) : "/sign-in";
 
   return (
     <html lang="en">

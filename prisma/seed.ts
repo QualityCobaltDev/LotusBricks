@@ -9,7 +9,14 @@ const hashPassword = (value: string) => createHash("sha256").update(value).diges
 async function main() {
   await prisma.user.upsert({
     where: { email: "admin@rightbricks.com" },
-    update: {},
+    update: {
+      fullName: "Platform Admin",
+      role: UserRole.ADMIN,
+      passwordHash: hashPassword("Admin123!"),
+      planTier: PlanTier.TIER_3,
+      signupFeePaid: true,
+      isActive: true
+    },
     create: {
       email: "admin@rightbricks.com",
       fullName: "Platform Admin",
@@ -23,7 +30,14 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "customer@rightbricks.com" },
-    update: {},
+    update: {
+      fullName: "Sample Customer",
+      role: UserRole.CUSTOMER,
+      passwordHash: hashPassword("Customer123!"),
+      planTier: PlanTier.TIER_2,
+      signupFeePaid: true,
+      isActive: true
+    },
     create: {
       email: "customer@rightbricks.com",
       fullName: "Sample Customer",
