@@ -143,3 +143,11 @@ summary { cursor: pointer; font-weight: 600; }
   .filter-bar { grid-template-columns: 1fr 1fr; }
   .detail-hero { height: 320px; }
 }
+
+
+.skip-link { position: absolute; left: -999px; top: 0; background: #101828; color: #fff; padding: .6rem .8rem; z-index: 60; }
+.skip-link:focus { left: .6rem; top: .6rem; }
+.contact-pill { font-size: .85rem; color: #344054; }
+.hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.inline-admin-form { display: grid; grid-template-columns: 140px 120px 1fr auto auto; gap: .4rem; align-items: center; }
+.admin-table-wrap { overflow-x: auto; }

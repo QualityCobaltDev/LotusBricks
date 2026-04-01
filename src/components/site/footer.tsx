@@ -1,16 +1,25 @@
 import Link from "next/link";
 
-export function SiteFooter() {
+export function SiteFooter({
+  emailHref,
+  email,
+  phoneHref,
+  phoneDisplay
+}: {
+  emailHref: string;
+  email: string;
+  phoneHref: string;
+  phoneDisplay: string;
+}) {
   return (
     <footer className="site-footer">
       <div className="shell footer-grid">
         <div>
           <h3>RightBricks</h3>
           <p>
-            A trusted marketplace for buyers, renters, and investors who need verified listings, clearer decisions, and faster
-            transactions.
+            Cambodia’s trusted marketplace for buyers, renters, sellers, landlords, and developers seeking verified listings and structured property workflows.
           </p>
-          <p className="muted">support@rightbricks.com · +1 (415) 555-0199</p>
+          <p className="muted"><a href={emailHref}>{email}</a> · <a href={phoneHref}>{phoneDisplay}</a></p>
         </div>
         <div>
           <h4>Explore</h4>
@@ -24,10 +33,10 @@ export function SiteFooter() {
         <div>
           <h4>Trust & legal</h4>
           <ul>
-            <li><a href="#">Data security</a></li>
-            <li><a href="#">Privacy policy</a></li>
-            <li><a href="#">Terms</a></li>
-            <li><a href="#">Accessibility</a></li>
+            <li><Link href="/support">Support center</Link></li>
+            <li><Link href="/legal/privacy">Privacy policy</Link></li>
+            <li><Link href="/legal/terms">Terms</Link></li>
+            <li><Link href="/legal/accessibility">Accessibility</Link></li>
           </ul>
         </div>
       </div>
