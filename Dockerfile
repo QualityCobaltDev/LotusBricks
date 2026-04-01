@@ -2,6 +2,7 @@ FROM node:22-alpine AS base
 WORKDIR /app
 
 FROM base AS deps
+RUN apk add --no-cache libc6-compat openssl
 COPY package*.json ./
 RUN npm ci
 
@@ -23,16 +24,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_PUBLIC_APP_VERSION=${APP_VERSION}
 LABEL org.opencontainers.image.version=${APP_VERSION}
 
-RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
+RUN apk add --no-cache libc6-compat openssl \
+    && addgroup -S nextjs \
+    && adduser -S nextjs -G nextjs
 
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder --chown=nextjs:nextjs /app/public ./public
+COPY --from=builder --chown=nextjs:nextjs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nextjs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nextjs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nextjs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nextjs /app/node_modules/@prisma ./node_modules/@prisma
 
 USER nextjs
 EXPOSE 3000
