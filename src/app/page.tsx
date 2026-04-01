@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { db } from "@/lib/db";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
 import { trustStats, testimonials } from "@/lib/site/content";
 import { isPrismaSchemaMismatch, logServerError } from "@/lib/observability";
@@ -26,8 +26,9 @@ export default async function HomePage() {
   let featured: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
   const pricingPreview = await getPricingPlans();
 
-  try {
-    [hero, featured] = await Promise.all([
+  if (isDatabaseConfigured()) {
+    try {
+      [hero, featured] = await Promise.all([
       db.siteContent.findUnique({ where: { key: "homepage.hero" }, select: { title: true, body: true } }),
       db.listing.findMany({
         where: { status: "PUBLISHED" },
@@ -36,8 +37,9 @@ export default async function HomePage() {
         take: 6
       })
     ]);
-  } catch (error) {
-    logServerError("home-page", error, { schemaMismatch: isPrismaSchemaMismatch(error) });
+    } catch (error) {
+      logServerError("home-page", error, { schemaMismatch: isPrismaSchemaMismatch(error) });
+    }
   }
 
   return (
