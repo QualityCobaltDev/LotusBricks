@@ -42,7 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   const contact = await getContactSettings();
-  const dashboardHref = session ? roleToRedirect(session.role) : "/sign-in";
+  const dashboardHref = session ? roleToRedirect(session.role) : "/login/customer";
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "dev";
   const orgLd = {
     "@context": "https://schema.org",
@@ -59,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body>
         <a href="#main-content" className="skip-link">Skip to main content</a>
-        <SiteHeader dashboardHref={dashboardHref} contactPhoneDisplay={contact.phoneDisplay} contactPhoneHref={contact.phoneHref} />
+        <SiteHeader dashboardHref={dashboardHref} />
         <main id="main-content">{children}</main>
         <SiteFooter email={contact.email} emailHref={contact.emailHref} phoneDisplay={contact.phoneDisplay} phoneHref={contact.phoneHref} whatsappHref={contact.whatsappHref} telegramHref={contact.telegramHref} appVersion={appVersion} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />

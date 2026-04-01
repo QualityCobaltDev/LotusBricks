@@ -18,6 +18,10 @@ export async function POST(req: Request) {
       return NextResponse.json(authError("INVALID_CREDENTIALS", "Invalid email or password"), { status: 401 });
     }
 
+    if (parsed.data.role && user.role !== parsed.data.role) {
+      return NextResponse.json(authError("INVALID_CREDENTIALS", "This login is restricted to a different account type."), { status: 403 });
+    }
+
     if (!user.isActive) {
       return NextResponse.json(authError("ACCOUNT_DISABLED", "Your account is disabled. Please contact support."), { status: 403 });
     }

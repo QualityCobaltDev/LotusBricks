@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
 import { faqs } from "@/lib/site/content";
-import { PLAN_CONFIG, PLAN_ORDER, formatUsd } from "@/lib/plans";
-import { CONTACT } from "@/lib/contact";
+import { formatUsd } from "@/lib/plans";
+import { getPricingPlans } from "@/lib/pricing-settings";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Transparent RightBricks pricing with a one-time $50 signup fee, clear plan limits, and custom tiers for larger portfolios.",
+  description: "Transparent RightBricks pricing with separate sign-up fees and contact-first custom plans.",
   alternates: { canonical: "/pricing" }
 };
 
 export default async function PricingPage() {
-  const plans = PLAN_ORDER.map((key) => PLAN_CONFIG[key]);
+  const plans = await getPricingPlans();
 
   return (
     <section className="shell section">
       <div className="section-head narrow">
-        <h1>Pricing built for serious property operators</h1>
-        <p className="muted">One-time $50 sign-up fee applies to new standard subscriptions. Need more than 10 listings? Our Custom Tier includes tailored onboarding and support.</p>
+        <h1>Clear, professional pricing</h1>
+        <p className="muted">Compare tier pricing, separate sign-up fees, and upfront totals before you choose.</p>
       </div>
 
       <div className="pricing-grid">
@@ -25,17 +25,26 @@ export default async function PricingPage() {
             <div>
               {plan.badge && <p className="eyebrow">{plan.badge}</p>}
               <h3>{plan.name}</h3>
-              <p className="muted">Best for: {plan.key === "TIER_1" ? "single asset owners" : plan.key === "TIER_2" ? "active agents" : plan.key === "TIER_3" ? "growing agencies" : "portfolio operators"}</p>
+              {plan.blurb && <p className="muted">{plan.blurb}</p>}
             </div>
-            <p className="price">{plan.recurringMonthlyUsd === null ? "Pricing Varies" : `${formatUsd(plan.recurringMonthlyUsd)}`}<small>{plan.recurringMonthlyUsd === null ? "" : " / month"}</small></p>
-            {plan.recurringMonthlyUsd !== null ? <p className="muted">+ {formatUsd(plan.oneTimeSignupFeeUsd)} one-time sign-up fee</p> : <p className="muted">Talk to sales for a Custom Tier proposal.</p>}
+            {plan.contactOnly ? (
+              <>
+                <p className="price">Custom Plan</p>
+                <p className="muted">Contact Us for Pricing</p>
+              </>
+            ) : (
+              <>
+                <p className="price">{formatUsd(plan.recurringMonthlyUsd ?? 0)} <small>/ month</small></p>
+                <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} Sign-Up Fee`}</p>
+                <p><strong>Total upfront: {formatUsd((plan.recurringMonthlyUsd ?? 0) + plan.oneTimeSignupFeeUsd)}</strong></p>
+              </>
+            )}
             <ul>
               <li>{plan.listingLimit === null ? "10+ Listings" : `${plan.listingLimit} Listings`}</li>
               <li>{plan.photosPerListing} Photos per listing</li>
               <li>{plan.videosPerListing} Videos per listing</li>
-              {plan.blurb && <li>{plan.blurb}</li>}
             </ul>
-            <a href={plan.ctaHref} className={`btn ${plan.contactOnly ? "btn-ghost" : "btn-primary"}`}>{plan.ctaLabel}</a>
+            <a href={plan.ctaHref} className={`btn ${plan.contactOnly ? "btn-ghost" : "btn-primary"}`}>{plan.contactOnly ? "Contact Us" : plan.ctaLabel}</a>
           </article>
         ))}
       </div>
@@ -46,10 +55,9 @@ export default async function PricingPage() {
           {faqs.map((f) => <details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>)}
         </article>
         <article className="card-pad">
-          <h2>Custom plan conversion path</h2>
-          <p>Share listing volume, target districts, and service requirements. We will provide a scoped Custom Tier proposal.</p>
-          <a className="btn btn-primary" href="/contact?plan=custom&tierNeeds=10-plus">Request Custom Tier</a>
-          <p className="muted">{CONTACT.standardLine}</p>
+          <h2>Custom tier conversion path</h2>
+          <p>Tier 4 is contact-first by design. Share your requirements and we&apos;ll scope a custom proposal.</p>
+          <a className="btn btn-primary" href="/contact?plan=custom&tierNeeds=10-plus">Contact Us</a>
         </article>
       </div>
     </section>
