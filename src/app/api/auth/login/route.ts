@@ -7,7 +7,8 @@ import { authError } from "@/lib/auth-contract";
 
 export async function POST(req: Request) {
   try {
-    const parsed = loginSchema.safeParse(await req.json());
+    const body = await req.json();
+    const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(authError("VALIDATION_ERROR", "Please enter a valid email and password."), { status: 400 });
     }
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
       return NextResponse.json(authError("ACCOUNT_DISABLED", "Your account is disabled. Please contact support."), { status: 403 });
     }
 
-    await createSession(user.id, user.role);
+    await createSession(user.id, user.role, Boolean(body.remember));
 
     return NextResponse.json({
       success: true,
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
       redirectTo: roleToRedirect(user.role)
     });
   } catch (error) {
-    logServerError("api-auth-login", error);
+    logServerError("api-auth-login", error, { hasAuthSecret: Boolean(process.env.AUTH_SECRET) });
     return NextResponse.json(
       authError("AUTH_UNAVAILABLE", "Authentication service is temporarily unavailable. Please try again."),
       { status: 500 }

@@ -5,12 +5,16 @@ export function SiteFooter({
   email,
   phoneHref,
   phoneDisplay,
+  whatsappHref,
+  telegramHref,
   appVersion
 }: {
   emailHref: string;
   email: string;
   phoneHref: string;
   phoneDisplay: string;
+  whatsappHref?: string;
+  telegramHref?: string;
   appVersion?: string;
 }) {
   return (
@@ -21,7 +25,8 @@ export function SiteFooter({
           <p>
             Cambodia’s trusted marketplace for buyers, renters, sellers, landlords, and developers seeking verified listings and structured property workflows.
           </p>
-          <p className="muted"><a href={emailHref}>{email}</a> · <a href={phoneHref}>{phoneDisplay}</a></p>
+          <p className="muted">✉️ <a href={emailHref}>{email}</a> · ☎️ <a href={phoneHref}>{phoneDisplay}</a></p>
+          <p className="muted">💬 <a href={whatsappHref}>WhatsApp</a> · 📲 <a href={telegramHref}>Telegram</a></p>
         </div>
         <div>
           <h4>Explore</h4>

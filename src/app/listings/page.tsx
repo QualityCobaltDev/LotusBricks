@@ -1,18 +1,27 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
 
+export const metadata: Metadata = {
+  title: "Verified Listings",
+  description: "Browse verified properties in Cambodia with filters for location, price, type, and bedrooms.",
+  alternates: { canonical: "/listings" }
+};
+
 export default async function ListingsPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; min?: string; max?: string; beds?: string }>;
+  searchParams: Promise<{ q?: string; min?: string; max?: string; beds?: string; city?: string; sort?: string }>;
 }) {
   const params = await searchParams;
   const q = params.q?.trim() ?? "";
+  const city = params.city?.trim() ?? "";
   const min = Number(params.min) || 0;
   const max = Number(params.max) || undefined;
   const beds = Number(params.beds) || 0;
+  const sort = params.sort ?? "featured";
 
   let listings: Awaited<ReturnType<typeof db.listing.findMany>> = [];
 
@@ -22,49 +31,69 @@ export default async function ListingsPage({
         status: "PUBLISHED",
         priceUsd: { gte: min, lte: max },
         bedrooms: beds ? { gte: beds } : undefined,
+        city: city ? { contains: city, mode: "insensitive" } : undefined,
         OR: q
           ? [{ city: { contains: q, mode: "insensitive" } }, { district: { contains: q, mode: "insensitive" } }, { title: { contains: q, mode: "insensitive" } }]
           : undefined
       },
-      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-      include: { media: { orderBy: { sortOrder: "asc" }, take: 1 } }
+      orderBy:
+        sort === "price_asc"
+          ? [{ priceUsd: "asc" }]
+          : sort === "price_desc"
+            ? [{ priceUsd: "desc" }]
+            : sort === "newest"
+              ? [{ createdAt: "desc" }]
+              : [{ featured: "desc" }, { createdAt: "desc" }],
+      include: { media: { orderBy: { sortOrder: "asc" }, take: 1 } },
+      take: 18
     });
   } catch (error) {
     logServerError("listings-page", error, { q, min, max, beds });
   }
 
+  const hasFilters = Boolean(q || city || min || max || beds);
+
   return (
     <section className="shell section">
       <div className="section-head">
         <h1>Browse verified listings</h1>
-        <p className="muted">Filter by location, budget, and property profile to move faster with confidence.</p>
+        <p className="muted">Search Phnom Penh, Siem Reap, Sihanoukville, and other growth corridors with confidence signals on every listing.</p>
       </div>
 
-      <form className="filter-bar" method="GET">
-        <input name="q" defaultValue={q} placeholder="City, district, or keyword" />
-        <input name="min" type="number" defaultValue={min || ""} placeholder="Min price" />
-        <input name="max" type="number" defaultValue={max || ""} placeholder="Max price" />
+      <form className="filter-bar" method="GET" aria-label="Listings filters">
+        <input name="q" defaultValue={q} placeholder="City, district, keyword" />
+        <input name="city" defaultValue={city} placeholder="City" />
+        <input name="min" type="number" defaultValue={min || ""} placeholder="Min USD" />
+        <input name="max" type="number" defaultValue={max || ""} placeholder="Max USD" />
         <select name="beds" defaultValue={beds || ""}>
-          <option value="">Any beds</option>
-          <option value="1">1+ beds</option>
-          <option value="2">2+ beds</option>
-          <option value="3">3+ beds</option>
-          <option value="4">4+ beds</option>
+          <option value="">Any beds</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option>
         </select>
-        <button className="btn btn-primary" type="submit">Apply filters</button>
+        <select name="sort" defaultValue={sort}>
+          <option value="featured">Featured</option><option value="newest">Newest</option><option value="price_asc">Price: Low to high</option><option value="price_desc">Price: High to low</option>
+        </select>
+        <button className="btn btn-primary" type="submit">Apply</button>
+        <Link href="/listings" className="btn btn-ghost">Reset</Link>
       </form>
 
+      {hasFilters && <p className="muted">Active filters applied. Use reset to return to full inventory.</p>}
+
       {listings.length ? (
-        <div className="listing-grid">
-          {listings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
+        <>
+          <div className="listing-grid">
+            {listings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+          <div className="hero-actions" style={{ marginTop: "1rem" }}>
+            <button className="btn btn-ghost" type="button" data-cta="listings-load-more">Load more</button>
+            <button className="btn btn-ghost" type="button" data-cta="listings-save-search">Save search</button>
+          </div>
+        </>
       ) : (
         <article className="empty-state">
-          <h3>No listings matched your filters</h3>
-          <p>Try widening your price range or removing a filter to discover more opportunities.</p>
-          <Link href="/listings" className="btn btn-ghost">Reset filters</Link>
+          <h3>No listings matched this filter set</h3>
+          <p>Try removing one or two constraints, or return to the verified default inventory.</p>
+          <Link href="/listings" className="btn btn-ghost">Back to full inventory</Link>
         </article>
       )}
     </section>

@@ -8,7 +8,7 @@ const hashPassword = (value: string) => createHash("sha256").update(value).diges
 
 async function main() {
   await prisma.user.upsert({
-    where: { email: "admin@rightbricks.com" },
+    where: { email: "admin@rightbricks.online" },
     update: {
       fullName: "Platform Admin",
       role: UserRole.ADMIN,
@@ -18,7 +18,7 @@ async function main() {
       isActive: true
     },
     create: {
-      email: "admin@rightbricks.com",
+      email: "admin@rightbricks.online",
       fullName: "Platform Admin",
       role: UserRole.ADMIN,
       passwordHash: hashPassword("Admin123!"),
@@ -29,7 +29,7 @@ async function main() {
   });
 
   await prisma.user.upsert({
-    where: { email: "customer@rightbricks.com" },
+    where: { email: "customer@rightbricks.online" },
     update: {
       fullName: "Sample Customer",
       role: UserRole.CUSTOMER,
@@ -39,7 +39,7 @@ async function main() {
       isActive: true
     },
     create: {
-      email: "customer@rightbricks.com",
+      email: "customer@rightbricks.online",
       fullName: "Sample Customer",
       role: UserRole.CUSTOMER,
       passwordHash: hashPassword("Customer123!"),
@@ -49,7 +49,7 @@ async function main() {
     }
   });
 
-  const customer = await prisma.user.findUniqueOrThrow({ where: { email: "customer@rightbricks.com" }, select: { id: true } });
+  const customer = await prisma.user.findUniqueOrThrow({ where: { email: "customer@rightbricks.online" }, select: { id: true } });
 
   const listing = await prisma.listing.upsert({
     where: { slug: "modern-villa-phnom-penh" },

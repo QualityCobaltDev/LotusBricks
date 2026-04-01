@@ -1,9 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 
 type ListingCardProps = {
   listing: {
     slug: string;
     title: string;
+    summary: string;
     city: string;
     district: string;
     priceUsd: number;
@@ -21,7 +23,7 @@ export function ListingCard({ listing }: ListingCardProps) {
   return (
     <article className="listing-card">
       <div className="listing-media-wrap">
-        <img src={image} alt={listing.title} loading="lazy" className="listing-media" />
+        <Image src={image} alt={`${listing.title} in ${listing.district}, ${listing.city}`} loading="lazy" className="listing-media" width={640} height={420} />
         <span className="pill">Verified</span>
         {listing.featured && <span className="pill dark">Featured</span>}
       </div>
@@ -29,12 +31,16 @@ export function ListingCard({ listing }: ListingCardProps) {
         <p className="price">${listing.priceUsd.toLocaleString()}</p>
         <h3>{listing.title}</h3>
         <p className="muted">{listing.district}, {listing.city}</p>
+        <p className="muted">{listing.summary}</p>
         <div className="meta-row">
           <span>{listing.bedrooms} bed</span>
           <span>{listing.bathrooms} bath</span>
           <span>{listing.areaSqm} sqm</span>
         </div>
-        <Link href={`/listings/${listing.slug}` as any} className="btn btn-primary">View details</Link>
+        <div className="hero-actions">
+          <Link href={`/listings/${listing.slug}` as any} className="btn btn-primary" data-cta="listing-view-details">View details</Link>
+          <button className="btn btn-ghost" type="button" aria-label={`Save ${listing.title}`} data-cta="listing-save">Save</button>
+        </div>
       </div>
     </article>
   );
