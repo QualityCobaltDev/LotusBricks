@@ -1,41 +1,12 @@
 import { db } from "@/lib/db";
-import { CONTACT_SETTING_KEY, DEFAULT_CONTACT } from "@/lib/constants";
-import { logServerError } from "@/lib/observability";
+import { CONTACT_SETTING_KEY } from "@/lib/constants";
+import { getContactSettingsServer } from "@/lib/site-settings.server";
+import type { ContactSettings } from "@/lib/site-settings.defaults";
 
-export type ContactSettings = {
-  phoneDisplay: string;
-  phoneHref: string;
-  email: string;
-  emailHref: string;
-  supportHours?: string;
-  supportAddress?: string;
-  whatsappHref?: string;
-  telegramHref?: string;
-};
+export type { ContactSettings } from "@/lib/site-settings.defaults";
 
 export async function getContactSettings(): Promise<ContactSettings> {
-  try {
-    const settings = await db.siteSetting.findUnique({ where: { key: CONTACT_SETTING_KEY } });
-    if (!settings) return DEFAULT_CONTACT;
-
-    const merged = {
-      ...DEFAULT_CONTACT,
-      ...(settings.value as Partial<ContactSettings>)
-    };
-
-    return {
-      ...merged,
-      email: DEFAULT_CONTACT.email,
-      emailHref: DEFAULT_CONTACT.emailHref,
-      phoneDisplay: DEFAULT_CONTACT.phoneDisplay,
-      phoneHref: DEFAULT_CONTACT.phoneHref,
-      whatsappHref: DEFAULT_CONTACT.whatsappHref,
-      telegramHref: DEFAULT_CONTACT.telegramHref
-    };
-  } catch (error) {
-    logServerError("site-settings", error, { key: CONTACT_SETTING_KEY });
-    return DEFAULT_CONTACT;
-  }
+  return getContactSettingsServer();
 }
 
 export async function upsertContactSettings(value: ContactSettings) {

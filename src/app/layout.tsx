@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import { getSession, roleToRedirect } from "@/lib/auth";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { getContactSettings } from "@/lib/site-settings";
 import { getSafeSiteUrl } from "@/lib/env";
-import { logServerError } from "@/lib/observability";
 
 const siteUrl = getSafeSiteUrl();
 
@@ -33,16 +31,8 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  let session: Awaited<ReturnType<typeof getSession>> = null;
-
-  try {
-    session = await getSession();
-  } catch (error) {
-    logServerError("layout-session", error);
-  }
-
   const contact = await getContactSettings();
-  const dashboardHref = session ? roleToRedirect(session.role) : "/login/customer";
+  const dashboardHref = "/login/customer";
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "dev";
   const orgLd = {
     "@context": "https://schema.org",

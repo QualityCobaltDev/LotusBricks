@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { db } from "@/lib/db";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
 
@@ -25,8 +25,9 @@ export default async function ListingsPage({
 
   let listings: Awaited<ReturnType<typeof db.listing.findMany>> = [];
 
-  try {
-    listings = await db.listing.findMany({
+  if (isDatabaseConfigured()) {
+    try {
+      listings = await db.listing.findMany({
       where: {
         status: "PUBLISHED",
         priceUsd: { gte: min, lte: max },
@@ -47,8 +48,9 @@ export default async function ListingsPage({
       include: { media: { orderBy: { sortOrder: "asc" }, take: 1 } },
       take: 18
     });
-  } catch (error) {
-    logServerError("listings-page", error, { q, min, max, beds });
+    } catch (error) {
+      logServerError("listings-page", error, { q, min, max, beds });
+    }
   }
 
   const hasFilters = Boolean(q || city || min || max || beds);

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { db } from "@/lib/db";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { ContactForm } from "@/components/ui/contact-form";
 import { logServerError } from "@/lib/observability";
 import { getContactSettings } from "@/lib/site-settings";
@@ -20,10 +20,12 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
   const contact = await getContactSettings();
   let fallbackListing: { id: string } | null = null;
 
-  try {
-    fallbackListing = await db.listing.findFirst({ where: { status: "PUBLISHED" }, select: { id: true } });
-  } catch (error) {
-    logServerError("contact-page", error);
+  if (isDatabaseConfigured()) {
+    try {
+      fallbackListing = await db.listing.findFirst({ where: { status: "PUBLISHED" }, select: { id: true } });
+    } catch (error) {
+      logServerError("contact-page", error);
+    }
   }
 
   const isCustomPlan = params.plan === "custom" || params.tierNeeds === "10-plus";
