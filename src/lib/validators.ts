@@ -1,7 +1,11 @@
 import { z } from "zod";
+import { getPlanByKey } from "@/lib/plans";
+
+const maxPhotos = getPlanByKey("TIER_1").photosPerListing;
+const maxVideos = getPlanByKey("TIER_1").videosPerListing;
 
 export const loginSchema = z.object({ email: z.string().email(), password: z.string().min(8) });
-export const registerSchema = z.object({ fullName: z.string().min(2), email: z.string().email(), password: z.string().min(8) });
+export const registerSchema = z.object({ fullName: z.string().min(2), email: z.string().email(), password: z.string().min(8), selectedPlan: z.string().optional().default("TIER_1") });
 export const listingSchema = z.object({
   id: z.string().optional(),
   slug: z.string().min(3),
@@ -16,8 +20,33 @@ export const listingSchema = z.object({
   areaSqm: z.coerce.number().int().positive(),
   featured: z.coerce.boolean().optional().default(false),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
+  imageUrls: z.array(z.string().url()).max(maxPhotos).optional().default([]),
+  videoUrls: z.array(z.string().url()).max(maxVideos).optional().default([]),
   imageUrl: z.string().url().optional().or(z.literal("")),
   videoUrl: z.string().url().optional().or(z.literal(""))
+}).superRefine((payload, ctx) => {
+  const legacyImages = payload.imageUrl ? [payload.imageUrl] : [];
+  const legacyVideos = payload.videoUrl ? [payload.videoUrl] : [];
+  const images = payload.imageUrls.length ? payload.imageUrls : legacyImages;
+  const videos = payload.videoUrls.length ? payload.videoUrls : legacyVideos;
+
+  if (images.length > maxPhotos) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["imageUrls"], message: `Maximum ${maxPhotos} photos per listing.` });
+  }
+
+  if (videos.length > maxVideos) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["videoUrls"], message: `Maximum ${maxVideos} videos per listing.` });
+  }
 });
 
-export const inquirySchema = z.object({ listingId: z.string().min(1), fullName: z.string().min(2), email: z.string().email(), phone: z.string().optional(), message: z.string().min(10) });
+export const inquirySchema = z.object({
+  listingId: z.string().min(1).optional().or(z.literal("")),
+  fullName: z.string().min(2),
+  email: z.string().email(),
+  phone: z.string().optional(),
+  companyName: z.string().optional(),
+  selectedPlan: z.string().optional(),
+  inquiryType: z.enum(["LISTING", "CUSTOM_PLAN", "GENERAL"]).optional().default("LISTING"),
+  requestedListings: z.coerce.number().int().positive().optional(),
+  message: z.string().min(10)
+});
