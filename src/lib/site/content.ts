@@ -37,6 +37,6 @@ export const faqs = [
   },
   {
     q: "Is RightBricks suitable for investors and agencies?",
-    a: "Absolutely. Growth and Scale plans include portfolio tools, priority support, and partner workflows for teams."
+    a: "Yes. Tier 1, Tier 2, and Tier 3 are self-serve, while Custom Tier supports portfolios over 10 listings through our sales team."
   }
 ];

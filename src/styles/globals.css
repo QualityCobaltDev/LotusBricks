@@ -112,6 +112,13 @@ input, textarea, select { width: 100%; border: 1px solid var(--line); border-rad
 .pricing-card ul { padding-left: 1rem; margin: 0; display: grid; gap: .45rem; }
 summary { cursor: pointer; font-weight: 600; }
 
+.pricing-card.premium { background: linear-gradient(180deg, #fcfdff, #f3f7ff); border-color: #b9cdf8; }
+.pricing-card .eyebrow { margin: 0 0 .4rem; }
+.comparison-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.comparison-table th, .comparison-table td { border-bottom: 1px solid #e4e7ec; text-align: left; padding: .65rem .4rem; }
+.comparison-table th { color: #344054; font-size: .84rem; text-transform: uppercase; letter-spacing: .02em; }
+
+
 .signin-wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1rem; padding: 2.5rem 0 3rem; }
 .signin-aside, .signin-card { background: #fff; border: 1px solid #e4e7ec; border-radius: 18px; padding: 1.25rem; box-shadow: var(--shadow); }
 .password-row { display: grid; grid-template-columns: 1fr auto; gap: .4rem; }

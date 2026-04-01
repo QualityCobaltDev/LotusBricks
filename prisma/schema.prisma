@@ -18,20 +18,37 @@ enum ListingStatus {
   ARCHIVED
 }
 
+enum PlanTier {
+  TIER_1
+  TIER_2
+  TIER_3
+  CUSTOM
+}
+
+enum InquiryType {
+  LISTING
+  CUSTOM_PLAN
+  GENERAL
+}
+
 model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  passwordHash String
-  role         UserRole      @default(CUSTOMER)
-  fullName     String
-  phone        String?
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  favorites    Favorite[]
-  inquiries    Inquiry[]
+  id            String        @id @default(cuid())
+  email         String        @unique
+  passwordHash  String
+  role          UserRole      @default(CUSTOMER)
+  fullName      String
+  phone         String?
+  planTier      PlanTier      @default(TIER_1)
+  signupFeePaid Boolean       @default(false)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  favorites     Favorite[]
+  inquiries     Inquiry[]
+  listings      Listing[]
 
   @@index([role])
+  @@index([planTier])
 }
 
 model Listing {
@@ -48,15 +65,18 @@ model Listing {
   areaSqm      Int
   status       ListingStatus  @default(DRAFT)
   featured     Boolean        @default(false)
+  ownerId      String?
   publishedAt  DateTime?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   media        ListingMedia[]
   favorites    Favorite[]
   inquiries    Inquiry[]
+  owner        User?          @relation(fields: [ownerId], references: [id], onDelete: SetNull)
 
   @@index([status, featured])
   @@index([city])
+  @@index([ownerId])
 }
 
 model ListingMedia {
@@ -83,19 +103,24 @@ model Favorite {
 }
 
 model Inquiry {
-  id          String   @id @default(cuid())
-  listingId   String
-  userId      String?
-  fullName    String
-  email       String
-  phone       String?
-  message     String
-  status      String   @default("NEW")
-  createdAt   DateTime @default(now())
-  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id                String      @id @default(cuid())
+  listingId         String?
+  userId            String?
+  fullName          String
+  email             String
+  phone             String?
+  companyName       String?
+  requestedListings Int?
+  inquiryType       InquiryType @default(LISTING)
+  selectedPlan      String?
+  message           String
+  status            String      @default("NEW")
+  createdAt         DateTime    @default(now())
+  listing           Listing?    @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  user              User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt])
+  @@index([inquiryType, createdAt])
 }
 
 model PricingPlan {

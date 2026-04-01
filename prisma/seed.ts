@@ -1,5 +1,6 @@
-import { PrismaClient, UserRole, ListingStatus } from "@prisma/client";
+import { PrismaClient, UserRole, ListingStatus, PlanTier } from "@prisma/client";
 import { createHash } from "node:crypto";
+import { PLAN_CONFIG, STANDARD_PLAN_ORDER, formatUsd } from "../src/lib/plans";
 
 const prisma = new PrismaClient();
 
@@ -14,6 +15,8 @@ async function main() {
       fullName: "Platform Admin",
       role: UserRole.ADMIN,
       passwordHash: hashPassword("Admin123!"),
+      planTier: PlanTier.TIER_3,
+      signupFeePaid: true,
       isActive: true
     }
   });
@@ -26,9 +29,13 @@ async function main() {
       fullName: "Sample Customer",
       role: UserRole.CUSTOMER,
       passwordHash: hashPassword("Customer123!"),
+      planTier: PlanTier.TIER_2,
+      signupFeePaid: true,
       isActive: true
     }
   });
+
+  const customer = await prisma.user.findUniqueOrThrow({ where: { email: "customer@rightbricks.com" }, select: { id: true } });
 
   const listing = await prisma.listing.upsert({
     where: { slug: "modern-villa-phnom-penh" },
@@ -46,6 +53,7 @@ async function main() {
       areaSqm: 320,
       status: ListingStatus.PUBLISHED,
       featured: true,
+      ownerId: customer.id,
       publishedAt: new Date()
     }
   });
@@ -58,11 +66,24 @@ async function main() {
     skipDuplicates: true
   });
 
+  await prisma.pricingPlan.deleteMany();
   await prisma.pricingPlan.createMany({
-    data: [
-      { name: "Starter", priceLabel: "$29", cadence: "monthly", ctaLabel: "Start Starter", features: ["1 active listing", "Email support"], sortOrder: 1 },
-      { name: "Growth", priceLabel: "$99", cadence: "monthly", ctaLabel: "Choose Growth", features: ["10 active listings", "Featured placement"], sortOrder: 2 }
-    ],
+    data: STANDARD_PLAN_ORDER.map((key, idx) => {
+      const plan = PLAN_CONFIG[key];
+      return {
+        name: plan.name,
+        priceLabel: formatUsd(plan.recurringMonthlyUsd ?? 0),
+        cadence: "monthly",
+        ctaLabel: plan.ctaLabel,
+        features: [
+          `${plan.listingLimit} ${plan.listingLimit === 1 ? "listing" : "listings"}`,
+          `${plan.photosPerListing} photos per listing`,
+          `${plan.videosPerListing} videos per listing`,
+          `+$${plan.oneTimeSignupFeeUsd} one-time sign-up fee`
+        ],
+        sortOrder: idx + 1
+      };
+    }),
     skipDuplicates: true
   });
 
