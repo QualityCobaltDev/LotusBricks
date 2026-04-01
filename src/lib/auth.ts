@@ -53,3 +53,11 @@ export async function getSession() {
     return null;
   }
 }
+
+export function roleToAppRole(role: Role): "admin" | "customer" {
+  return role === "ADMIN" ? "admin" : "customer";
+}
+
+export function roleToRedirect(role: Role): "/admin/dashboard" | "/account" {
+  return role === "ADMIN" ? "/admin/dashboard" : "/account";
+}

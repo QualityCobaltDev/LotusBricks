@@ -1,17 +1,20 @@
 import { logServerError } from "@/lib/observability";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { createSession, hashPassword } from "@/lib/auth";
+import { createSession, hashPassword, roleToAppRole, roleToRedirect } from "@/lib/auth";
 import { registerSchema } from "@/lib/validators";
 import { STANDARD_PLAN_KEYS } from "@/lib/plans";
+import { authError } from "@/lib/auth-contract";
 
 export async function POST(req: Request) {
   try {
     const parsed = registerSchema.safeParse(await req.json());
-    if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json(authError("VALIDATION_ERROR", "Please complete all required fields."), { status: 400 });
+    }
 
     const exists = await db.user.findUnique({ where: { email: parsed.data.email } });
-    if (exists) return NextResponse.json({ error: "Email already used" }, { status: 409 });
+    if (exists) return NextResponse.json(authError("VALIDATION_ERROR", "Email already used"), { status: 409 });
 
     const planTier = STANDARD_PLAN_KEYS.has(parsed.data.selectedPlan as never) ? parsed.data.selectedPlan : "TIER_1";
 
@@ -27,9 +30,20 @@ export async function POST(req: Request) {
     });
 
     await createSession(user.id, "CUSTOMER");
-    return NextResponse.json({ ok: true, redirectTo: "/account", requiresSignupFee: true, signupFeeUsd: 50 });
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.fullName,
+        role: roleToAppRole(user.role)
+      },
+      redirectTo: roleToRedirect(user.role),
+      requiresSignupFee: true,
+      signupFeeUsd: 50
+    });
   } catch (error) {
     logServerError("api-auth-register", error);
-    return NextResponse.json({ error: "Registration is temporarily unavailable" }, { status: 500 });
+    return NextResponse.json(authError("AUTH_UNAVAILABLE", "Registration is temporarily unavailable. Please try again."), { status: 500 });
   }
 }

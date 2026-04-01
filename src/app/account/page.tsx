@@ -1,9 +1,9 @@
-import { requireAuth } from "@/server/guards";
+import { requireCustomer } from "@/server/guards";
 import { db } from "@/lib/db";
 import { getPlanByKey } from "@/lib/plans";
 
 export default async function AccountPage() {
-  const session = await requireAuth();
+  const session = await requireCustomer();
   const user = await db.user.findUnique({ where: { id: session.userId } });
   const favorites = await db.favorite.count({ where: { userId: session.userId } });
   const listingCount = await db.listing.count({ where: { ownerId: session.userId } });
