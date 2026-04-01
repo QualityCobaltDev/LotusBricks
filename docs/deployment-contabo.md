@@ -24,9 +24,13 @@ git clone <repo> rightbricks
 cd rightbricks
 cp .env.example .env
 # edit secrets
-sudo docker compose build
-sudo docker compose up -d
+./scripts/deploy-production.sh main
 ```
+
+## Deterministic redeploys
+- Use `./scripts/deploy-production.sh <branch>` for every production release.
+- The script does `git fetch`, fast-forward pull, no-cache `docker compose build web`, migration deploy, and only then `docker compose up -d --no-build`.
+- The deployed web image is tagged as `rightbricks-web:<git-sha>` and labeled with `org.opencontainers.image.version=<git-sha>` for auditability.
 
 ## DNS and TLS prerequisites (critical)
 - Create `A` records for both `rightbricks.online` and `www.rightbricks.online` pointing to the VPS IPv4.

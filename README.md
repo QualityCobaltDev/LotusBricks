@@ -24,9 +24,10 @@ npm run dev
 
 ## Docker deployment
 ```bash
-docker compose build
-docker compose up -d
+./scripts/deploy-production.sh main
 ```
+
+This deployment script fails fast, stamps the image with the deployed commit SHA, applies Prisma migrations, starts containers only after a successful build, and prints logs plus container health.
 
 ## Seed credentials
 - Admin: `admin@rightbricks.com` / `Admin123!`
