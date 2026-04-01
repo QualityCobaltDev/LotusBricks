@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { ContactForm } from "@/components/ui/contact-form";
+import { logServerError } from "@/lib/observability";
 
 type ContactPageProps = {
   searchParams: Promise<{ plan?: string; tierNeeds?: string }>;
@@ -7,7 +8,14 @@ type ContactPageProps = {
 
 export default async function ContactPage({ searchParams }: ContactPageProps) {
   const params = await searchParams;
-  const fallbackListing = await db.listing.findFirst({ where: { status: "PUBLISHED" }, select: { id: true } });
+  let fallbackListing: { id: string } | null = null;
+
+  try {
+    fallbackListing = await db.listing.findFirst({ where: { status: "PUBLISHED" }, select: { id: true } });
+  } catch (error) {
+    logServerError("contact-page", error);
+  }
+
   const isCustomPlan = params.plan === "custom" || params.tierNeeds === "10-plus";
 
   return (

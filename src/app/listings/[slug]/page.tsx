@@ -3,17 +3,30 @@ import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { InquiryForm } from "@/components/ui/inquiry-form";
 import { ListingCard } from "@/components/ui/listing-card";
+import { logServerError } from "@/lib/observability";
+import { Prisma } from "@prisma/client";
 
 export default async function ListingDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const listing = await db.listing.findUnique({ where: { slug }, include: { media: { orderBy: { sortOrder: "asc" } } } });
-  if (!listing || listing.status !== "PUBLISHED") return notFound();
 
-  const similar = await db.listing.findMany({
-    where: { status: "PUBLISHED", city: listing.city, id: { not: listing.id } },
-    include: { media: { take: 1, orderBy: { sortOrder: "asc" } } },
-    take: 3
-  });
+  let listing: Prisma.ListingGetPayload<{ include: { media: true } }> | null = null;
+  let similar: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
+
+  try {
+    listing = await db.listing.findUnique({ where: { slug }, include: { media: { orderBy: { sortOrder: "asc" } } } });
+
+    if (listing) {
+      similar = await db.listing.findMany({
+        where: { status: "PUBLISHED", city: listing.city, id: { not: listing.id } },
+        include: { media: true },
+        take: 3
+      });
+    }
+  } catch (error) {
+    logServerError("listing-detail", error, { slug });
+  }
+
+  if (!listing || listing.status !== "PUBLISHED") return notFound();
 
   const gallery = listing.media.length
     ? listing.media.map((m) => m.url)
