@@ -4,12 +4,14 @@ export function SiteFooter({
   emailHref,
   email,
   phoneHref,
-  phoneDisplay
+  phoneDisplay,
+  appVersion
 }: {
   emailHref: string;
   email: string;
   phoneHref: string;
   phoneDisplay: string;
+  appVersion?: string;
 }) {
   return (
     <footer className="site-footer">
@@ -42,7 +44,7 @@ export function SiteFooter({
       </div>
       <div className="shell footer-bottom">
         <span>© {new Date().getFullYear()} RightBricks. All rights reserved.</span>
-        <span>Built for transparent, high-confidence property decisions.</span>
+        <span>Build {appVersion ?? "dev"} · Built for transparent, high-confidence property decisions.</span>
       </div>
     </footer>
   );
