@@ -49,7 +49,7 @@ export function SiteFooter({
       </div>
       <div className="shell footer-bottom">
         <span>© {new Date().getFullYear()} RightBricks. All rights reserved.</span>
-        <span>Build {appVersion ?? "dev"} · Built for transparent, high-confidence property decisions.</span>
+        <span>{appVersion ? `Build ${appVersion} · ` : ""}Built for transparent, high-confidence property decisions.</span>
       </div>
     </footer>
   );
