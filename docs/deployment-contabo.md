@@ -28,6 +28,18 @@ sudo docker compose build
 sudo docker compose up -d
 ```
 
+## DNS and TLS prerequisites (critical)
+- Create `A` records for both `rightbricks.online` and `www.rightbricks.online` pointing to the VPS IPv4.
+- Only create `AAAA` records if the VPS has fully working public IPv6 routing and inbound firewall rules for `80/tcp` and `443/tcp`.
+- If IPv6 is not fully configured, remove `AAAA` records to prevent clients and ACME validation from using a broken path.
+- Verify with:
+  ```bash
+  dig +short A rightbricks.online
+  dig +short A www.rightbricks.online
+  dig +short AAAA rightbricks.online
+  dig +short AAAA www.rightbricks.online
+  ```
+
 ## Operations
 - Run migrations inside web container.
 - Verify TLS issued by Caddy.
