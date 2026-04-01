@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { CONTACT_SETTING_KEY, DEFAULT_CONTACT } from "@/lib/constants";
+import { logServerError } from "@/lib/observability";
 
 export type ContactSettings = {
   phoneDisplay: string;
@@ -11,13 +12,18 @@ export type ContactSettings = {
 };
 
 export async function getContactSettings(): Promise<ContactSettings> {
-  const settings = await db.siteSetting.findUnique({ where: { key: CONTACT_SETTING_KEY } });
-  if (!settings) return DEFAULT_CONTACT;
+  try {
+    const settings = await db.siteSetting.findUnique({ where: { key: CONTACT_SETTING_KEY } });
+    if (!settings) return DEFAULT_CONTACT;
 
-  return {
-    ...DEFAULT_CONTACT,
-    ...(settings.value as Partial<ContactSettings>)
-  };
+    return {
+      ...DEFAULT_CONTACT,
+      ...(settings.value as Partial<ContactSettings>)
+    };
+  } catch (error) {
+    logServerError("site-settings", error, { key: CONTACT_SETTING_KEY });
+    return DEFAULT_CONTACT;
+  }
 }
 
 export async function upsertContactSettings(value: ContactSettings) {
