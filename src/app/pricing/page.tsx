@@ -1,0 +1,2 @@
+import { db } from "@/lib/db";
+export default async function PricingPage(){const plans=await db.pricingPlan.findMany({where:{isActive:true},orderBy:{sortOrder:'asc'}});return <section><h1>Pricing</h1><div className='grid'>{plans.map((p)=><article className='card' key={p.id}><h3>{p.name}</h3><p>{p.priceLabel} / {p.cadence}</p><ul>{(p.features as string[]).map((f)=><li key={f}>{f}</li>)}</ul></article>)}</div></section>}

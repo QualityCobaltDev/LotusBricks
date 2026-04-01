@@ -1,0 +1,1 @@
+export default function AboutPage(){return <section><h1>About RightBricks</h1><p>We help customers and partners discover verified properties with transparent pricing and media-rich listings.</p></section>}

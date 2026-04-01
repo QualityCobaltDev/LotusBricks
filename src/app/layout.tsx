@@ -1,22 +1,23 @@
-import type { Metadata } from "next";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
-import "@/styles/globals.css";
+import "../styles/globals.css";
+import Link from "next/link";
+import { getSession } from "@/lib/auth";
 
-export const metadata: Metadata = {
-  title: "LotusBricks",
-  description: "Scalable real estate marketplace built with Next.js 15"
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
   return (
     <html lang="en">
       <body>
-        <SiteHeader />
-        <main className="main-shell">
-          <div className="container">{children}</div>
-        </main>
-        <SiteFooter />
+        <header className="header">
+          <Link href="/" className="brand">RightBricks</Link>
+          <nav>
+            <Link href="/listings">Listings</Link>
+            <Link href="/pricing">Pricing</Link>
+            <Link href="/about">About</Link>
+            <Link href="/contact">Contact</Link>
+            {session ? <Link href={session.role === "ADMIN" ? "/admin" : "/account"}>Dashboard</Link> : <Link href="/sign-in">Sign In</Link>}
+          </nav>
+        </header>
+        <main className="container">{children}</main>
       </body>
     </html>
   );

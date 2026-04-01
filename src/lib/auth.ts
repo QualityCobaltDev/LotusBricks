@@ -1,26 +1,45 @@
-export type AuthPayload = {
-  email: string;
-  password: string;
-};
+import { cookies } from "next/headers";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { env } from "./env";
 
-export type AuthResult = { ok: boolean; message?: string; role?: "admin" | "customer" };
+const cookieName = "rb_session";
 
-export const validateEmail = (email: string): boolean => /\S+@\S+\.\S+/.test(email);
+type Role = "ADMIN" | "CUSTOMER";
 
-export async function login(payload: AuthPayload): Promise<AuthResult> {
-  const response = await fetch("/api/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  return response.json();
+export const hashPassword = (input: string) => createHash("sha256").update(input).digest("hex");
+
+function sign(data: string) {
+  return createHmac("sha256", env.AUTH_SECRET).update(data).digest("hex");
 }
 
-export async function register(payload: AuthPayload & { name: string }): Promise<AuthResult> {
-  const response = await fetch("/api/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  return response.json();
+function createToken(userId: string, role: Role) {
+  const exp = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  const payload = `${userId}|${role}|${exp}`;
+  return `${payload}|${sign(payload)}`;
+}
+
+function parseToken(token: string): { userId: string; role: Role } | null {
+  const [userId, role, exp, sig] = token.split("|");
+  if (!userId || !role || !exp || !sig) return null;
+  const payload = `${userId}|${role}|${exp}`;
+  const expected = sign(payload);
+  if (sig.length !== expected.length) return null;
+  if (!timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
+  if (Number(exp) < Date.now()) return null;
+  if (role !== "ADMIN" && role !== "CUSTOMER") return null;
+  return { userId, role };
+}
+
+export async function createSession(userId: string, role: Role) {
+  (await cookies()).set(cookieName, createToken(userId, role), { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/" });
+}
+
+export async function destroySession() {
+  (await cookies()).delete(cookieName);
+}
+
+export async function getSession() {
+  const token = (await cookies()).get(cookieName)?.value;
+  if (!token) return null;
+  return parseToken(token);
 }
