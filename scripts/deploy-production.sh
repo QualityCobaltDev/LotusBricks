@@ -62,7 +62,7 @@ log "Building web image (no cache)"
 docker compose build --no-cache web
 
 log "Applying Prisma migrations in one-off container"
-docker compose run --rm web npx prisma migrate deploy
+docker compose run --rm web npm run prisma:deploy
 
 log "Starting stack with freshly-built images"
 docker compose up -d --no-build --remove-orphans
