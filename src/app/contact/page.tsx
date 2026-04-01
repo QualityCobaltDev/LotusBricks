@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { ContactForm } from "@/components/ui/contact-form";
 import { logServerError } from "@/lib/observability";
+import { getContactSettings } from "@/lib/site-settings";
 
 type ContactPageProps = {
   searchParams: Promise<{ plan?: string; tierNeeds?: string }>;
@@ -8,6 +9,7 @@ type ContactPageProps = {
 
 export default async function ContactPage({ searchParams }: ContactPageProps) {
   const params = await searchParams;
+  const contact = await getContactSettings();
   let fallbackListing: { id: string } | null = null;
 
   try {
@@ -21,7 +23,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
   return (
     <section className="shell section">
       <div className="section-head narrow">
-        <h1>Contact RightBricks</h1>
+        <h1>Contact RightBricks Cambodia</h1>
         <p className="muted">Need more than 10 listings? Contact us for a tailored Custom Tier. Standard tiers include up to 10 photos and 2 videos per listing.</p>
       </div>
 
@@ -29,16 +31,17 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
         <article className="card-pad">
           <h2>{isCustomPlan ? "Speak to sales" : "Talk to a specialist"}</h2>
           <p className="muted">Response time: usually under 2 hours on business days.</p>
-          <p>Email: support@rightbricks.com</p>
-          <p>Phone: +1 (415) 555-0199</p>
-          <p>Office: 301 Market Street, San Francisco, CA</p>
+          <p>Email: <a href={contact.emailHref}>{contact.email}</a></p>
+          <p>Phone: <a href={contact.phoneHref}>{contact.phoneDisplay}</a></p>
+          {contact.supportHours && <p>Support hours: {contact.supportHours}</p>}
+          {contact.supportAddress && <p>Office: {contact.supportAddress}</p>}
         </article>
         <article className="card-pad">
           <h2>{isCustomPlan ? "Request a Custom Tier" : "Send us a message"}</h2>
           <ContactForm
             listingId={fallbackListing?.id ?? ""}
             selectedPlan={(params.plan ?? "").toUpperCase()}
-            inquiryType={isCustomPlan ? "CUSTOM_PLAN" : "GENERAL"}
+            inquiryType={isCustomPlan ? "CUSTOM_PLAN" : "CONTACT"}
           />
         </article>
       </div>

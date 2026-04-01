@@ -2,7 +2,13 @@ import { z } from "zod";
 
 const serverSchema = z.object({
   DATABASE_URL: z.string().min(1),
-  AUTH_SECRET: z.string().min(16)
+  AUTH_SECRET: z.string().min(16),
+  SMTP_HOST: z.string().min(1).optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_USER: z.string().email().optional(),
+  SMTP_PASS: z.string().min(1).optional(),
+  SMTP_SECURE: z.enum(["true", "false"]).optional(),
+  SMTP_FROM: z.string().optional()
 });
 
 const publicSchema = z.object({
@@ -11,7 +17,13 @@ const publicSchema = z.object({
 
 const rawServerEnv = {
   DATABASE_URL: process.env.DATABASE_URL,
-  AUTH_SECRET: process.env.AUTH_SECRET
+  AUTH_SECRET: process.env.AUTH_SECRET,
+  SMTP_HOST: process.env.SMTP_HOST,
+  SMTP_PORT: process.env.SMTP_PORT,
+  SMTP_USER: process.env.SMTP_USER,
+  SMTP_PASS: process.env.SMTP_PASS,
+  SMTP_SECURE: process.env.SMTP_SECURE,
+  SMTP_FROM: process.env.SMTP_FROM
 };
 
 const rawPublicEnv = {

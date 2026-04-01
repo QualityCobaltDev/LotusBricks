@@ -43,10 +43,27 @@ export const inquirySchema = z.object({
   listingId: z.string().min(1).optional().or(z.literal("")),
   fullName: z.string().min(2),
   email: z.string().email(),
-  phone: z.string().optional(),
+  phone: z.string().min(7).optional(),
   companyName: z.string().optional(),
   selectedPlan: z.string().optional(),
-  inquiryType: z.enum(["LISTING", "CUSTOM_PLAN", "GENERAL"]).optional().default("LISTING"),
+  inquiryType: z.enum(["LISTING", "CUSTOM_PLAN", "GENERAL", "CONTACT", "VALUATION", "LISTING_SUBMISSION"]).optional().default("LISTING"),
   requestedListings: z.coerce.number().int().positive().optional(),
+  sourcePage: z.string().optional(),
+  honeypot: z.string().optional().default(""),
   message: z.string().min(10)
+});
+
+export const contactSettingsSchema = z.object({
+  phoneDisplay: z.string().min(8),
+  phoneHref: z.string().startsWith("tel:"),
+  email: z.string().email(),
+  emailHref: z.string().startsWith("mailto:"),
+  supportHours: z.string().optional(),
+  supportAddress: z.string().optional()
+});
+
+export const inquiryStatusSchema = z.object({
+  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "VIEWING_SCHEDULED", "NEGOTIATION", "WON", "LOST", "ARCHIVED"]),
+  notes: z.string().optional(),
+  assignedTo: z.string().optional()
 });

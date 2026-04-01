@@ -29,6 +29,25 @@ enum InquiryType {
   LISTING
   CUSTOM_PLAN
   GENERAL
+  CONTACT
+  VALUATION
+  LISTING_SUBMISSION
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  VIEWING_SCHEDULED
+  NEGOTIATION
+  WON
+  LOST
+  ARCHIVED
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
 }
 
 model User {
@@ -114,13 +133,19 @@ model Inquiry {
   inquiryType       InquiryType @default(LISTING)
   selectedPlan      String?
   message           String
-  status            String      @default("NEW")
+  sourcePage        String?
+  status            LeadStatus  @default(NEW)
+  isUrgent          Boolean     @default(false)
+  assignedTo        String?
+  notes             String?
   createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
   listing           Listing?    @relation(fields: [listingId], references: [id], onDelete: SetNull)
   user              User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt])
   @@index([inquiryType, createdAt])
+  @@index([assignedTo])
 }
 
 model PricingPlan {
@@ -139,10 +164,31 @@ model PricingPlan {
 }
 
 model SiteContent {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  title       String
-  body        String
-  meta        Json?
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String
+  body      String
+  meta      Json?
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model EmailLog {
+  id         String      @id @default(cuid())
+  type       String
+  recipient  String
+  subject    String
+  status     EmailStatus @default(SENT)
+  error      String?
+  metadata   Json?
+  createdAt  DateTime    @default(now())
+
+  @@index([type, createdAt])
+  @@index([status, createdAt])
 }

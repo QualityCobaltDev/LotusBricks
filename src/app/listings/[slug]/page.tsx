@@ -5,10 +5,12 @@ import { InquiryForm } from "@/components/ui/inquiry-form";
 import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
 import { Prisma } from "@prisma/client";
+import { getContactSettings } from "@/lib/site-settings";
 
 export default async function ListingDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
+  const contact = await getContactSettings();
   let listing: Prisma.ListingGetPayload<{ include: { media: true } }> | null = null;
   let similar: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
 
@@ -70,6 +72,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
         <aside className="sticky-card">
           <h3>Schedule a viewing</h3>
           <p className="muted">Share your timeline and our advisors will coordinate next steps.</p>
+          <p className="muted">Need immediate assistance? <a href={contact.phoneHref}>{contact.phoneDisplay}</a> · <a href={contact.emailHref}>{contact.email}</a></p>
           <InquiryForm listingId={listing.id} compact />
         </aside>
       </div>
