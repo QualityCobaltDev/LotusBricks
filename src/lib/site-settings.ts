@@ -9,6 +9,8 @@ export type ContactSettings = {
   emailHref: string;
   supportHours?: string;
   supportAddress?: string;
+  whatsappHref?: string;
+  telegramHref?: string;
 };
 
 export async function getContactSettings(): Promise<ContactSettings> {
@@ -16,9 +18,19 @@ export async function getContactSettings(): Promise<ContactSettings> {
     const settings = await db.siteSetting.findUnique({ where: { key: CONTACT_SETTING_KEY } });
     if (!settings) return DEFAULT_CONTACT;
 
-    return {
+    const merged = {
       ...DEFAULT_CONTACT,
       ...(settings.value as Partial<ContactSettings>)
+    };
+
+    return {
+      ...merged,
+      email: DEFAULT_CONTACT.email,
+      emailHref: DEFAULT_CONTACT.emailHref,
+      phoneDisplay: DEFAULT_CONTACT.phoneDisplay,
+      phoneHref: DEFAULT_CONTACT.phoneHref,
+      whatsappHref: DEFAULT_CONTACT.whatsappHref,
+      telegramHref: DEFAULT_CONTACT.telegramHref
     };
   } catch (error) {
     logServerError("site-settings", error, { key: CONTACT_SETTING_KEY });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CONTACT } from "@/lib/contact";
 
 type ContactFormProps = {
   listingId?: string;
@@ -35,17 +36,27 @@ export function ContactForm({ listingId = "", selectedPlan = "", inquiryType = "
 
   return (
     <form action={onSubmit} className="stack-form">
-      <label>Full name<input name="fullName" required /></label>
-      <label>Email<input name="email" type="email" required /></label>
-      <label>Phone<input name="phone" /></label>
-      <label>Company / Agency<input name="companyName" /></label>
-      <label>Plan<input name="selectedPlan" defaultValue={selectedPlan} /></label>
-      {inquiryType === "CUSTOM_PLAN" && <label>Listings needed<input name="requestedListings" type="number" min={11} placeholder="e.g. 25" required /></label>}
-      <label>How can we help?<textarea name="message" required minLength={10} /></label>
+      <label htmlFor="fullName">Full name<input id="fullName" name="fullName" required /></label>
+      <label htmlFor="email">Email<input id="email" name="email" type="email" required aria-describedby="reply-help" /></label>
+      <small id="reply-help" className="muted">Replies are sent from {CONTACT.email}.</small>
+      <label htmlFor="phone">Phone<input id="phone" name="phone" placeholder="(+855)" /></label>
+      <label htmlFor="companyName">Company / Agency<input id="companyName" name="companyName" /></label>
+      <label htmlFor="preferredContact">Preferred contact method
+        <select id="preferredContact" name="preferredContact" defaultValue="EMAIL">
+          <option value="EMAIL">Email</option>
+          <option value="PHONE">Phone</option>
+          <option value="WHATSAPP">WhatsApp</option>
+          <option value="TELEGRAM">Telegram</option>
+        </select>
+      </label>
+      <label htmlFor="selectedPlan">Plan<input id="selectedPlan" name="selectedPlan" defaultValue={selectedPlan} /></label>
+      {inquiryType === "CUSTOM_PLAN" && <label htmlFor="requestedListings">Listings needed<input id="requestedListings" name="requestedListings" type="number" min={11} placeholder="e.g. 25" required /></label>}
+      <label htmlFor="message">How can we help?<textarea id="message" name="message" required minLength={10} /></label>
       <input name="website" tabIndex={-1} autoComplete="off" className="hp-field" aria-hidden />
       <button className="btn btn-primary">Send message</button>
-      {status === "ok" && <p className="form-ok">We’ve received your enquiry. Our team will contact you shortly via phone or email.</p>}
-      {status === "error" && <p className="form-error">Submission failed. Please email contact@rightbricks.online.</p>}
+      <p className="muted">{CONTACT.standardLine}</p>
+      {status === "ok" && <p className="form-ok">Thanks — our team will respond within a few hours.</p>}
+      {status === "error" && <p className="form-error">Submission failed. Please email {CONTACT.email}.</p>}
     </form>
   );
 }

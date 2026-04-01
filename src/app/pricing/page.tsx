@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { faqs } from "@/lib/site/content";
 import { PLAN_CONFIG, PLAN_ORDER, formatUsd } from "@/lib/plans";
+import { CONTACT } from "@/lib/contact";
+
+export const metadata: Metadata = {
+  title: "Pricing",
+  description: "Transparent RightBricks pricing with a one-time $50 signup fee, clear plan limits, and custom tiers for larger portfolios.",
+  alternates: { canonical: "/pricing" }
+};
 
 export default async function PricingPage() {
   const plans = PLAN_ORDER.map((key) => PLAN_CONFIG[key]);
@@ -7,8 +15,8 @@ export default async function PricingPage() {
   return (
     <section className="shell section">
       <div className="section-head narrow">
-        <h1>Transparent pricing for every portfolio stage</h1>
-        <p className="muted">One-time $50 sign-up fee applies to all new standard subscriptions. Every plan includes up to 10 photos and 2 videos per listing.</p>
+        <h1>Pricing built for serious property operators</h1>
+        <p className="muted">One-time $50 sign-up fee applies to new standard subscriptions. Need more than 10 listings? Our Custom Tier includes tailored onboarding and support.</p>
       </div>
 
       <div className="pricing-grid">
@@ -17,14 +25,12 @@ export default async function PricingPage() {
             <div>
               {plan.badge && <p className="eyebrow">{plan.badge}</p>}
               <h3>{plan.name}</h3>
+              <p className="muted">Best for: {plan.key === "TIER_1" ? "single asset owners" : plan.key === "TIER_2" ? "active agents" : plan.key === "TIER_3" ? "growing agencies" : "portfolio operators"}</p>
             </div>
-            <p className="price">
-              {plan.recurringMonthlyUsd === null ? "Pricing Varies" : `${formatUsd(plan.recurringMonthlyUsd)}`}<small>{plan.recurringMonthlyUsd === null ? "" : " / month"}</small>
-            </p>
-            {plan.recurringMonthlyUsd !== null && <p className="muted">+ {formatUsd(plan.oneTimeSignupFeeUsd)} one-time sign-up fee</p>}
-            {plan.recurringMonthlyUsd === null && <p className="muted">Need more than 10 listings? Contact us for a tailored Custom Tier.</p>}
+            <p className="price">{plan.recurringMonthlyUsd === null ? "Pricing Varies" : `${formatUsd(plan.recurringMonthlyUsd)}`}<small>{plan.recurringMonthlyUsd === null ? "" : " / month"}</small></p>
+            {plan.recurringMonthlyUsd !== null ? <p className="muted">+ {formatUsd(plan.oneTimeSignupFeeUsd)} one-time sign-up fee</p> : <p className="muted">Talk to sales for a Custom Tier proposal.</p>}
             <ul>
-              <li>{plan.listingLimit === null ? "10+ Listings" : `${plan.listingLimit} ${plan.listingLimit === 1 ? "Listing" : "Listings"}`}</li>
+              <li>{plan.listingLimit === null ? "10+ Listings" : `${plan.listingLimit} Listings`}</li>
               <li>{plan.photosPerListing} Photos per listing</li>
               <li>{plan.videosPerListing} Videos per listing</li>
               {plan.blurb && <li>{plan.blurb}</li>}
@@ -34,46 +40,16 @@ export default async function PricingPage() {
         ))}
       </div>
 
-      <div className="section">
-        <h2>Plan comparison</h2>
-        <div className="card-pad">
-          <table className="comparison-table">
-            <thead>
-              <tr><th>Plan</th><th>Recurring</th><th>Sign-up fee</th><th>Listings</th><th>Photos/listing</th><th>Videos/listing</th></tr>
-            </thead>
-            <tbody>
-              {plans.map((plan) => (
-                <tr key={`row-${plan.key}`}>
-                  <td>{plan.name}</td>
-                  <td>{plan.recurringMonthlyUsd === null ? "Pricing Varies" : `${formatUsd(plan.recurringMonthlyUsd)}/mo`}</td>
-                  <td>{plan.recurringMonthlyUsd === null ? "N/A" : formatUsd(plan.oneTimeSignupFeeUsd)}</td>
-                  <td>{plan.listingLimit === null ? "10+ (Contact Sales)" : plan.listingLimit}</td>
-                  <td>{plan.photosPerListing}</td>
-                  <td>{plan.videosPerListing}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <div className="section two-col">
         <article className="card-pad">
-          <h2>Billing clarity before checkout</h2>
-          <p>All new standard subscriptions show two separate charges before payment:</p>
-          <ul className="check-list">
-            <li>Recurring monthly subscription fee (plan-based)</li>
-            <li>One-time $50 sign-up fee (charged once, not on renewals)</li>
-          </ul>
+          <h2>FAQ</h2>
+          {faqs.map((f) => <details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>)}
         </article>
         <article className="card-pad">
-          <h2>Frequently asked questions</h2>
-          {faqs.map((f) => (
-            <details key={f.q}>
-              <summary>{f.q}</summary>
-              <p>{f.a}</p>
-            </details>
-          ))}
+          <h2>Custom plan conversion path</h2>
+          <p>Share listing volume, target districts, and service requirements. We will provide a scoped Custom Tier proposal.</p>
+          <a className="btn btn-primary" href="/contact?plan=custom&tierNeeds=10-plus">Request Custom Tier</a>
+          <p className="muted">{CONTACT.standardLine}</p>
         </article>
       </div>
     </section>

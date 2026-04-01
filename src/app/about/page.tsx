@@ -1,46 +1,47 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { trustStats } from "@/lib/site/content";
+
+export const metadata: Metadata = {
+  title: "About",
+  description: "Learn how RightBricks delivers verified property intelligence and trusted marketplace workflows across Cambodia.",
+  alternates: { canonical: "/about" }
+};
 
 export default function AboutPage() {
   return (
     <section className="shell section">
       <div className="section-head narrow">
-        <h1>Building confidence in every property decision</h1>
-        <p className="muted">
-          RightBricks was created to eliminate uncertainty in property discovery through verification, richer listing intelligence,
-          and a customer-first advisory experience.
-        </p>
+        <h1>About RightBricks</h1>
+        <p className="muted">RightBricks exists to reduce uncertainty in real estate decisions through verification-first listing standards, transparent data, and responsive support.</p>
       </div>
 
       <div className="two-col">
         <article className="card-pad">
-          <h2>Our mission</h2>
-          <p>Make real estate decisions more transparent, efficient, and trustworthy for buyers, renters, investors, and agencies.</p>
-          <h3>What makes us different</h3>
+          <h2>What we verify</h2>
           <ul className="check-list">
-            <li>Verification standards before listings go live.</li>
-            <li>Media-rich detail pages that reduce ambiguity.</li>
-            <li>Fast response operations that improve closing velocity.</li>
+            <li>Listing source legitimacy and ownership signals.</li>
+            <li>Media consistency, recency, and property matching.</li>
+            <li>Core facts used by buyers, renters, and investors.</li>
           </ul>
+          <h3>Who we serve</h3>
+          <p>Buyers, renters, agencies, developers, and institutional teams looking for clearer property decisions in Cambodia.</p>
         </article>
         <article className="card-pad">
-          <h2>Who we serve</h2>
-          <p>From first-time renters to institutional buyers, our platform supports both individual journeys and portfolio strategies.</p>
-          <p>RightBricks combines marketplace UX with premium service expectations for modern property transactions.</p>
+          <h2>Our operating principles</h2>
+          <ol>
+            <li>Truth over volume: better listings beat more listings.</li>
+            <li>Speed with accountability: clear inquiry routing and follow-through.</li>
+            <li>Market context matters: localization and district-level relevance.</li>
+          </ol>
+          <p className="muted">Expansion-ready architecture supports Phnom Penh, Siem Reap, and Sihanoukville growth tracks.</p>
         </article>
       </div>
 
-      <div className="stat-grid">
-        {trustStats.map((item) => (
-          <article key={item.label} className="stat-card">
-            <p>{item.value}</p>
-            <span>{item.label}</span>
-          </article>
-        ))}
-      </div>
+      <div className="stat-grid">{trustStats.map((item) => <article key={item.label} className="stat-card"><p>{item.value}</p><span>{item.label}</span></article>)}</div>
 
       <section className="cta-band">
-        <h2>Partner with a platform built for trust at scale</h2>
+        <h2>Ready to work with a verification-first marketplace?</h2>
         <div className="hero-actions">
           <Link href="/contact" className="btn btn-primary">Speak with our team</Link>
           <Link href="/listings" className="btn btn-ghost">View live inventory</Link>

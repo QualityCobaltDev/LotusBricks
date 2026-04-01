@@ -1,8 +1,12 @@
+import { CONTACT } from "@/lib/contact";
+
 export const DEFAULT_CONTACT = {
-  phoneDisplay: "(+855) 011 389 625",
-  phoneHref: "tel:+85511389625",
-  email: "contact@rightbricks.online",
-  emailHref: "mailto:contact@rightbricks.online"
+  phoneDisplay: CONTACT.phoneDisplay,
+  phoneHref: CONTACT.phoneHref,
+  email: CONTACT.email,
+  emailHref: CONTACT.emailHref,
+  whatsappHref: CONTACT.whatsappHref,
+  telegramHref: CONTACT.telegramHref
 };
 
 export const CONTACT_SETTING_KEY = "platform.contact";

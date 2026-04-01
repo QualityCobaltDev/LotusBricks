@@ -54,10 +54,12 @@ export const inquirySchema = z.object({
 });
 
 export const contactSettingsSchema = z.object({
-  phoneDisplay: z.string().min(8),
-  phoneHref: z.string().startsWith("tel:"),
-  email: z.string().email(),
-  emailHref: z.string().startsWith("mailto:"),
+  phoneDisplay: z.literal("(+855) 011 389 625"),
+  phoneHref: z.literal("tel:+85511389625"),
+  email: z.literal("contact@rightbricks.online"),
+  emailHref: z.literal("mailto:contact@rightbricks.online"),
+  whatsappHref: z.literal("https://wa.me/85511389625").optional(),
+  telegramHref: z.literal("https://t.me/").optional(),
   supportHours: z.string().optional(),
   supportAddress: z.string().optional()
 });
