@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import { env } from "./env";
+import { requireServerEnv } from "./env";
 
 const cookieName = "rb_session";
 
@@ -8,8 +8,12 @@ type Role = "ADMIN" | "CUSTOMER";
 
 export const hashPassword = (input: string) => createHash("sha256").update(input).digest("hex");
 
+function getAuthSecret() {
+  return requireServerEnv("AUTH_SECRET").AUTH_SECRET;
+}
+
 function sign(data: string) {
-  return createHmac("sha256", env.AUTH_SECRET).update(data).digest("hex");
+  return createHmac("sha256", getAuthSecret()).update(data).digest("hex");
 }
 
 function createToken(userId: string, role: Role) {
@@ -41,5 +45,11 @@ export async function destroySession() {
 export async function getSession() {
   const token = (await cookies()).get(cookieName)?.value;
   if (!token) return null;
-  return parseToken(token);
+
+  try {
+    return parseToken(token);
+  } catch (error) {
+    console.error("[auth] Failed to parse session token", error);
+    return null;
+  }
 }

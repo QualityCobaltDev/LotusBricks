@@ -2,14 +2,25 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
 import { trustStats, testimonials } from "@/lib/site/content";
+import { isPrismaSchemaMismatch, logServerError } from "@/lib/observability";
+import { Prisma } from "@prisma/client";
 
 export default async function HomePage() {
-  const hero = await db.siteContent.findUnique({ where: { key: "homepage.hero" } });
-  const featured = await db.listing.findMany({
-    where: { status: "PUBLISHED" },
-    include: { media: { orderBy: { sortOrder: "asc" }, take: 1 } },
-    take: 6
-  });
+  let hero: { title: string; body: string } | null = null;
+  let featured: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
+
+  try {
+    [hero, featured] = await Promise.all([
+      db.siteContent.findUnique({ where: { key: "homepage.hero" }, select: { title: true, body: true } }),
+      db.listing.findMany({
+        where: { status: "PUBLISHED" },
+        include: { media: { orderBy: { sortOrder: "asc" }, take: 1 } },
+        take: 6
+      })
+    ]);
+  } catch (error) {
+    logServerError("home-page", error, { schemaMismatch: isPrismaSchemaMismatch(error) });
+  }
 
   return (
     <>

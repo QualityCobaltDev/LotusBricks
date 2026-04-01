@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
+import { logServerError } from "@/lib/observability";
 
 export default async function ListingsPage({
   searchParams
@@ -13,18 +14,24 @@ export default async function ListingsPage({
   const max = Number(params.max) || undefined;
   const beds = Number(params.beds) || 0;
 
-  const listings = await db.listing.findMany({
-    where: {
-      status: "PUBLISHED",
-      priceUsd: { gte: min, lte: max },
-      bedrooms: beds ? { gte: beds } : undefined,
-      OR: q
-        ? [{ city: { contains: q, mode: "insensitive" } }, { district: { contains: q, mode: "insensitive" } }, { title: { contains: q, mode: "insensitive" } }]
-        : undefined
-    },
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-    include: { media: { orderBy: { sortOrder: "asc" }, take: 1 } }
-  });
+  let listings: Awaited<ReturnType<typeof db.listing.findMany>> = [];
+
+  try {
+    listings = await db.listing.findMany({
+      where: {
+        status: "PUBLISHED",
+        priceUsd: { gte: min, lte: max },
+        bedrooms: beds ? { gte: beds } : undefined,
+        OR: q
+          ? [{ city: { contains: q, mode: "insensitive" } }, { district: { contains: q, mode: "insensitive" } }, { title: { contains: q, mode: "insensitive" } }]
+          : undefined
+      },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      include: { media: { orderBy: { sortOrder: "asc" }, take: 1 } }
+    });
+  } catch (error) {
+    logServerError("listings-page", error, { q, min, max, beds });
+  }
 
   return (
     <section className="shell section">
