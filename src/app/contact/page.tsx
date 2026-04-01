@@ -1,0 +1,4 @@
+"use client";
+import { useState } from "react";
+export default function ContactPage(){const [msg,setMsg]=useState("");async function onSubmit(formData:FormData){const res=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listingId:'general',fullName:String(formData.get('fullName')),email:String(formData.get('email')),message:String(formData.get('message'))})});setMsg(res.ok?'Thanks, our team will contact you.':'Unable to submit');}
+return <section><h1>Contact</h1><form action={onSubmit}><input name='fullName' placeholder='Full name' required/><input name='email' type='email' placeholder='Email' required/><textarea name='message' placeholder='How can we help?' required/><button className='btn'>Send</button>{msg && <p>{msg}</p>}</form></section>;}

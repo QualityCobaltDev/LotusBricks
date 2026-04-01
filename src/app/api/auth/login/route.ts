@@ -1,19 +1,6 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { setRoleCookie } from "@/lib/session/cookie";
+import { db } from "@/lib/db";
+import { createSession, hashPassword } from "@/lib/auth";
+import { loginSchema } from "@/lib/validators";
 
-const schema = z.object({ email: z.string().email(), password: z.string().min(8) });
-
-export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ ok: false, message: "Invalid credentials." }, { status: 400 });
-
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  const isAdmin = Boolean(adminEmail && adminPassword && parsed.data.email === adminEmail && parsed.data.password === adminPassword);
-
-  const role: "admin" | "customer" = isAdmin ? "admin" : "customer";
-  await setRoleCookie(role);
-  return NextResponse.json({ ok: true, role });
-}
+export async function POST(req: Request){const parsed=loginSchema.safeParse(await req.json());if(!parsed.success)return NextResponse.json({error:'Invalid input'},{status:400});const user=await db.user.findUnique({where:{email:parsed.data.email}});if(!user||user.passwordHash!==hashPassword(parsed.data.password)||!user.isActive){return NextResponse.json({error:'Invalid credentials'},{status:401});}await createSession(user.id,user.role);return NextResponse.json({ok:true,redirectTo:user.role==='ADMIN'?'/admin':'/account'});}

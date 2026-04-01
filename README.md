@@ -1,30 +1,33 @@
-# RightBricks
+# RightBricks Rebuild
 
-Production-first foundation for the RightBricks real estate marketplace + SaaS platform.
+Production-grade rewrite of the RightBricks property platform using Next.js App Router + Prisma + PostgreSQL.
 
-## Included in this foundation
-- Next.js (App Router) + TypeScript with typed routes.
-- Tailwind-based public site shell with reusable header/footer and CTA primitives.
-- Public marketplace routes: `/`, `/buy`, `/rent`, `/listings/[slug]`, `/sell`, `/landlords`, `/developers`, `/pricing`.
-- Seller/admin shell routes: `/dashboard`, `/admin`.
-- Temporary marketplace repository (`lib/marketplace-data.ts`) for realistic listings while Prisma wiring is completed.
-- Prisma schema baseline for users, listings, leads, offers, notifications, and audits.
-- Docker Compose stack for Contabo VPS (`Caddy + Web + PostgreSQL + Redis + Backup`) with web healthcheck.
+## Architecture
+- Public marketing and listing pages.
+- Shared sign-in endpoint with server-side role routing.
+- Admin area (`/admin`) for users, listings, inquiries, pricing, and content visibility.
+- Customer area (`/account`) with saved listings.
+- API routes with Zod validation and role checks.
+- Prisma-backed content and business entities.
+- Docker Compose stack (`web`, `db`, `proxy`) behind Caddy.
 
-## Quick start
+## Environment
+Copy `.env.example` to `.env` and set secure values.
+
+## Run locally
 ```bash
-cp .env.example .env
 npm install
 npm run prisma:generate
+npm run build
 npm run dev
 ```
 
-## Production
+## Docker deployment
 ```bash
 docker compose build
 docker compose up -d
 ```
 
-## Core docs
-- Product and architecture blueprint: `docs/blueprint.md`
-- Deployment runbook: `docs/deployment-contabo.md`
+## Seed credentials
+- Admin: `admin@rightbricks.com` / `Admin123!`
+- Customer: `customer@rightbricks.com` / `Customer123!`

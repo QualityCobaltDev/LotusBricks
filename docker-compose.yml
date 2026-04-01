@@ -1,44 +1,21 @@
-version: "3.9"
-
 services:
-  proxy:
-    image: caddy:2.9
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      web:
-        condition: service_healthy
-
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file:
-      - .env
+    build: .
+    env_file: .env
     environment:
-      - NODE_ENV=production
-      - PORT=3000
+      NODE_ENV: production
+      PORT: 3000
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 15s
       timeout: 5s
-      retries: 5
+      retries: 8
 
   db:
     image: postgres:16-alpine
-    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -51,33 +28,15 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
+  proxy:
+    image: caddy:2.9
+    ports:
+      - "80:80"
     volumes:
-      - redis_data:/data
-
-  backup:
-    image: prodrigestivill/postgres-backup-local:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_HOST: db
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      SCHEDULE: "0 2 * * *"
-      BACKUP_KEEP_DAYS: 7
-      BACKUP_KEEP_WEEKS: 4
-      BACKUP_KEEP_MONTHS: 3
-    volumes:
-      - ./backups:/backups
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
-      db:
+      web:
         condition: service_healthy
 
 volumes:
   postgres_data:
-  redis_data:
-  caddy_data:
-  caddy_config:
