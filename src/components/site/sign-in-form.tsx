@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { AuthErrorResponse, AuthSuccessResponse } from "@/lib/auth-contract";
 import { toSignInErrorMessage } from "@/lib/auth-client";
 
-export function SignInForm() {
+export function SignInForm({ role }: { role: "ADMIN" | "CUSTOMER" }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -14,7 +14,6 @@ export function SignInForm() {
 
   async function onSubmit(formData: FormData) {
     if (isSubmitting) return;
-
     setError("");
     setIsSubmitting(true);
 
@@ -25,7 +24,8 @@ export function SignInForm() {
         body: JSON.stringify({
           email: formData.get("email"),
           password: formData.get("password"),
-          remember: Boolean(formData.get("remember"))
+          remember: Boolean(formData.get("remember")),
+          role
         })
       });
 
@@ -46,7 +46,7 @@ export function SignInForm() {
 
   return (
     <form action={onSubmit} className="stack-form" noValidate>
-      <label htmlFor="email">Email<input id="email" name="email" type="email" required autoComplete="email" /></label>
+      <label htmlFor="email">Email<input id="email" name="email" type="email" required autoComplete="email" inputMode="email" /></label>
       <label htmlFor="password">
         Password
         <div className="password-row">
@@ -58,7 +58,7 @@ export function SignInForm() {
       </label>
       <label className="remember"><input type="checkbox" name="remember" />Remember me for 30 days</label>
       <button className="btn btn-primary" disabled={isSubmitting} aria-busy={isSubmitting}>
-        {isSubmitting ? "Signing in..." : "Sign in"}
+        {isSubmitting ? "Signing in..." : `Sign in as ${role === "ADMIN" ? "Admin" : "Customer"}`}
       </button>
       <Link href="/support/forgot-password" className="muted">Forgot password?</Link>
       {error && <p className="form-error" role="alert">{error}</p>}

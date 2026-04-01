@@ -1,34 +1,36 @@
 import { requireAdmin } from "@/server/guards";
-import { PLAN_CONFIG, PLAN_ORDER, formatUsd } from "@/lib/plans";
+import { formatUsd } from "@/lib/plans";
+import { getPricingPlans } from "@/lib/pricing-settings";
+import { PricingSettingsForm } from "@/components/admin/pricing-settings-form";
 
 export default async function PricingAdmin() {
   await requireAdmin();
-  const rows = PLAN_ORDER.map((k) => PLAN_CONFIG[k]);
+  const rows = await getPricingPlans();
 
   return (
-    <section>
-      <h1>Pricing plans</h1>
-      <p>Single source of truth for recurring price, one-time sign-up fee, and listing/media caps.</p>
-      <div className="card-pad">
-        <table className="comparison-table">
-          <thead>
-            <tr><th>Plan</th><th>Recurring monthly</th><th>Sign-up fee</th><th>Listings</th><th>Photos</th><th>Videos</th><th>Checkout</th></tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.key}>
-                <td>{r.name}</td>
-                <td>{r.recurringMonthlyUsd === null ? "Pricing Varies" : formatUsd(r.recurringMonthlyUsd)}</td>
-                <td>{r.recurringMonthlyUsd === null ? "N/A" : formatUsd(r.oneTimeSignupFeeUsd)}</td>
-                <td>{r.listingLimit === null ? "10+" : r.listingLimit}</td>
-                <td>{r.photosPerListing}</td>
-                <td>{r.videosPerListing}</td>
-                <td>{r.contactOnly ? "Contact-only" : "Self-serve"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <section className="shell section two-col">
+      <PricingSettingsForm initial={rows} />
+      <article className="card-pad">
+        <h2>Live pricing table</h2>
+        <div className="admin-table-wrap">
+          <table className="comparison-table">
+            <thead>
+              <tr><th>Plan</th><th>Base</th><th>Sign-up</th><th>Total upfront</th><th>Checkout</th></tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.key}>
+                  <td>{r.name}</td>
+                  <td>{r.recurringMonthlyUsd === null ? "Price Varies" : formatUsd(r.recurringMonthlyUsd)}</td>
+                  <td>{r.recurringMonthlyUsd === null ? "N/A" : formatUsd(r.oneTimeSignupFeeUsd)}</td>
+                  <td>{r.recurringMonthlyUsd === null ? "Contact required" : formatUsd(r.recurringMonthlyUsd + r.oneTimeSignupFeeUsd)}</td>
+                  <td>{r.contactOnly ? "Contact-only" : "Self-serve"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </article>
     </section>
   );
 }

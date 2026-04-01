@@ -6,6 +6,8 @@ import { ListingCard } from "@/components/ui/listing-card";
 import { trustStats, testimonials } from "@/lib/site/content";
 import { isPrismaSchemaMismatch, logServerError } from "@/lib/observability";
 import { Prisma } from "@prisma/client";
+import { getPricingPlans } from "@/lib/pricing-settings";
+import { formatUsd } from "@/lib/plans";
 
 export const metadata: Metadata = {
   title: "Home",
@@ -22,6 +24,7 @@ const guides = [
 export default async function HomePage() {
   let hero: { title: string; body: string } | null = null;
   let featured: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
+  const pricingPreview = await getPricingPlans();
 
   try {
     [hero, featured] = await Promise.all([
@@ -86,6 +89,23 @@ export default async function HomePage() {
       <section className="shell section">
         <div className="section-head"><h2>Market intelligence & resources</h2></div>
         <div className="grid">{guides.map((g) => <article className="card" key={g.title}><h3>{g.title}</h3><p className="muted">{g.text}</p><Link href={g.href as any}>Read more</Link></article>)}</div>
+      </section>
+
+
+      <section className="shell section">
+        <div className="section-head">
+          <h2>Standardized pricing tiers</h2>
+          <Link href="/pricing">View full pricing</Link>
+        </div>
+        <div className="pricing-grid">
+          {pricingPreview.map((plan) => (
+            <article key={plan.key} className="pricing-card">
+              <h3>{plan.name}</h3>
+              {plan.contactOnly ? <p className="muted">Contact Us for Pricing</p> : <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} Sign-Up Fee`}</p>}
+              <a href={plan.ctaHref} className="btn btn-ghost">{plan.contactOnly ? "Contact Us" : plan.ctaLabel}</a>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="shell section">

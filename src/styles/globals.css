@@ -121,12 +121,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .desktop-nav { display: flex; gap: 1rem; }
 .desktop-nav a { padding: .4rem .75rem; border-radius: 999px; color: var(--color-text-muted); }
 .desktop-nav .active, .desktop-nav a:hover { background: var(--blue-100); color: var(--blue-800); }
-.nav-ctas { display: flex; gap: .6rem; align-items: center; }
+.nav-ctas { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .mobile-toggle { display: none; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); padding: .5rem .65rem; color: var(--color-text); }
 .mobile-panel { display: none; }
+.mobile-panel .btn { width: 100%; }
 .mobile-panel a { color: var(--color-text); }
 
-.btn { display: inline-flex; justify-content: center; align-items: center; border: 1px solid transparent; border-radius: 12px; padding: .65rem 1rem; font-weight: 600; cursor: pointer; transition: .2s ease; }
+.btn { display: inline-flex; justify-content: center; align-items: center; border: 1px solid transparent; border-radius: 12px; padding: .72rem 1rem; min-height: 44px; font-weight: 600; cursor: pointer; transition: .2s ease; }
 .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); }
 .btn-primary:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
 .btn-ghost { background: var(--color-surface); border-color: var(--blue-300); color: var(--blue-700); }
@@ -195,7 +196,7 @@ summary { cursor: pointer; font-weight: 600; color: var(--blue-700); }
 
 .pricing-card.premium { background: linear-gradient(180deg, #fdfdff, var(--blue-50)); border-color: var(--blue-300); }
 .pricing-card .eyebrow { margin: 0 0 .4rem; }
-.comparison-table { width: 100%; border-collapse: collapse; font-size: .95rem; background: var(--admin-surface); }
+.comparison-table { width: 100%; border-collapse: collapse; font-size: .95rem; background: var(--admin-surface); min-width: 680px; }
 .comparison-table th, .comparison-table td { border-bottom: 1px solid var(--color-border); text-align: left; padding: .65rem .4rem; }
 .comparison-table th { color: var(--blue-800); font-size: .84rem; text-transform: uppercase; letter-spacing: .02em; background: var(--admin-sidebar); }
 
@@ -237,4 +238,25 @@ summary { cursor: pointer; font-weight: 600; color: var(--blue-700); }
   .mobile-panel { display: grid; gap: .4rem; padding: .5rem 4vw 1rem; border-top: 1px solid var(--color-border); background: var(--color-surface-muted); }
   .filter-bar { grid-template-columns: 1fr 1fr; }
   .detail-hero { height: 320px; }
+}
+
+
+@media (max-width: 720px) {
+  .shell { width: min(1180px, 94vw); }
+  .section { padding: 2.4rem 0; }
+  .nav-shell { padding: .7rem 0; }
+  .brand small { display: none; }
+  .nav-ctas .btn { display: none; }
+  .mobile-toggle { display: inline-flex; min-height: 44px; min-width: 44px; }
+  .mobile-panel { padding: .8rem 4vw 1rem; gap: .7rem; }
+  .mobile-panel a { padding: .7rem .2rem; border-bottom: 1px solid var(--color-border); }
+  .hero-actions { display: grid; grid-template-columns: 1fr; }
+  .hero-search { grid-template-columns: 1fr; }
+  .filter-bar { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .price { font-size: 1.25rem; }
+  .comparison-table { min-width: 560px; }
+  .inline-admin-form { grid-template-columns: 1fr; }
+  .password-row { grid-template-columns: 1fr; }
 }

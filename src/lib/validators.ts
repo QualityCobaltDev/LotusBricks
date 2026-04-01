@@ -4,7 +4,7 @@ import { getPlanByKey } from "@/lib/plans";
 const maxPhotos = getPlanByKey("TIER_1").photosPerListing;
 const maxVideos = getPlanByKey("TIER_1").videosPerListing;
 
-export const loginSchema = z.object({ email: z.string().email(), password: z.string().min(8) });
+export const loginSchema = z.object({ email: z.string().email(), password: z.string().min(8), role: z.enum(["ADMIN", "CUSTOMER"]).optional() });
 export const registerSchema = z.object({ fullName: z.string().min(2), email: z.string().email(), password: z.string().min(8), selectedPlan: z.string().optional().default("TIER_1") });
 export const listingSchema = z.object({
   id: z.string().optional(),
@@ -69,3 +69,16 @@ export const inquiryStatusSchema = z.object({
   notes: z.string().optional(),
   assignedTo: z.string().optional()
 });
+
+
+export const pricingSettingsSchema = z.record(z.enum(["TIER_1", "TIER_2", "TIER_3", "CUSTOM"]), z.object({
+  name: z.string().min(2),
+  recurringMonthlyUsd: z.number().nullable(),
+  oneTimeSignupFeeUsd: z.number().min(0),
+  ctaLabel: z.string().min(2),
+  ctaHref: z.string().min(1),
+  badge: z.string().optional(),
+  blurb: z.string().optional(),
+  featured: z.boolean().optional(),
+  isActive: z.boolean().optional()
+}));

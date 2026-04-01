@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { PLAN_CONFIG, PLAN_ORDER } from "@/lib/plans";
+import { getPricingPlans, upsertPricingSettings } from "@/lib/pricing-settings";
+import { pricingSettingsSchema } from "@/lib/validators";
 
 export async function GET() {
-  return NextResponse.json(PLAN_ORDER.map((k) => PLAN_CONFIG[k]));
+  return NextResponse.json(await getPricingPlans());
 }
 
-export async function POST(req: Request) {
+export async function PUT(req: Request) {
   const session = await getSession();
   if (session?.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  const body = await req.json();
-  return NextResponse.json({ message: "Plan configuration is code-managed in src/lib/plans.ts", received: body }, { status: 202 });
+
+  const parsed = pricingSettingsSchema.safeParse(await req.json());
+  if (!parsed.success) return NextResponse.json({ error: "Invalid payload", details: parsed.error.flatten() }, { status: 400 });
+
+  await upsertPricingSettings(parsed.data as any);
+  return NextResponse.json({ ok: true });
 }

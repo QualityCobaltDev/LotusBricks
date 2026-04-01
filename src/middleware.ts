@@ -15,7 +15,7 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (!role && (pathname.startsWith("/account") || pathname.startsWith("/admin"))) {
-    return NextResponse.redirect(new URL("/sign-in", req.url));
+    return NextResponse.redirect(new URL("/login/customer", req.url));
   }
 
   if (role === "CUSTOMER" && pathname.startsWith("/admin")) {
@@ -26,7 +26,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   }
 
-  if (role && pathname === "/sign-in") {
+  if (role && (pathname === "/sign-in" || pathname === "/login/customer" || pathname === "/login/admin")) {
     return NextResponse.redirect(new URL(role === "ADMIN" ? "/admin/dashboard" : "/account", req.url));
   }
 
@@ -34,5 +34,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/account/:path*", "/sign-in"]
+  matcher: ["/admin/:path*", "/account/:path*", "/sign-in", "/login/customer", "/login/admin"]
 };
