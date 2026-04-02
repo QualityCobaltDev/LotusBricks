@@ -20,7 +20,7 @@ ENV SKIP_DATABASE_DURING_BUILD=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN mkdir -p public
-RUN npx prisma generate
+RUN npm run prisma:generate
 RUN npm run build
 
 FROM node:22-alpine AS runner

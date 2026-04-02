@@ -1,3 +1,4 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import {
   PrismaClient,
   UserRole,
@@ -8,11 +9,14 @@ import {
   PropertyAvailability,
   FurnishingType
 } from "@prisma/client";
+import { Pool } from "pg";
 import { createHash } from "node:crypto";
 import { PLAN_CONFIG, STANDARD_PLAN_ORDER, formatUsd } from "../src/lib/plans";
 import { DEMO_LISTING_MEDIA } from "../src/lib/listing-media";
 
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 const hashPassword = (value: string) => createHash("sha256").update(value).digest("hex");
 
@@ -828,4 +832,7 @@ async function main() {
 
 }
 
-main().finally(() => prisma.$disconnect());
+main().finally(async () => {
+  await prisma.$disconnect();
+  await pool.end();
+});

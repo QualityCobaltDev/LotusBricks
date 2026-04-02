@@ -1,7 +1,11 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
 import { DEMO_LISTING_MEDIA } from "../src/lib/listing-media";
 
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function run() {
   for (const [slug, media] of Object.entries(DEMO_LISTING_MEDIA)) {
@@ -36,4 +40,7 @@ async function run() {
   }
 }
 
-run().finally(() => prisma.$disconnect());
+run().finally(async () => {
+  await prisma.$disconnect();
+  await pool.end();
+});
