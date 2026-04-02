@@ -1,5 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useMemo, useState } from "react";
+
+type ListingMedia = {
+  url: string;
+  kind?: string | null;
+  thumbnail?: string | null;
+};
 
 type ListingCardProps = {
   listing: {
@@ -17,19 +26,73 @@ type ListingCardProps = {
     furnishing?: string | null;
     availability?: string;
     featured: boolean;
-    media?: { url: string }[];
+    media?: ListingMedia[];
   };
 };
 
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80";
+
+function isLikelyMediaUrl(url?: string | null) {
+  if (!url) return false;
+  return url.startsWith("/") || /^https?:\/\//i.test(url);
+}
+
+function getCardImage(media: ListingMedia[] | undefined) {
+  const image = media?.find((item) => item.kind?.toLowerCase() === "image" && isLikelyMediaUrl(item.url));
+  if (image?.url) return image.url;
+
+  const poster = media?.find((item) => item.kind?.toLowerCase() === "video" && isLikelyMediaUrl(item.thumbnail))?.thumbnail;
+  if (poster) return poster;
+
+  const firstValid = media?.find((item) => isLikelyMediaUrl(item.url))?.url;
+  return firstValid ?? FALLBACK_IMAGE;
+}
+
+function ListingThumbnail({ title, district, city, imageUrl }: { title: string; district: string; city: string; imageUrl: string }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const hasImage = !imageFailed && isLikelyMediaUrl(imageUrl);
+
+  if (!hasImage) {
+    return (
+      <div className="listing-media-fallback" aria-label="Listing media placeholder" role="img">
+        <span className="listing-media-fallback-mark">RightBricks</span>
+        <strong>Verified listing media</strong>
+        <span>{district}, {city}</span>
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={imageUrl}
+      alt={`${title} in ${district}, ${city}`}
+      loading="lazy"
+      className="listing-media"
+      fill
+      sizes="(max-width: 720px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      onError={() => setImageFailed(true)}
+    />
+  );
+}
+
 export function ListingCard({ listing }: ListingCardProps) {
-  const image = listing.media?.[0]?.url ?? "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80";
+  const media = listing.media ?? [];
+  const image = useMemo(() => getCardImage(media), [media]);
+  const hasVideo = media.some((item) => item.kind?.toLowerCase() === "video");
+  const mediaCount = media.length;
 
   return (
     <article className="listing-card">
       <div className="listing-media-wrap">
-        <Image src={image} alt={`${listing.title} in ${listing.district}, ${listing.city}`} loading="lazy" className="listing-media" width={640} height={420} />
-        <span className="pill">Verified</span>
-        {listing.featured && <span className="pill dark">Featured</span>}
+        <ListingThumbnail title={listing.title} district={listing.district} city={listing.city} imageUrl={image} />
+        <div className="listing-badge-row">
+          <span className="pill">Verified</span>
+          <div className="listing-badge-cluster">
+            {hasVideo && <span className="pill dark video-pill">Video</span>}
+            {listing.featured && <span className="pill dark">Featured</span>}
+          </div>
+        </div>
+        {mediaCount > 1 && <span className="media-count-pill">{mediaCount} media</span>}
       </div>
       <div className="listing-content">
         <p className="price">${listing.priceUsd.toLocaleString()}{listing.priceSuffix ?? ""}</p>
