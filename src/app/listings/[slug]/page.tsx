@@ -8,6 +8,7 @@ import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
 import { Prisma } from "@prisma/client";
 import { getPrimaryMedia, normalizeListingMedia, hasVideoMedia, MEDIA_FALLBACK_IMAGE, getYouTubeEmbedUrl } from "@/lib/listing-media";
+import { getSession } from "@/lib/auth";
 
 const asStringArray = (value: Prisma.JsonValue | null | undefined) =>
   Array.isArray(value) ? value.map((item) => String(item)) : [];
@@ -43,8 +44,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ListingDetail({ params }: Props) {
+export default async function ListingDetail({
+  params,
+  searchParams
+}: Props & { searchParams?: Promise<{ preview?: string }> }) {
   const { slug } = await params;
+  const previewParams = searchParams ? await searchParams : undefined;
 
   let listing: Prisma.ListingGetPayload<{ include: { media: true } }> | null = null;
   let similar: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
@@ -83,7 +88,12 @@ export default async function ListingDetail({ params }: Props) {
     logServerError("listing-detail", error, { slug });
   }
 
-  if (!listing || listing.status !== "PUBLISHED") return notFound();
+  if (!listing) return notFound();
+  if (listing.status !== "PUBLISHED") {
+    const session = await getSession();
+    const previewAllowed = previewParams?.preview === "1" && session?.role === "ADMIN";
+    if (!previewAllowed) return notFound();
+  }
 
   const normalizedMedia = normalizeListingMedia(listing.media, listing.title);
   const videos = normalizedMedia.filter((m) => m.type === "video");

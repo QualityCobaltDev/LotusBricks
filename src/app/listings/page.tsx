@@ -7,6 +7,8 @@ import { logServerError } from "@/lib/observability";
 import { Reveal } from "@/components/ui/reveal";
 import { getStaggerDelay } from "@/lib/motion";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = buildMetadata({
   title: "Verified Property Listings Cambodia",
   description: "Explore verified apartments, villas, and investment property listings across Cambodia.",
