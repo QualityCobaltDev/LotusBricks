@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 };
 
 const guides = [
-  { title: "Phnom Penh investment guide", href: "/support", text: "Yield signals, district-by-district trends, and acquisition checkpoints." },
-  { title: "Buyer due-diligence checklist", href: "/support", text: "A practical review flow before paying deposits or entering negotiation." },
-  { title: "Developer listing playbook", href: "/pricing", text: "How to present verified media and convert qualified inquiries faster." }
+  { title: "Phnom Penh investment guide", href: "/resources/phnom-penh-investment-guide", text: "Yield signals, district-by-district trends, and acquisition checkpoints." },
+  { title: "Buyer due-diligence checklist", href: "/resources/buyer-due-diligence-checklist", text: "A practical review flow before paying deposits or entering negotiation." },
+  { title: "Developer listing playbook", href: "/resources/developer-listing-playbook", text: "How to present verified media and convert qualified inquiries faster." }
 ];
 
 export default async function HomePage() {
