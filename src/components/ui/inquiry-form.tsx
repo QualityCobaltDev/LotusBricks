@@ -4,7 +4,7 @@ import { useState } from "react";
 
 type InquiryFormState = "idle" | "ok" | "error";
 
-export function InquiryForm({ listingId, compact = false }: { listingId: string; compact?: boolean }) {
+export function InquiryForm({ listingId, compact = false, initialMessage }: { listingId: string; compact?: boolean; initialMessage?: string }) {
   const [state, setState] = useState<InquiryFormState>("idle");
 
   async function submit(formData: FormData) {
@@ -20,6 +20,9 @@ export function InquiryForm({ listingId, compact = false }: { listingId: string;
         fullName: String(formData.get("fullName")),
         email: String(formData.get("email")),
         phone: String(formData.get("phone") ?? ""),
+        preferredContact: String(formData.get("preferredContact") ?? "EMAIL"),
+        interestType: String(formData.get("interestType") ?? "General enquiry"),
+        preferredViewingDate: String(formData.get("preferredViewingDate") ?? ""),
         message: String(formData.get("message"))
       })
     });
@@ -36,8 +39,16 @@ export function InquiryForm({ listingId, compact = false }: { listingId: string;
           <option value="EMAIL">Email</option><option value="PHONE">Phone</option><option value="WHATSAPP">WhatsApp</option><option value="TELEGRAM">Telegram</option>
         </select>
       </label>
+      <label className="muted">Interest type
+        <select name="interestType" defaultValue="Viewing Request">
+          <option value="Viewing Request">Viewing Request</option><option value="Price Negotiation">Price Negotiation</option><option value="Investment Evaluation">Investment Evaluation</option><option value="General Enquiry">General Enquiry</option>
+        </select>
+      </label>
+      <label className="muted">Preferred viewing date
+        <input name="preferredViewingDate" type="date" />
+      </label>
       <input name="website" tabIndex={-1} autoComplete="off" className="hp-field" aria-hidden />
-      <textarea name="message" placeholder="Tell us your timeline, budget, and goals." required minLength={10} />
+      <textarea name="message" defaultValue={initialMessage ?? "Hello RightBricks, I am interested in this property. Please share more details and viewing availability."} placeholder="Tell us your timeline, budget, and goals." required minLength={10} />
       <button className="btn btn-primary">Send inquiry</button>
       {state === "ok" && <p className="form-ok">We’ve received your enquiry. Our team will contact you shortly via phone or email.</p>}
       {state === "error" && <p className="form-error">Unable to submit right now. Please contact contact@rightbricks.online or call (+855) 011 389 625.</p>}

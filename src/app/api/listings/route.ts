@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const plan = getPlanByKey(user.planTier);
-    const { imageUrl, videoUrl, imageUrls, videoUrls, ...payload } = parsed.data;
+    const { imageUrl, videoUrl, imageUrls, videoUrls, availabilityDate, ...payload } = parsed.data;
     const images = imageUrls.length ? imageUrls : imageUrl ? [imageUrl] : [];
     const videos = videoUrls.length ? videoUrls : videoUrl ? [videoUrl] : [];
 
@@ -62,6 +62,7 @@ export async function POST(req: Request) {
         where: { id: existingListing.id },
         data: {
           ...payload,
+          availabilityDate: availabilityDate ? new Date(availabilityDate) : undefined,
           ownerId: session.role === "ADMIN" ? existingListing.ownerId : session.userId,
           publishedAt: payload.status === "PUBLISHED" ? new Date() : null
         }
@@ -69,6 +70,7 @@ export async function POST(req: Request) {
       : await db.listing.create({
         data: {
           ...payload,
+          availabilityDate: availabilityDate ? new Date(availabilityDate) : undefined,
           ownerId: session.userId,
           publishedAt: payload.status === "PUBLISHED" ? new Date() : null
         }
