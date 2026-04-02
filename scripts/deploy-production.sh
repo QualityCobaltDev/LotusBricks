@@ -58,16 +58,27 @@ export GIT_SHA
 
 log "Deploying commit $GIT_SHA_FULL"
 
-log "Building web image (no cache)"
-docker compose build --no-cache web
+log "Stopping existing stack"
+docker compose down --remove-orphans
 
-log "Applying Prisma migrations in one-off container"
-docker compose run --rm web npm run prisma:deploy
+log "Building images (no cache)"
+docker compose build --no-cache
 
-log "Starting stack with freshly-built images"
-docker compose up -d --no-build --remove-orphans
-
+log "Starting database"
+docker compose up -d db
 wait_for_health db 120
+
+log "Generating Prisma client in web image"
+docker compose run --rm web npm run prisma:generate
+
+log "Syncing database schema (Prisma db push)"
+docker compose run --rm web npm run prisma:push
+
+log "Running seed data"
+docker compose run --rm web npm run seed
+
+log "Starting application services"
+docker compose up -d web proxy
 wait_for_health web 240
 
 log "Current compose status"

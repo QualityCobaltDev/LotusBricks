@@ -27,8 +27,18 @@ npm run dev
 ./scripts/deploy-production.sh main
 ```
 
-This deployment script fails fast, stamps the image with the deployed commit SHA, applies Prisma migrations, starts containers only after a successful build, and prints logs plus container health.
+This deployment script fails fast, stamps images with the deployed commit SHA, rebuilds the Docker stack deterministically, waits for Postgres health, runs `prisma generate`, runs `prisma db push`, seeds baseline data, then starts web/proxy and prints health + logs.
 
 ## Seed credentials
-- Admin: `admin@rightbricks.com` / `Admin123!`
-- Customer: `customer@rightbricks.com` / `Customer123!`
+- Admin: `admin@rightbricks.online` / `Admin123!`
+- Customer: `customer@rightbricks.online` / `Customer123!`
+
+
+## Database lifecycle
+```bash
+npm run prisma:generate
+npm run prisma:push
+npm run seed
+```
+
+Use `prisma db push` as the production schema-sync strategy for this repository.
