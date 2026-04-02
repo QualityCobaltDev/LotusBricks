@@ -68,16 +68,7 @@ log "Starting database"
 docker compose up -d db
 wait_for_health db 120
 
-log "Generating Prisma client in web image"
-docker compose run --rm web npm run prisma:generate
-
-log "Syncing database schema (Prisma db push)"
-docker compose run --rm web npm run prisma:push
-
-log "Running seed data"
-docker compose run --rm web npm run seed
-
-log "Starting application services"
+log "Starting application services (web startup runs wait-for-db + prisma migrate deploy)"
 docker compose up -d web proxy
 wait_for_health web 240
 

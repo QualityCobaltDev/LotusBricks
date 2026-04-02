@@ -1,6 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const BUILD_PHASE = "phase-production-build";
+
+function isBuildTimeProcess() {
+  return process.env.NEXT_PHASE === BUILD_PHASE || process.env.SKIP_DATABASE_DURING_BUILD === "1";
+}
 
 function createPrismaClient() {
   if (!process.env.DATABASE_URL) {
@@ -11,7 +16,7 @@ function createPrismaClient() {
 }
 
 export function isDatabaseConfigured() {
-  return Boolean(process.env.DATABASE_URL);
+  return Boolean(process.env.DATABASE_URL) && !isBuildTimeProcess();
 }
 
 export function getDb() {

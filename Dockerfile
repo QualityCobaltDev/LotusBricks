@@ -16,6 +16,7 @@ FROM base AS builder
 ARG APP_VERSION=dev
 ENV NEXT_PUBLIC_APP_VERSION=${APP_VERSION}
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV SKIP_DATABASE_DURING_BUILD=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN mkdir -p public
@@ -40,6 +41,8 @@ COPY --from=builder --chown=nextjs:nextjs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nextjs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nextjs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nextjs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nextjs /app/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
+COPY --from=builder --chown=nextjs:nextjs /app/scripts/wait-for-db.mjs ./scripts/wait-for-db.mjs
 
 USER nextjs
 EXPOSE 3000
@@ -47,4 +50,4 @@ EXPOSE 3000
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
-CMD ["node", "server.js"]
+CMD ["sh", "./scripts/docker-entrypoint.sh"]

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { db } from "@/lib/db";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { InquiryForm } from "@/components/ui/inquiry-form";
 import { ListingCard } from "@/components/ui/listing-card";
@@ -13,10 +13,22 @@ const asStringArray = (value: Prisma.JsonValue | null | undefined) =>
   Array.isArray(value) ? value.map((item) => String(item)) : [];
 
 type Props = { params: Promise<{ slug: string }> };
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  if (!isDatabaseConfigured()) {
+    return { title: "Listing" };
+  }
+
   const { slug } = await params;
-  const listing = await db.listing.findUnique({ where: { slug } });
+  let listing: { title: string; city: string; seoTitle: string | null; seoDescription: string | null; summary: string; openGraphImage: string | null } | null = null;
+
+  try {
+    listing = await db.listing.findUnique({ where: { slug } });
+  } catch (error) {
+    logServerError("listing-metadata", error, { slug });
+  }
+
   if (!listing) return { title: "Listing not found" };
 
   return {
