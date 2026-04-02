@@ -1,6 +1,7 @@
 services:
   web:
     image: rightbricks-web:${GIT_SHA:-dev}
+    pull_policy: never
     build:
       context: .
       args:
