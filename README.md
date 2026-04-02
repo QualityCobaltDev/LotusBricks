@@ -42,3 +42,10 @@ npm run seed
 ```
 
 Use `prisma db push` as the production schema-sync strategy for this repository.
+
+
+## Demo media curation workflow
+
+- Seed fresh curated listing media: `npm run prisma:reset`
+- Backfill curated demo media onto existing seeded listings without removing uploaded media: `npm run seed:backfill-media`
+- Validate media normalization helpers: `npm run test:media`

@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState } from "react";
-
-type ListingMedia = {
-  url: string;
-  kind?: string | null;
-  thumbnail?: string | null;
-};
+import { getCardThumbnail, hasVideoMedia, normalizeListingMedia } from "@/lib/listing-media";
 
 type ListingCardProps = {
   listing: {
@@ -26,7 +20,7 @@ type ListingCardProps = {
     furnishing?: string | null;
     availability?: string;
     featured: boolean;
-    media?: ListingMedia[];
+    media?: { id?: string; kind?: string; url: string; thumbnail?: string | null; isPrimary?: boolean; sortOrder?: number; sourceType?: string | null }[];
   };
 };
 
@@ -76,23 +70,20 @@ function ListingThumbnail({ title, district, city, imageUrl }: { title: string; 
 }
 
 export function ListingCard({ listing }: ListingCardProps) {
-  const media = listing.media ?? [];
-  const image = useMemo(() => getCardImage(media), [media]);
-  const hasVideo = media.some((item) => item.kind?.toLowerCase() === "video");
-  const mediaCount = media.length;
+  const media = normalizeListingMedia(listing.media, listing.title);
+  const image = getCardThumbnail(media);
+  const hasVideo = hasVideoMedia(media);
 
   return (
     <article className="listing-card">
       <div className="listing-media-wrap">
-        <ListingThumbnail title={listing.title} district={listing.district} city={listing.city} imageUrl={image} />
-        <div className="listing-badge-row">
-          <span className="pill">Verified</span>
-          <div className="listing-badge-cluster">
-            {hasVideo && <span className="pill dark video-pill">Video</span>}
-            {listing.featured && <span className="pill dark">Featured</span>}
-          </div>
+        <Image src={image} alt={`${listing.title} in ${listing.district}, ${listing.city}`} loading="lazy" className="listing-media" width={640} height={420} />
+        <span className="pill">Verified</span>
+        {listing.featured && <span className="pill dark">Featured</span>}
+        <div className="media-badges">
+          {hasVideo && <span className="pill subtle">Video</span>}
+          {media.length > 1 && <span className="pill subtle">{media.length} media</span>}
         </div>
-        {mediaCount > 1 && <span className="media-count-pill">{mediaCount} media</span>}
       </div>
       <div className="listing-content">
         <p className="price">${listing.priceUsd.toLocaleString()}{listing.priceSuffix ?? ""}</p>

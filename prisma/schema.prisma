@@ -204,7 +204,9 @@ model ListingMedia {
   description String?
   isPrimary   Boolean  @default(false)
   sortOrder   Int      @default(0)
+  sourceType  String   @default("upload")
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@index([listingId, sortOrder])

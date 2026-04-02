@@ -12,7 +12,9 @@
     "qa:verify": "node scripts/verify-release.mjs",
     "seed": "tsx prisma/seed.ts",
     "prisma:push": "prisma db push",
-    "prisma:reset": "prisma db push --force-reset && npm run seed"
+    "prisma:reset": "prisma db push --force-reset && npm run seed",
+    "seed:backfill-media": "tsx prisma/backfill-demo-media.ts",
+    "test:media": "tsx --test src/lib/__tests__/listing-media.test.ts"
   },
   "dependencies": {
     "@prisma/client": "6.19.2",
