@@ -6,7 +6,7 @@ export default async function AdminUsers() {
   await requireAdmin();
   const [users, byRole] = await Promise.all([
     db.user.findMany({ orderBy: { createdAt: "desc" }, include: { listings: true, inquiries: true, favorites: true } }),
-    db.user.groupBy({ by: ["role"], _count: true })
+    db.user.groupBy({ by: ["role"], _count: { _all: true } })
   ]);
 
   return (
@@ -16,7 +16,7 @@ export default async function AdminUsers() {
         <p className="muted">Monitor customer/admin activity, associated resources, and account health.</p>
       </div>
       <div className="three-col">
-        {byRole.map((role) => <article key={role.role} className="stat-card"><p>{role._count}</p><span>{role.role}</span></article>)}
+        {byRole.map((role) => <article key={role.role} className="stat-card"><p>{role._count._all}</p><span>{role.role}</span></article>)}
       </div>
       <div className="card-pad admin-table-wrap">
         <table className="comparison-table">
