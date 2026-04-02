@@ -53,8 +53,8 @@ export function ListingCard({ listing }: ListingCardProps) {
         </div>
         {listing.availability && <p className="muted">Status: {listing.availability.replaceAll("_", " ").toLowerCase()}</p>}
         <div className="hero-actions listing-actions">
-          <Link href={`/listings/${listing.slug}` as any} className="btn btn-primary" data-cta="listing-view-details">View details</Link>
-          <Link href={`/listings/${listing.slug}` as any} className="btn btn-ghost" data-cta="listing-enquire">Enquire</Link>
+          <Link href={`/listings/${listing.slug}` as any} className="btn btn-primary" data-cta="listing-view-details">View details <span aria-hidden className="btn-arrow">→</span></Link>
+          <Link href={`/listings/${listing.slug}` as any} className="btn btn-ghost" data-cta="listing-enquire">Enquire <span aria-hidden className="btn-arrow">→</span></Link>
         </div>
       </div>
     </article>
