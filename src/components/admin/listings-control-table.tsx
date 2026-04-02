@@ -2,11 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Listing, ListingMedia, User } from "@prisma/client";
 
-type Row = Listing & { media: ListingMedia[]; owner: Pick<User, "fullName" | "planTier"> | null };
+export type AdminListingRow = {
+  id: string;
+  slug: string;
+  title: string;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  ownerName: string;
+  ownerPlanTier: string | null;
+  mediaCount: number;
+  updatedAtIso: string;
+};
 
-export function ListingsControlTable({ rows }: { rows: Row[] }) {
+export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -65,25 +73,36 @@ export function ListingsControlTable({ rows }: { rows: Row[] }) {
       {feedback.type === "ok" && <p className="form-ok">{feedback.message}</p>}
       {feedback.type === "error" && <p className="form-error">{feedback.message}</p>}
 
-      <div className="admin-table-wrap">
-        <table className="comparison-table">
-          <thead>
-            <tr><th><input type="checkbox" onChange={(e) => setSelected(e.target.checked ? filtered.map((x) => x.id) : [])} /></th><th>Listing</th><th>Status</th><th>Owner</th><th>Plan</th><th>Updated</th></tr>
-          </thead>
-          <tbody>
-            {filtered.map((x) => (
-              <tr key={x.id}>
-                <td><input checked={selected.includes(x.id)} type="checkbox" onChange={(e) => toggle(x.id, e.target.checked)} /></td>
-                <td><strong>{x.title}</strong><br /><small>{x.slug}</small></td>
-                <td>{x.status}</td>
-                <td>{x.owner?.fullName ?? "Unassigned"}</td>
-                <td>{x.owner?.planTier ?? "N/A"}</td>
-                <td>{new Date(x.updatedAt).toISOString().slice(0, 10)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {rows.length === 0 ? (
+        <article className="empty-state" style={{ marginTop: "1rem" }}>
+          <h3>No listings yet</h3>
+          <p>Create your first listing to start managing publication workflows.</p>
+        </article>
+      ) : (
+        <div className="admin-table-wrap">
+          <table className="comparison-table">
+            <thead>
+              <tr><th><input type="checkbox" onChange={(e) => setSelected(e.target.checked ? filtered.map((x) => x.id) : [])} /></th><th>Listing</th><th>Status</th><th>Owner</th><th>Plan</th><th>Media</th><th>Updated</th></tr>
+            </thead>
+            <tbody>
+              {filtered.map((x) => {
+                const dateLabel = Number.isNaN(Date.parse(x.updatedAtIso)) ? "Unknown" : new Date(x.updatedAtIso).toISOString().slice(0, 10);
+                return (
+                  <tr key={x.id}>
+                    <td><input checked={selected.includes(x.id)} type="checkbox" onChange={(e) => toggle(x.id, e.target.checked)} /></td>
+                    <td><strong>{x.title}</strong><br /><small>{x.slug}</small></td>
+                    <td>{x.status}</td>
+                    <td>{x.ownerName}</td>
+                    <td>{x.ownerPlanTier ?? "N/A"}</td>
+                    <td>{x.mediaCount}</td>
+                    <td>{dateLabel}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { roleToAppRole, roleToRedirect } from "@/lib/auth";
 
 test("role redirects are deterministic", () => {
   assert.equal(roleToRedirect("ADMIN"), "/admin/dashboard");
-  assert.equal(roleToRedirect("CUSTOMER"), "/account");
+  assert.equal(roleToRedirect("CUSTOMER"), "/listings");
   assert.equal(roleToAppRole("ADMIN"), "admin");
   assert.equal(roleToAppRole("CUSTOMER"), "customer");
 });

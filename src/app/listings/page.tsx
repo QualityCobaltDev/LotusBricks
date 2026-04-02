@@ -128,7 +128,7 @@ export default async function ListingsPage({
           </div>
           <div className="hero-actions" style={{ marginTop: "1rem" }}>
             <button className="btn btn-ghost" type="button" data-cta="listings-load-more">Load more</button>
-            <button className="btn btn-ghost" type="button" data-cta="listings-save-search">Save search</button>
+            <Link className="btn btn-ghost" href="/contact" data-cta="listings-request-help">Request live assistance</Link>
           </div>
         </>
       ) : inventoryState === "unavailable" ? (

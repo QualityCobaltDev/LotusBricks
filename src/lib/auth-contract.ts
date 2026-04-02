@@ -10,7 +10,7 @@ export type AuthUser = {
 export type AuthSuccessResponse = {
   success: true;
   user: AuthUser;
-  redirectTo: "/admin/dashboard" | "/account";
+  redirectTo: "/admin/dashboard" | "/listings";
 };
 
 export type AuthErrorCode =

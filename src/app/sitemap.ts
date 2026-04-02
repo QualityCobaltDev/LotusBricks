@@ -5,7 +5,7 @@ import { getSafeSiteUrl } from "@/lib/env";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSafeSiteUrl();
   const now = new Date();
-  const pages = ["", "/listings", "/pricing", "/about", "/contact", "/login/customer", "/login/admin", "/support", "/support/forgot-password", "/legal/privacy", "/legal/terms", "/legal/accessibility", "/resources", "/resources/phnom-penh-investment-guide", "/resources/buyer-due-diligence-checklist", "/resources/developer-listing-playbook"];
+  const pages = ["", "/listings", "/pricing", "/about", "/contact", "/login/admin", "/support", "/support/forgot-password", "/legal/privacy", "/legal/terms", "/legal/accessibility", "/resources", "/resources/phnom-penh-investment-guide", "/resources/buyer-due-diligence-checklist", "/resources/developer-listing-playbook"];
 
   const staticRoutes: MetadataRoute.Sitemap = pages.map((path) => ({
     url: `${base}${path}`,

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default async function SignIn() {
-  redirect("/login/customer");
+  redirect("/listings");
 }

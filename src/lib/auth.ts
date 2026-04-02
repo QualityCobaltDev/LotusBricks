@@ -66,6 +66,6 @@ export function roleToAppRole(role: Role): "admin" | "customer" {
   return role === "ADMIN" ? "admin" : "customer";
 }
 
-export function roleToRedirect(role: Role): "/admin/dashboard" | "/account" {
-  return role === "ADMIN" ? "/admin/dashboard" : "/account";
+export function roleToRedirect(role: Role): "/admin/dashboard" | "/listings" {
+  return role === "ADMIN" ? "/admin/dashboard" : "/listings";
 }

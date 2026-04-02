@@ -61,7 +61,7 @@ export function ListingCard({ listing }: ListingCardProps) {
         {listing.availability && <p className="muted">Status: {listing.availability.replaceAll("_", " ").toLowerCase()}</p>}
         <div className="hero-actions">
           <Link href={`/listings/${listing.slug}` as any} className="btn btn-primary" data-cta="listing-view-details">View details</Link>
-          <button className="btn btn-ghost" type="button" aria-label={`Save ${listing.title}`} data-cta="listing-save">Save</button>
+          <Link href={`/listings/${listing.slug}` as any} className="btn btn-ghost" data-cta="listing-enquire">Enquire</Link>
         </div>
       </div>
     </article>

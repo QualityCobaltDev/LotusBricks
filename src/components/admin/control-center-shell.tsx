@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
+import { AdminLogoutButton } from "@/components/admin/admin-logout-button";
 
 const NAV = [
   { label: "Dashboard", href: "/admin/dashboard" },
@@ -46,7 +47,8 @@ export function ControlCenterShell({ children }: { children: React.ReactNode }) 
           </div>
           <div className="admin-topbar-actions">
             <a className="btn btn-ghost" href="/">Open Website</a>
-            <a className="btn btn-primary" href="/admin/listings">Quick: New Listing</a>
+            <a className="btn btn-primary" href="/admin/listings">Listing Operations</a>
+            <AdminLogoutButton />
           </div>
         </header>
         {children}

@@ -11,7 +11,7 @@ const navItems = [
   { href: "/contact", label: "Contact" }
 ];
 
-export function SiteHeader({ dashboardHref }: { dashboardHref: string }) {
+export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -35,10 +35,8 @@ export function SiteHeader({ dashboardHref }: { dashboardHref: string }) {
         </nav>
 
         <div className="nav-ctas">
-          <Link href="/login/customer" className="btn btn-ghost">Customer Login</Link>
-          <Link href="/login/admin" className="btn btn-ghost">Admin Login</Link>
           <Link href="/listings" className="btn btn-ghost">Browse</Link>
-          <Link href={dashboardHref as any} className="btn btn-primary">Dashboard</Link>
+          <Link href="/contact" className="btn btn-primary">Enquire now</Link>
           <button aria-label="Open menu" className="mobile-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>☰</button>
         </div>
       </div>
@@ -50,9 +48,7 @@ export function SiteHeader({ dashboardHref }: { dashboardHref: string }) {
               {item.label}
             </Link>
           ))}
-          <Link href="/login/customer" onClick={() => setOpen(false)}>Customer Login</Link>
-          <Link href="/login/admin" onClick={() => setOpen(false)}>Admin Login</Link>
-          <Link href={dashboardHref as any} onClick={() => setOpen(false)}>Dashboard</Link>
+          <Link href="/contact" onClick={() => setOpen(false)}>Enquire now</Link>
         </div>
       )}
     </header>
