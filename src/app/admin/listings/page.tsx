@@ -1,34 +1,27 @@
 import { requireAdmin } from "@/server/guards";
 import { db } from "@/lib/db";
 import { PLAN_CONFIG } from "@/lib/plans";
-import Image from "next/image";
-import { getCardThumbnail, normalizeListingMedia } from "@/lib/listing-media";
+import { ListingsControlTable } from "@/components/admin/listings-control-table";
 
 export default async function AdminListings() {
   await requireAdmin();
-  const listings = await db.listing.findMany({ orderBy: { updatedAt: "desc" }, include: { media: true, owner: { select: { fullName: true, planTier: true } } } });
+  const [listings, counts] = await Promise.all([
+    db.listing.findMany({ orderBy: { updatedAt: "desc" }, include: { media: true, owner: { select: { fullName: true, planTier: true } } } }),
+    db.listing.groupBy({ by: ["status"], _count: true })
+  ]);
+
   return (
-    <section>
-      <h1>Manage listings</h1>
-      <p>API validations enforce: max {PLAN_CONFIG.TIER_1.photosPerListing} photos and {PLAN_CONFIG.TIER_1.videosPerListing} videos per listing.</p>
-      <div className="grid">
-        {listings.map((x) => {
-          const media = normalizeListingMedia(x.media, x.title);
-          const images = media.filter((item) => item.type === "image").length;
-          const videos = media.filter((item) => item.type === "video").length;
-          const seeded = media.filter((item) => item.sourceType === "seed").length;
-          return (
-            <article className="card" key={x.id}>
-              <Image src={getCardThumbnail(media)} alt={x.title} width={360} height={220} className="listing-media" />
-              <strong>{x.title}</strong>
-              <p>{x.status}</p>
-              <p>Owner: {x.owner?.fullName ?? "Unassigned"} ({x.owner?.planTier ?? "n/a"})</p>
-              <p>{images}/10 photos · {videos}/2 videos</p>
-              <p>Seeded media: {seeded} · Uploaded media: {media.length - seeded}</p>
-            </article>
-          );
-        })}
+    <section className="section">
+      <div className="section-head">
+        <h2>Listing Operations</h2>
+        <p className="muted">Manage listing lifecycle, ownership, and media governance in one control surface.</p>
       </div>
+      <div className="three-col">
+        {counts.map((x) => <article className="stat-card" key={x.status}><p>{x._count}</p><span>{x.status}</span></article>)}
+        <article className="stat-card"><p>{PLAN_CONFIG.TIER_1.photosPerListing}</p><span>Photo limit baseline</span></article>
+        <article className="stat-card"><p>{PLAN_CONFIG.TIER_1.videosPerListing}</p><span>Video limit baseline</span></article>
+      </div>
+      <ListingsControlTable rows={listings} />
     </section>
   );
 }

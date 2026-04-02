@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { inquiryStatusSchema } from "@/lib/validators";
+import { logAuditEvent } from "@/lib/admin-control";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -18,6 +19,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       notes: parsed.data.notes || null,
       assignedTo: parsed.data.assignedTo || null
     }
+  });
+
+  await logAuditEvent({
+    at: new Date().toISOString(),
+    actor: session.userId,
+    action: "UPDATE",
+    objectType: "LEAD",
+    objectId: id,
+    summary: `Lead status set to ${parsed.data.status}`
   });
 
   return NextResponse.json(updated);

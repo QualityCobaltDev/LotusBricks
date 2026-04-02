@@ -279,3 +279,28 @@ summary { cursor: pointer; font-weight: 600; color: var(--blue-700); }
   padding: 1rem;
   z-index: 70;
 }
+
+.admin-shell { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; background: var(--admin-bg); }
+.admin-sidebar { position: sticky; top: 0; align-self: start; height: 100vh; padding: 1rem; border-right: 1px solid var(--color-border); background: var(--admin-sidebar); display: grid; gap: .9rem; }
+.admin-main { padding: 1rem 1.2rem 2rem; }
+.admin-topbar { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; padding: .6rem 0 1rem; border-bottom: 1px solid var(--color-border); }
+.admin-topbar h1 { margin: 0; font-size: 1.35rem; }
+.admin-topbar-actions { display: flex; gap: .6rem; align-items: center; }
+.admin-kicker { margin: 0; text-transform: uppercase; letter-spacing: .08em; color: var(--blue-700); font-size: .75rem; font-weight: 700; }
+.admin-nav-links { display: grid; gap: .35rem; }
+.admin-nav-links a, .admin-tab { border: 1px solid transparent; border-radius: 10px; padding: .55rem .65rem; color: var(--neutral-700); background: transparent; text-align: left; font: inherit; cursor: pointer; }
+.admin-nav-links a.active, .admin-nav-links a:hover, .admin-tab.active, .admin-tab:hover { background: var(--admin-highlight); color: var(--blue-900); border-color: var(--blue-200); }
+.three-col { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0; }
+.kanban-mini { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; }
+.kanban-mini article { border: 1px solid var(--color-border); border-radius: 12px; padding: .8rem; background: var(--color-surface); }
+.kanban-mini p { margin: .3rem 0 0; font-size: 1.2rem; font-weight: 700; }
+
+@media (max-width: 1120px) {
+  .admin-shell { grid-template-columns: 1fr; }
+  .admin-sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--color-border); }
+}
+
+@media (max-width: 960px) {
+  .three-col { grid-template-columns: 1fr; }
+  .kanban-mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
