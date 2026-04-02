@@ -151,8 +151,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .stat-card p { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--blue-800); }
 .stat-card span { color: var(--color-text-muted); font-size: .9rem; }
 
-.listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-.listing-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 8px 20px rgba(16,24,40,.06); transition: .2s ease; }
+.listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; align-items: stretch; }
+.listing-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 8px 20px rgba(16,24,40,.06); transition: .2s ease; height: 100%; display: flex; flex-direction: column; }
 .listing-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--blue-300); }
 .listing-media-wrap { position: relative; }
 .listing-media { width: 100%; height: 220px; object-fit: cover; }
@@ -260,6 +260,8 @@ summary { cursor: pointer; font-weight: 600; color: var(--blue-700); }
   .stat-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; }
   .price { font-size: 1.25rem; }
+  .listing-grid { gap: .85rem; }
+  .listing-content { padding: .85rem; }
   .comparison-table { min-width: 560px; }
   .inline-admin-form { grid-template-columns: 1fr; }
   .password-row { grid-template-columns: 1fr; }
