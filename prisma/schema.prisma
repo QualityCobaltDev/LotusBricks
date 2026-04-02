@@ -18,6 +18,42 @@ enum ListingStatus {
   ARCHIVED
 }
 
+enum ListingType {
+  SALE
+  RENT
+  COMMERCIAL
+  LAND
+  LUXURY
+  INVESTMENT
+}
+
+enum PropertyCategory {
+  VILLA
+  CONDO
+  APARTMENT
+  TOWNHOUSE
+  PENTHOUSE
+  OFFICE
+  SHOPHOUSE
+  LAND
+  WAREHOUSE
+}
+
+enum PropertyAvailability {
+  AVAILABLE
+  RESERVED
+  SOLD
+  RENTED
+  UNDER_OFFER
+}
+
+enum FurnishingType {
+  FULLY_FURNISHED
+  SEMI_FURNISHED
+  UNFURNISHED
+  NOT_APPLICABLE
+}
+
 enum PlanTier {
   TIER_1
   TIER_2
@@ -75,14 +111,71 @@ model Listing {
   id           String         @id @default(cuid())
   slug         String         @unique
   title        String
+  listingType  ListingType    @default(RENT)
+  category     PropertyCategory @default(CONDO)
+  availability PropertyAvailability @default(AVAILABLE)
   summary      String
+  heroDescription String?
   description  String
+  fullDescription String?
   city         String
   district     String
+  country      String         @default("Cambodia")
+  commune      String?
+  streetAddress String?
+  mapLabel     String?
+  latitude     Float?
+  longitude    Float?
+  neighborhoodSummary String?
+  currency     String         @default("USD")
   priceUsd     Int
+  priceSuffix  String?
+  originalPriceUsd Int?
+  negotiable   Boolean        @default(false)
+  serviceFees  String?
+  annualManagementFee String?
+  depositTerms String?
+  paymentTerms String?
   bedrooms     Int
   bathrooms    Int
   areaSqm      Int
+  landAreaSqm  Int?
+  floors       Int?
+  parkingSpaces Int?
+  furnishing   FurnishingType @default(FULLY_FURNISHED)
+  titleType    String?
+  yearBuilt    Int?
+  renovatedYear Int?
+  orientation  String?
+  propertyCondition String?
+  keySellingPoints Json?
+  idealFor     Json?
+  neighborhoodBenefits Json?
+  investmentHighlights Json?
+  features     Json?
+  indoorFeatures Json?
+  outdoorFeatures Json?
+  securityFeatures Json?
+  lifestyleFeatures Json?
+  floorPlanImage String?
+  brochurePdf  String?
+  availabilityDate DateTime?
+  viewingAvailability String?
+  agentName    String?
+  agentRole    String?
+  contactPhone String?
+  contactEmail String?
+  whatsappAvailable Boolean @default(true)
+  telegramAvailable Boolean @default(true)
+  enquirySubjectTemplate String?
+  seoTitle     String?
+  seoDescription String?
+  openGraphImage String?
+  structuredData Json?
+  badges       Json?
+  breadcrumbs  Json?
+  similarListings Json?
+  sortOrder    Int            @default(100)
   status       ListingStatus  @default(DRAFT)
   featured     Boolean        @default(false)
   ownerId      String?
@@ -104,6 +197,12 @@ model ListingMedia {
   listingId   String
   url         String
   kind        String
+  alt         String?
+  caption     String?
+  thumbnail   String?
+  title       String?
+  description String?
+  isPrimary   Boolean  @default(false)
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
