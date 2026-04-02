@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/site/theme-toggle";
 
 const navItems = [
   { href: "/listings", label: "Listings" },
@@ -35,7 +36,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="nav-ctas">
-          <Link href="/listings" className="btn btn-ghost">Browse</Link>
+          <ThemeToggle />
+          <Link href="/listings" className="btn btn-outline">Browse</Link>
           <Link href="/contact" className="btn btn-primary">Enquire now</Link>
           <button aria-label="Open menu" className="mobile-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>☰</button>
         </div>
@@ -48,7 +50,8 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <Link href="/contact" onClick={() => setOpen(false)}>Enquire now</Link>
+          <ThemeToggle />
+          <Link className="btn btn-primary" href="/contact" onClick={() => setOpen(false)}>Enquire now</Link>
         </div>
       )}
     </header>
