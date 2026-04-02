@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CONTACT } from "@/lib/contact";
 import { trackEvent } from "@/lib/analytics/events";
+import { useTranslations } from "next-intl";
 
 type ContactFormProps = {
   listingId?: string;
@@ -11,6 +12,7 @@ type ContactFormProps = {
 };
 
 export function ContactForm({ listingId = "", selectedPlan = "", inquiryType = "CONTACT" }: ContactFormProps) {
+  const t = useTranslations("contactForm");
   const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
   const [started, setStarted] = useState(false);
 
@@ -45,27 +47,27 @@ export function ContactForm({ listingId = "", selectedPlan = "", inquiryType = "
 
   return (
     <form action={onSubmit} className="stack-form" onFocusCapture={onStart}>
-      <label htmlFor="fullName">Full name<input id="fullName" name="fullName" required /></label>
-      <label htmlFor="email">Email<input id="email" name="email" type="email" required aria-describedby="reply-help" /></label>
-      <small id="reply-help" className="muted">Replies are sent from {CONTACT.email}.</small>
-      <label htmlFor="phone">Phone<input id="phone" name="phone" placeholder="(+855)" /></label>
-      <label htmlFor="companyName">Company / Agency<input id="companyName" name="companyName" /></label>
-      <label htmlFor="preferredContact">Preferred contact method
+      <label htmlFor="fullName">{t("fullName")}<input id="fullName" name="fullName" required /></label>
+      <label htmlFor="email">{t("email")}<input id="email" name="email" type="email" required aria-describedby="reply-help" /></label>
+      <small id="reply-help" className="muted">{t("repliesSentFrom", { email: CONTACT.email })}</small>
+      <label htmlFor="phone">{t("phone")}<input id="phone" name="phone" placeholder={t("phonePlaceholder")} /></label>
+      <label htmlFor="companyName">{t("companyAgency")}<input id="companyName" name="companyName" /></label>
+      <label htmlFor="preferredContact">{t("preferredContact")}
         <select id="preferredContact" name="preferredContact" defaultValue="EMAIL">
-          <option value="EMAIL">Email</option>
-          <option value="PHONE">Phone</option>
-          <option value="WHATSAPP">WhatsApp</option>
-          <option value="TELEGRAM">Telegram</option>
+          <option value="EMAIL">{t("emailOption")}</option>
+          <option value="PHONE">{t("phoneOption")}</option>
+          <option value="WHATSAPP">{t("whatsappOption")}</option>
+          <option value="TELEGRAM">{t("telegramOption")}</option>
         </select>
       </label>
-      <label htmlFor="selectedPlan">Plan<input id="selectedPlan" name="selectedPlan" defaultValue={selectedPlan} /></label>
-      {inquiryType === "CUSTOM_PLAN" && <label htmlFor="requestedListings">Listings needed<input id="requestedListings" name="requestedListings" type="number" min={11} placeholder="e.g. 25" required /></label>}
-      <label htmlFor="message">How can we help?<textarea id="message" name="message" required minLength={10} /></label>
+      <label htmlFor="selectedPlan">{t("plan")}<input id="selectedPlan" name="selectedPlan" defaultValue={selectedPlan} /></label>
+      {inquiryType === "CUSTOM_PLAN" && <label htmlFor="requestedListings">{t("listingsNeeded")}<input id="requestedListings" name="requestedListings" type="number" min={11} placeholder={t("listingsPlaceholder")} required /></label>}
+      <label htmlFor="message">{t("howCanWeHelp")}<textarea id="message" name="message" required minLength={10} /></label>
       <input name="website" tabIndex={-1} autoComplete="off" className="hp-field" aria-hidden />
-      <button className="btn btn-primary">Send message</button>
+      <button className="btn btn-primary">{t("sendMessage")}</button>
       <p className="muted">{CONTACT.standardLine}</p>
-      {status === "ok" && <p className="form-ok">Thanks — our team will respond within a few hours.</p>}
-      {status === "error" && <p className="form-error">Submission failed. Please email {CONTACT.email}.</p>}
+      {status === "ok" && <p className="form-ok">{t("successMessage")}</p>}
+      {status === "error" && <p className="form-error">{t("errorMessage", { email: CONTACT.email })}</p>}
     </form>
   );
 }

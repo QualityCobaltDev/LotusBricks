@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 type InquiryFormState = "idle" | "ok" | "error";
 
 export function InquiryForm({ listingId, compact = false, initialMessage }: { listingId: string; compact?: boolean; initialMessage?: string }) {
+  const t = useTranslations("inquiryForm");
   const [state, setState] = useState<InquiryFormState>("idle");
 
   async function submit(formData: FormData) {
@@ -31,27 +33,27 @@ export function InquiryForm({ listingId, compact = false, initialMessage }: { li
 
   return (
     <form action={submit} className={compact ? "compact-form" : "stack-form"}>
-      <input name="fullName" placeholder="Full name" required />
-      <input name="email" type="email" placeholder="Email" required />
-      <input name="phone" placeholder="Phone (optional, e.g. (+855) 011 389 625)" />
-      <label className="muted">Preferred contact method
+      <input name="fullName" placeholder={t("fullName")} required />
+      <input name="email" type="email" placeholder={t("email")} required />
+      <input name="phone" placeholder={t("phone")} />
+      <label className="muted">{t("preferredContact")}
         <select name="preferredContact" defaultValue="EMAIL">
-          <option value="EMAIL">Email</option><option value="PHONE">Phone</option><option value="WHATSAPP">WhatsApp</option><option value="TELEGRAM">Telegram</option>
+          <option value="EMAIL">{t("emailOption")}</option><option value="PHONE">{t("phoneOption")}</option><option value="WHATSAPP">{t("whatsappOption")}</option><option value="TELEGRAM">{t("telegramOption")}</option>
         </select>
       </label>
-      <label className="muted">Interest type
+      <label className="muted">{t("interestType")}
         <select name="interestType" defaultValue="Viewing Request">
-          <option value="Viewing Request">Viewing Request</option><option value="Price Negotiation">Price Negotiation</option><option value="Investment Evaluation">Investment Evaluation</option><option value="General Enquiry">General Enquiry</option>
+          <option value="Viewing Request">{t("viewingRequest")}</option><option value="Price Negotiation">{t("priceNegotiation")}</option><option value="Investment Evaluation">{t("investmentEvaluation")}</option><option value="General Enquiry">{t("generalEnquiry")}</option>
         </select>
       </label>
-      <label className="muted">Preferred viewing date
+      <label className="muted">{t("preferredViewingDate")}
         <input name="preferredViewingDate" type="date" />
       </label>
       <input name="website" tabIndex={-1} autoComplete="off" className="hp-field" aria-hidden />
-      <textarea name="message" defaultValue={initialMessage ?? "Hello RightBricks, I am interested in this property. Please share more details and viewing availability."} placeholder="Tell us your timeline, budget, and goals." required minLength={10} />
-      <button className="btn btn-primary">Send inquiry</button>
-      {state === "ok" && <p className="form-ok">We’ve received your enquiry. Our team will contact you shortly via phone or email.</p>}
-      {state === "error" && <p className="form-error">Unable to submit right now. Please contact contact@rightbricks.online or call (+855) 011 389 625.</p>}
+      <textarea name="message" defaultValue={initialMessage ?? t("defaultMessage")} placeholder={t("messagePlaceholder")} required minLength={10} />
+      <button className="btn btn-primary">{t("sendInquiry")}</button>
+      {state === "ok" && <p className="form-ok">{t("successMessage")}</p>}
+      {state === "error" && <p className="form-error">{t("errorMessage")}</p>}
     </form>
   );
 }

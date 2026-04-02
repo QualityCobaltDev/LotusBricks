@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 type ListingMedia = {
   url: string;
@@ -40,23 +41,22 @@ function isLikelyMediaUrl(url?: string | null) {
 function getCardImage(media: ListingMedia[] | undefined) {
   const image = media?.find((item) => item.kind?.toLowerCase() === "image" && isLikelyMediaUrl(item.url));
   if (image?.url) return image.url;
-
   const poster = media?.find((item) => item.kind?.toLowerCase() === "video" && isLikelyMediaUrl(item.thumbnail))?.thumbnail;
   if (poster) return poster;
-
   const firstValid = media?.find((item) => isLikelyMediaUrl(item.url))?.url;
   return firstValid ?? FALLBACK_IMAGE;
 }
 
 function ListingThumbnail({ title, district, city, imageUrl }: { title: string; district: string; city: string; imageUrl: string }) {
+  const t = useTranslations("listingCard");
   const [imageFailed, setImageFailed] = useState(false);
   const hasImage = !imageFailed && isLikelyMediaUrl(imageUrl);
 
   if (!hasImage) {
     return (
       <div className="listing-media-fallback" aria-label="Listing media placeholder" role="img">
-        <span className="listing-media-fallback-mark">RightBricks</span>
-        <strong>Verified listing media</strong>
+        <span className="listing-media-fallback-mark">{t("brandMark")}</span>
+        <strong>{t("verifiedListingMedia")}</strong>
         <span>{district}, {city}</span>
       </div>
     );
@@ -76,6 +76,7 @@ function ListingThumbnail({ title, district, city, imageUrl }: { title: string; 
 }
 
 export function ListingCard({ listing }: ListingCardProps) {
+  const t = useTranslations("listingCard");
   const media = listing.media ?? [];
   const image = useMemo(() => getCardImage(media), [media]);
   const hasVideo = media.some((item) => item.kind?.toLowerCase() === "video");
@@ -86,13 +87,13 @@ export function ListingCard({ listing }: ListingCardProps) {
       <div className="listing-media-wrap">
         <ListingThumbnail title={listing.title} district={listing.district} city={listing.city} imageUrl={image} />
         <div className="listing-badge-row">
-          <span className="pill">Verified</span>
+          <span className="pill">{t("verified")}</span>
           <div className="listing-badge-cluster">
-            {hasVideo && <span className="pill dark video-pill">Video</span>}
-            {listing.featured && <span className="pill dark">Featured</span>}
+            {hasVideo && <span className="pill dark video-pill">{t("video")}</span>}
+            {listing.featured && <span className="pill dark">{t("featured")}</span>}
           </div>
         </div>
-        {mediaCount > 1 && <span className="media-count-pill">{mediaCount} media</span>}
+        {mediaCount > 1 && <span className="media-count-pill">{t("mediaCount", { count: mediaCount })}</span>}
       </div>
       <div className="listing-content">
         <p className="price">${listing.priceUsd.toLocaleString()}{listing.priceSuffix ?? ""}</p>
@@ -100,15 +101,15 @@ export function ListingCard({ listing }: ListingCardProps) {
         <p className="muted">{listing.district}, {listing.city}</p>
         <p className="muted">{listing.summary}</p>
         <div className="meta-row">
-          <span>{listing.bedrooms} bed</span>
-          <span>{listing.bathrooms} bath</span>
-          <span>{listing.areaSqm} sqm</span>
+          <span>{t("bed", { count: listing.bedrooms })}</span>
+          <span>{t("bath", { count: listing.bathrooms })}</span>
+          <span>{t("sqm", { count: listing.areaSqm })}</span>
           {listing.category && <span>{listing.category.toLowerCase()}</span>}
         </div>
-        {listing.availability && <p className="muted">Status: {listing.availability.replaceAll("_", " ").toLowerCase()}</p>}
+        {listing.availability && <p className="muted">{t("status", { status: listing.availability.replaceAll("_", " ").toLowerCase() })}</p>}
         <div className="hero-actions">
-          <Link href={`/listings/${listing.slug}` as any} className="btn btn-primary" data-cta="listing-view-details">View details</Link>
-          <button className="btn btn-ghost" type="button" aria-label={`Save ${listing.title}`} data-cta="listing-save">Save</button>
+          <Link href={`/listings/${listing.slug}` as any} className="btn btn-primary" data-cta="listing-view-details">{t("viewDetails")}</Link>
+          <button className="btn btn-ghost" type="button" aria-label={t("saveListing", { title: listing.title })} data-cta="listing-save">{t("save")}</button>
         </div>
       </div>
     </article>

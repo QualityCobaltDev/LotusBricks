@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { readConsent, writeConsent } from "@/lib/analytics/events";
 
 export function ConsentBanner() {
+  const t = useTranslations("consent");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -16,17 +18,17 @@ export function ConsentBanner() {
   return (
     <aside className="consent-banner" aria-live="polite" aria-label="Cookie consent">
       <p>
-        We use analytics cookies to improve listings discovery and support quality. You can change this anytime in your browser storage settings. Read our <Link href="/legal/privacy">Privacy Policy</Link>.
+        {t("message")} <Link href="/legal/privacy">{t("privacyPolicy")}</Link>.
       </p>
       <div className="hero-actions">
         <button className="btn btn-primary" onClick={() => {
           writeConsent("accepted");
           setVisible(false);
-        }}>Accept analytics</button>
+        }}>{t("accept")}</button>
         <button className="btn btn-ghost" onClick={() => {
           writeConsent("rejected");
           setVisible(false);
-        }}>Decline</button>
+        }}>{t("decline")}</button>
       </div>
     </aside>
   );
