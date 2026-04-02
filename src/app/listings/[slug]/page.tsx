@@ -9,19 +9,24 @@ import { logServerError } from "@/lib/observability";
 import { Prisma } from "@prisma/client";
 import { getPrimaryMedia, normalizeListingMedia, hasVideoMedia, MEDIA_FALLBACK_IMAGE, getYouTubeEmbedUrl } from "@/lib/listing-media";
 import { getSession } from "@/lib/auth";
+import { normalizeListingSlug } from "@/lib/listing-slug";
 
 const asStringArray = (value: Prisma.JsonValue | null | undefined) =>
   Array.isArray(value) ? value.map((item) => String(item)) : [];
 
 type Props = { params: Promise<{ slug: string }> };
 export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!isDatabaseConfigured()) {
     return { title: "Listing" };
   }
 
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = normalizeListingSlug(rawSlug);
+  if (!slug) return { title: "Listing not found" };
   let listing: { title: string; city: string; seoTitle: string | null; seoDescription: string | null; summary: string; openGraphImage: string | null } | null = null;
 
   try {
@@ -49,13 +54,15 @@ export default async function ListingDetail({
   searchParams
 }: Props & { searchParams?: Promise<{ preview?: string }> }) {
   const { slug } = await params;
+  const normalizedSlug = normalizeListingSlug(slug);
+  if (!normalizedSlug) return notFound();
   const previewParams = searchParams ? await searchParams : undefined;
 
   let listing: Prisma.ListingGetPayload<{ include: { media: true } }> | null = null;
   let similar: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
 
   try {
-    listing = await db.listing.findUnique({ where: { slug }, include: { media: { orderBy: { sortOrder: "asc" } } } });
+    listing = await db.listing.findUnique({ where: { slug: normalizedSlug }, include: { media: { orderBy: { sortOrder: "asc" } } } });
 
     if (listing) {
       const seededSimilar = asStringArray(listing.similarListings);
