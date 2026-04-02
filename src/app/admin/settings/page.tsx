@@ -3,13 +3,16 @@ import { getContactSettings } from "@/lib/site-settings";
 import { ContactSettingsForm } from "@/components/admin/contact-settings-form";
 import { db } from "@/lib/db";
 import { BrandSettingsForm } from "@/components/admin/brand-settings-form";
+import { SmtpSettingsForm } from "@/components/admin/smtp-settings-form";
+import { getSmtpSettings } from "@/lib/smtp-settings";
 
 export default async function AdminSettingsPage() {
   await requireAdmin();
-  const [contact, emailLogs, brandSettings] = await Promise.all([
+  const [contact, emailLogs, brandSettings, smtpSettings] = await Promise.all([
     getContactSettings(),
     db.emailLog.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
-    db.siteSetting.findUnique({ where: { key: "admin.brand-settings.v1" } })
+    db.siteSetting.findUnique({ where: { key: "admin.brand-settings.v1" } }),
+    getSmtpSettings()
   ]);
 
   return (
@@ -17,13 +20,11 @@ export default async function AdminSettingsPage() {
       <div className="stack-form">
         <BrandSettingsForm initial={(brandSettings?.value as Record<string, string> | undefined) ?? {}} />
         <ContactSettingsForm initial={contact} />
+        <SmtpSettingsForm initial={smtpSettings ?? {}} />
       </div>
       <article className="card-pad">
         <h2>Messaging logs & SMTP controls</h2>
         <p className="muted">Tracks transactional emails and operational notifications.</p>
-        <form action="/api/admin/test-email" method="post">
-          <button className="btn btn-ghost" type="submit">Send SMTP test email</button>
-        </form>
         <div className="admin-table-wrap">
           <table className="comparison-table">
             <thead><tr><th>Type</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Provider response</th><th>Timestamp (UTC)</th></tr></thead>

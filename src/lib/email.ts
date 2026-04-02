@@ -2,6 +2,7 @@ import tls from "node:tls";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { getContactSettings } from "@/lib/site-settings";
+import { getSmtpSettings } from "@/lib/smtp-settings";
 
 export type EmailTemplateData = {
   heading: string;
@@ -68,11 +69,12 @@ export async function sendTransactionalEmail(params: {
   const contact = await getContactSettings();
   const html = renderTemplate(params.template, contact);
 
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? 465);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const from = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "contact@rightbricks.online";
+  const savedSmtp = await getSmtpSettings();
+  const host = savedSmtp?.host ?? process.env.SMTP_HOST;
+  const port = savedSmtp?.port ?? Number(process.env.SMTP_PORT ?? 465);
+  const user = savedSmtp?.user ?? process.env.SMTP_USER;
+  const pass = savedSmtp?.pass ?? process.env.SMTP_PASS;
+  const from = savedSmtp?.from ?? process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "contact@rightbricks.online";
 
   if (!host || !user || !pass) {
     await db.emailLog.create({ data: { type: params.type, recipient: params.to, subject: params.subject, status: "FAILED", error: "SMTP missing env vars", metadata: params.metadata as any } });

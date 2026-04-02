@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Inquiry, Listing } from "@prisma/client";
 import { InquiryStatusForm } from "@/components/admin/inquiry-status-form";
 
@@ -9,19 +10,32 @@ type Row = Inquiry & { listing: Pick<Listing, "title" | "slug"> | null };
 const PIPELINE = ["NEW", "CONTACTED", "QUALIFIED", "VIEWING_SCHEDULED", "NEGOTIATION", "WON", "LOST", "ARCHIVED"] as const;
 
 export function LeadsControlBoard({ rows }: { rows: Row[] }) {
+  const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [status, setStatus] = useState<string>("ALL");
+  const [feedback, setFeedback] = useState<{ type: "idle" | "ok" | "error"; message?: string }>({ type: "idle" });
 
   const filtered = useMemo(() => rows.filter((r) => status === "ALL" || r.status === status), [rows, status]);
 
   async function runBulk(nextStatus: string) {
     if (!selected.length) return;
-    const res = await fetch("/api/admin/inquiries-bulk", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: selected, status: nextStatus })
-    });
-    if (res.ok) window.location.reload();
+    try {
+      const res = await fetch("/api/admin/inquiries-bulk", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected, status: nextStatus })
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setFeedback({ type: "error", message: data?.error ?? "Bulk lead update failed." });
+        return;
+      }
+      setFeedback({ type: "ok", message: data?.message ?? "Leads updated." });
+      setSelected([]);
+      router.refresh();
+    } catch (error) {
+      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Bulk lead update failed." });
+    }
   }
 
   return (
@@ -43,6 +57,8 @@ export function LeadsControlBoard({ rows }: { rows: Row[] }) {
           <button className="btn btn-ghost" type="button" onClick={() => runBulk("WON")}>Mark won</button>
           <button className="btn btn-accent" type="button" onClick={() => runBulk("ARCHIVED")}>Archive selected</button>
         </div>
+        {feedback.type === "ok" && <p className="form-ok">{feedback.message}</p>}
+        {feedback.type === "error" && <p className="form-error">{feedback.message}</p>}
         <div className="admin-table-wrap">
           <table className="comparison-table">
             <thead><tr><th><input type="checkbox" onChange={(e) => setSelected(e.target.checked ? filtered.map((row) => row.id) : [])} /></th><th>Lead</th><th>Type</th><th>Source</th><th>Urgent</th><th>Status workflow</th></tr></thead>
