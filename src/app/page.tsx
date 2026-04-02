@@ -14,8 +14,8 @@ import { ParallaxLayer } from "@/components/ui/parallax-layer";
 import { getStaggerDelay } from "@/lib/motion";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Verified Property Marketplace Cambodia",
-  description: "RightBricks helps buyers, investors, and developers discover verified listings with trusted advisory support.",
+  title: "List Property & Get Qualified Leads in Cambodia",
+  description: "RightBricks helps owners, agencies, and developers list properties, capture qualified enquiries, and close faster with verified visibility.",
   path: "/"
 });
 
@@ -23,6 +23,13 @@ const guides = [
   { title: "Phnom Penh investment guide", href: "/resources/phnom-penh-investment-guide", text: "Yield signals, district-by-district trends, and acquisition checkpoints." },
   { title: "Buyer due-diligence checklist", href: "/resources/buyer-due-diligence-checklist", text: "A practical review flow before paying deposits or entering negotiation." },
   { title: "Developer listing playbook", href: "/resources/developer-listing-playbook", text: "How to present verified media and convert qualified inquiries faster." }
+];
+
+const outcomes = [
+  "Higher visibility across Cambodia's active property audience",
+  "Faster lead response with direct enquiry routing",
+  "Premium presentation with verified listing standards",
+  "Clear pricing with transparent listing packages"
 ];
 
 export default async function HomePage() {
@@ -53,24 +60,30 @@ export default async function HomePage() {
           <div className="hero-backdrop-orb" />
         </ParallaxLayer>
         <Reveal>
-          <span className="eyebrow">Verified property intelligence for Cambodia</span>
-          <h1>{hero?.title ?? "Invest, buy, and lease with higher confidence"}</h1>
+          <span className="eyebrow">Cambodia&apos;s trusted property listing platform</span>
+          <h1>{hero?.title ?? "List your property, attract qualified leads, and close faster"}</h1>
           <p>
             {hero?.body ??
-              "RightBricks pairs verified listing data, documentation-first workflows, and responsive advisory support to help you move faster with less risk."}
+              "RightBricks helps property owners, agencies, and developers showcase verified listings with high-trust presentation, direct enquiries, and sales-focused support."}
           </p>
           <div className="hero-actions">
-            <Link href="/listings" className="btn btn-primary" data-cta="home-primary" data-track-event="click_browse_listings" data-track-label="home-primary">Browse verified listings</Link>
-            <Link href="/contact" className="btn btn-outline" data-cta="home-secondary">Book advisory call</Link>
+            <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="home-list-property">List Your Property</Link>
+            <Link href="/listings" className="btn btn-outline" data-track-event="click_browse_listings" data-track-label="home-browse">Browse Listings</Link>
+            <Link href="/contact" className="btn btn-ghost" data-track-event="contact_form_start" data-track-label="home-contact">Contact Us</Link>
           </div>
+          <ul className="trust-inline">
+            <li>Direct owner/agent enquiries</li>
+            <li>Fast response from RightBricks team</li>
+            <li>No-obligation consultation</li>
+          </ul>
         </Reveal>
         <Reveal delay={140} className="hero-visual-wrap" y={24}>
           <ParallaxLayer speed={0.06}>
             <div className="hero-card">
               <Image src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1400&q=80" alt="Premium property exterior" fill priority sizes="(max-width: 960px) 100vw, 50vw" />
               <div className="hero-overlay">
-                <strong>Verified listings. Real momentum.</strong>
-                <span>Clear facts, trust signals, and direct inquiry pathways.</span>
+                <strong>Premium exposure for serious sellers and landlords</strong>
+                <span>Verified listings, structured media, and clear enquiry flow.</span>
               </div>
             </div>
           </ParallaxLayer>
@@ -88,40 +101,59 @@ export default async function HomePage() {
         ))}
       </section>
 
+      <section className="shell section two-col">
+        <Reveal>
+          <div className="card-pad">
+            <h2>Why list with RightBricks</h2>
+            <ul className="check-list">
+              {outcomes.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+            <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="why-list-cta">Get Started</Link>
+          </div>
+        </Reveal>
+        <Reveal delay={100}>
+          <div className="card-pad">
+            <h2>How it works</h2>
+            <ol>
+              <li>Choose your listing tier and share your property details.</li>
+              <li>RightBricks verifies your listing and publishes with premium structure.</li>
+              <li>Receive enquiries and schedule viewings through a clear contact path.</li>
+            </ol>
+            <Link href="/contact" className="btn btn-outline" data-track-event="contact_form_start" data-track-label="how-it-works-cta">Talk to Sales</Link>
+          </div>
+        </Reveal>
+      </section>
+
       <section className="shell section">
         <div className="section-head">
           <h2>Featured listings</h2>
-          <Link href="/listings">View all listings</Link>
+          <Link href="/listings" data-track-event="click_browse_listings" data-track-label="featured-view-all">View all listings</Link>
         </div>
         <div className="listing-grid">{featured.map((listing, index) => <Reveal key={listing.id} delay={getStaggerDelay(index)}><ListingCard listing={listing} /></Reveal>)}</div>
       </section>
 
-      <section className="shell section two-col">
-        <Reveal><div className="card-pad"><h2>How RightBricks works</h2><ol><li>Browse verified listings with structured filters.</li><li>Review pricing context, media, and facts in one page.</li><li>Inquire instantly and get a human response within hours.</li></ol></div></Reveal>
-        <Reveal delay={100}><div className="card-pad"><h2>Why teams choose us</h2><ul className="check-list"><li>Verification-first listing standards.</li><li>Investor-aware insights, not generic listing copy.</li><li>Fast, accountable support via email, phone, WhatsApp, and Telegram.</li></ul></div></Reveal>
-      </section>
-
-      <section className="shell section">
-        <div className="section-head"><h2>Market intelligence & resources</h2></div>
-        <div className="grid">{guides.map((g, index) => <Reveal key={g.title} delay={getStaggerDelay(index)}><article className="card"><h3>{g.title}</h3><p className="muted">{g.text}</p><Link href={g.href as any}>Read more</Link></article></Reveal>)}</div>
-      </section>
-
       <section className="shell section">
         <div className="section-head">
-          <h2>Standardized pricing tiers</h2>
-          <Link href="/pricing">View full pricing</Link>
+          <h2>Listing plans built for growth</h2>
+          <Link href="/pricing">Compare all tiers</Link>
         </div>
         <div className="pricing-grid">
           {pricingPreview.map((plan, index) => (
             <Reveal key={plan.key} delay={getStaggerDelay(index)}>
               <article className="pricing-card">
                 <h3>{plan.name}</h3>
-                {plan.contactOnly ? <p className="muted">Contact Us for Pricing</p> : <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} Sign-Up Fee`}</p>}
-                <a href={plan.ctaHref} className="btn btn-outline">{plan.contactOnly ? "Contact Us" : plan.ctaLabel}</a>
+                {plan.contactOnly ? <p className="muted">Custom pricing for multi-project portfolios</p> : <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} sign-up`}</p>}
+                <p className="muted">{plan.contactOnly ? "Best for enterprise portfolios and high-volume inventory." : `Includes ${plan.listingLimit} active listing${plan.listingLimit === 1 ? "" : "s"}, ${plan.photosPerListing} photos, and ${plan.videosPerListing} videos per listing.`}</p>
+                <a href={plan.ctaHref} className="btn btn-outline" data-track-event="choose_tier" data-track-label={`home-${plan.key.toLowerCase()}`}>{plan.contactOnly ? "Contact Us" : "Choose Plan"}</a>
               </article>
             </Reveal>
           ))}
         </div>
+      </section>
+
+      <section className="shell section">
+        <div className="section-head"><h2>Market intelligence & resources</h2></div>
+        <div className="grid">{guides.map((g, index) => <Reveal key={g.title} delay={getStaggerDelay(index)}><article className="card"><h3>{g.title}</h3><p className="muted">{g.text}</p><Link href={g.href as any}>Read more</Link></article></Reveal>)}</div>
       </section>
 
       <section className="shell section">
@@ -134,11 +166,11 @@ export default async function HomePage() {
       </section>
 
       <Reveal className="shell cta-band">
-        <h2>Ready for your next property move?</h2>
-        <p>Explore verified inventory, save high-fit opportunities, and reach advisors without delay.</p>
+        <h2>Start converting more leads with RightBricks</h2>
+        <p>Choose a plan, launch your listing, and let verified visibility drive serious enquiries.</p>
         <div className="hero-actions">
-          <Link href="/listings" className="btn btn-primary" data-track-event="click_browse_listings" data-track-label="home-footer-cta">Explore listings</Link>
-          <Link href="/contact" className="btn btn-outline">Speak to RightBricks</Link>
+          <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="home-footer-list">List Your Property</Link>
+          <Link href="/contact" className="btn btn-outline" data-track-event="contact_form_start" data-track-label="home-footer-contact">Contact Us</Link>
         </div>
       </Reveal>
     </>

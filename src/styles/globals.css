@@ -282,6 +282,23 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .quote-grid footer { margin-top: .7rem; color: var(--muted-foreground); font-size: .9rem; }
 .cta-band { background: var(--gradient-brand); color: var(--primary-foreground); border-radius: 24px; padding: 2.2rem; margin: 1rem auto 3rem; box-shadow: var(--shadow-lg); }
 
+.trust-inline { list-style: none; padding: 0; margin: .4rem 0 0; display: grid; gap: .35rem; color: var(--muted-foreground); font-size: .95rem; }
+.trust-inline li::before { content: "✓ "; color: var(--primary); font-weight: 700; }
+
+.footer-cta { margin-bottom: 1.4rem; background: color-mix(in srgb, var(--muted) 75%, transparent); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.footer-cta h3 { margin: 0; }
+.footer-cta p { margin: .35rem 0 0; color: var(--muted-foreground); }
+
+.floating-contact {
+  position: fixed;
+  right: .9rem;
+  bottom: .9rem;
+  display: flex;
+  gap: .5rem;
+  z-index: 65;
+}
+.floating-contact .btn { box-shadow: var(--shadow-md); }
+
 .filter-bar { display: grid; grid-template-columns: 1.4fr repeat(3, .7fr) auto; gap: .6rem; margin: 1rem 0 1.2rem; }
 input, textarea, select { width: 100%; border: 1px solid var(--input); border-radius: 12px; padding: .72rem .78rem; background: var(--card); color: var(--foreground); font: inherit; transition: border-color var(--motion-hover) var(--ease-swift), box-shadow var(--motion-hover) var(--ease-swift), background-color var(--motion-hover) var(--ease-swift); }
 label { transition: color var(--motion-micro) var(--ease-swift); }
@@ -390,6 +407,7 @@ details[open] summary + p { animation: details-in var(--motion-page) var(--ease-
   .stat-grid { grid-template-columns: repeat(2,1fr); }
   .quote-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
+  .footer-cta { flex-direction: column; align-items: flex-start; }
   .desktop-nav { display: none; }
   .mobile-toggle { display: inline-flex; }
   
@@ -408,6 +426,8 @@ details[open] summary + p { animation: details-in var(--motion-page) var(--ease-
   .mobile-panel { top: 4.05rem; padding: .8rem 4vw 1rem; gap: .7rem; }
   .mobile-panel a { padding: .7rem .2rem; border-bottom: 1px solid var(--border); }
   .hero-actions, .hero-search, .filter-bar, .stat-grid, .pricing-grid, .password-row { grid-template-columns: 1fr; }
+  .floating-contact { left: .6rem; right: .6rem; bottom: .6rem; display: grid; grid-template-columns: 1fr 1fr; }
+  .floating-contact .btn { width: 100%; }
   .hero { padding-top: 3.2rem; }
   .price { font-size: 1.25rem; }
   .listing-grid { gap: .85rem; }

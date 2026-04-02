@@ -42,8 +42,8 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
   return (
     <section className="shell section">
       <div className="section-head narrow">
-        <h1>Contact RightBricks Cambodia</h1>
-        <p className="muted">{CONTACT.availabilityLine} {CONTACT.responseTime}</p>
+        <h1>Contact RightBricks sales & advisory team</h1>
+        <p className="muted">{CONTACT.availabilityLine} {CONTACT.responseTime} No obligation and direct support.</p>
       </div>
 
       <div className="two-col">
@@ -55,13 +55,13 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             <a className="btn btn-ghost" href={CONTACT.whatsappHref}>WhatsApp</a>{" "}
             <a className="btn btn-ghost" href={CONTACT.telegramHref}>Telegram</a>
           </p>
-          <p className="muted">Available on WhatsApp and Telegram for faster responses.</p>
+          <p className="muted">We respond quickly and route you to the right specialist.</p>
           {contact.supportHours && <p>Support hours: {contact.supportHours}</p>}
           {contact.supportAddress && <p>Office: {contact.supportAddress}</p>}
         </article>
         <article className="card-pad">
           <h2>{isCustomPlan ? "Request a Custom Tier" : "Send us a message"}</h2>
-          <p className="muted">What happens next: we review your goals, confirm fit, and reply with next-step options.</p>
+          <p className="muted">What happens next: we review your goals, confirm fit, and share next-step options within a few hours.</p>
           <ContactForm
             listingId={fallbackListing?.id ?? ""}
             selectedPlan={normalizePlan(params.plan ?? "")}
