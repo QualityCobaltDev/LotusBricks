@@ -1,6 +1,8 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient; pool?: Pool };
 const BUILD_PHASE = "phase-production-build";
 
 function isBuildTimeProcess() {
@@ -12,7 +14,11 @@ function createPrismaClient() {
     throw new Error("DATABASE_URL is not set. Database-backed routes require this env var at runtime.");
   }
 
-  return new PrismaClient();
+  const pool = globalForPrisma.pool ?? new Pool({ connectionString: process.env.DATABASE_URL });
+  globalForPrisma.pool = pool;
+  const adapter = new PrismaPg(pool);
+
+  return new PrismaClient({ adapter });
 }
 
 export function isDatabaseConfigured() {

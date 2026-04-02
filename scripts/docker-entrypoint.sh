@@ -15,7 +15,7 @@ node ./scripts/wait-for-db.mjs
 
 log "database reachable"
 log "applying Prisma migrations (prisma migrate deploy)"
-npx prisma migrate deploy
+npm run prisma:migrate:deploy
 
 log "starting Next.js server"
 exec node server.js
