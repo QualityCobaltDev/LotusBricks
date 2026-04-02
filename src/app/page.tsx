@@ -10,6 +10,8 @@ import { Prisma } from "@prisma/client";
 import { getPricingPlans } from "@/lib/pricing-settings";
 import { formatUsd } from "@/lib/plans";
 import { Reveal } from "@/components/ui/reveal";
+import { ParallaxLayer } from "@/components/ui/parallax-layer";
+import { getStaggerDelay } from "@/lib/motion";
 
 export const metadata: Metadata = buildMetadata({
   title: "Verified Property Marketplace Cambodia",
@@ -47,6 +49,9 @@ export default async function HomePage() {
   return (
     <>
       <section className="hero shell">
+        <ParallaxLayer className="hero-backdrop" speed={0.04}>
+          <div className="hero-backdrop-orb" />
+        </ParallaxLayer>
         <Reveal>
           <span className="eyebrow">Verified property intelligence for Cambodia</span>
           <h1>{hero?.title ?? "Invest, buy, and lease with higher confidence"}</h1>
@@ -59,20 +64,22 @@ export default async function HomePage() {
             <Link href="/contact" className="btn btn-outline" data-cta="home-secondary">Book advisory call</Link>
           </div>
         </Reveal>
-        <Reveal delay={100} className="hero-visual-wrap">
-          <div className="hero-card">
-            <Image src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1400&q=80" alt="Premium property exterior" fill priority sizes="(max-width: 960px) 100vw, 50vw" />
-            <div className="hero-overlay">
-              <strong>Verified listings. Real momentum.</strong>
-              <span>Clear facts, trust signals, and direct inquiry pathways.</span>
+        <Reveal delay={140} className="hero-visual-wrap" y={24}>
+          <ParallaxLayer speed={0.06}>
+            <div className="hero-card">
+              <Image src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1400&q=80" alt="Premium property exterior" fill priority sizes="(max-width: 960px) 100vw, 50vw" />
+              <div className="hero-overlay">
+                <strong>Verified listings. Real momentum.</strong>
+                <span>Clear facts, trust signals, and direct inquiry pathways.</span>
+              </div>
             </div>
-          </div>
+          </ParallaxLayer>
         </Reveal>
       </section>
 
       <section className="shell stat-grid">
         {trustStats.map((item, index) => (
-          <Reveal key={item.label} delay={index * 80}>
+          <Reveal key={item.label} delay={getStaggerDelay(index)}>
             <article className="stat-card">
               <p>{item.value}</p>
               <span>{item.label}</span>
@@ -86,7 +93,7 @@ export default async function HomePage() {
           <h2>Featured listings</h2>
           <Link href="/listings">View all listings</Link>
         </div>
-        <div className="listing-grid">{featured.map((listing, index) => <Reveal key={listing.id} delay={index * 90}><ListingCard listing={listing} /></Reveal>)}</div>
+        <div className="listing-grid">{featured.map((listing, index) => <Reveal key={listing.id} delay={getStaggerDelay(index)}><ListingCard listing={listing} /></Reveal>)}</div>
       </section>
 
       <section className="shell section two-col">
@@ -96,7 +103,7 @@ export default async function HomePage() {
 
       <section className="shell section">
         <div className="section-head"><h2>Market intelligence & resources</h2></div>
-        <div className="grid">{guides.map((g, index) => <Reveal key={g.title} delay={index * 80}><article className="card"><h3>{g.title}</h3><p className="muted">{g.text}</p><Link href={g.href as any}>Read more</Link></article></Reveal>)}</div>
+        <div className="grid">{guides.map((g, index) => <Reveal key={g.title} delay={getStaggerDelay(index)}><article className="card"><h3>{g.title}</h3><p className="muted">{g.text}</p><Link href={g.href as any}>Read more</Link></article></Reveal>)}</div>
       </section>
 
       <section className="shell section">
@@ -106,7 +113,7 @@ export default async function HomePage() {
         </div>
         <div className="pricing-grid">
           {pricingPreview.map((plan, index) => (
-            <Reveal key={plan.key} delay={index * 90}>
+            <Reveal key={plan.key} delay={getStaggerDelay(index)}>
               <article className="pricing-card">
                 <h3>{plan.name}</h3>
                 {plan.contactOnly ? <p className="muted">Contact Us for Pricing</p> : <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} Sign-Up Fee`}</p>}
@@ -121,7 +128,7 @@ export default async function HomePage() {
         <div className="section-head"><h2>Trusted by active market participants</h2></div>
         <div className="quote-grid">
           {testimonials.map((t, index) => (
-            <Reveal key={t.name} delay={index * 90}><blockquote className="card-pad">“{t.quote}”<footer>{t.name} · {t.role}</footer></blockquote></Reveal>
+            <Reveal key={t.name} delay={getStaggerDelay(index)}><blockquote className="card-pad">“{t.quote}”<footer>{t.name} · {t.role}</footer></blockquote></Reveal>
           ))}
         </div>
       </section>

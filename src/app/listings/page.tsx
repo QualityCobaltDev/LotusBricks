@@ -4,6 +4,8 @@ import { buildMetadata } from "@/lib/metadata";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
+import { Reveal } from "@/components/ui/reveal";
+import { getStaggerDelay } from "@/lib/motion";
 
 export const metadata: Metadata = buildMetadata({
   title: "Verified Property Listings Cambodia",
@@ -78,12 +80,12 @@ export default async function ListingsPage({
 
   return (
     <section className="shell section">
-      <div className="section-head">
+      <Reveal y={16}><div className="section-head">
         <h1>Browse verified listings</h1>
         <p className="muted">Search Phnom Penh, Siem Reap, Sihanoukville, and other growth corridors with confidence signals on every listing.</p>
-      </div>
+      </div></Reveal>
 
-      <form className="filter-bar" method="GET" aria-label="Listings filters">
+      <Reveal delay={80} y={12}><form className="filter-bar" method="GET" aria-label="Listings filters">
         <input name="q" defaultValue={q} placeholder="City, district, keyword" />
         <input name="city" defaultValue={city} placeholder="City" />
         <input name="min" type="number" defaultValue={min || ""} placeholder="Min USD" />
@@ -115,15 +117,15 @@ export default async function ListingsPage({
         </select>
         <button className="btn btn-primary" type="submit" data-track-event="apply_filter" data-track-label="listings-filter-apply">Apply</button>
         <Link href="/listings" className="btn btn-ghost">Reset</Link>
-      </form>
+      </form></Reveal>
 
       {hasFilters && <p className="muted">Active filters applied. Use reset to return to full inventory.</p>}
 
       {listings.length ? (
         <>
           <div className="listing-grid">
-            {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+            {listings.map((listing, index) => (
+              <Reveal key={listing.id} delay={getStaggerDelay(index)}><ListingCard listing={listing} /></Reveal>
             ))}
           </div>
           <div className="hero-actions" style={{ marginTop: "1rem" }}>
