@@ -839,6 +839,36 @@ async function main() {
       body: "RightBricks helps buyers, renters, and investors discover verified property listings with transparent details."
     }
   });
+
+  await prisma.siteSetting.upsert({
+    where: { key: "platform.contact" },
+    update: {
+      value: {
+        email: CONTACT_EMAIL,
+        emailHref: `mailto:${CONTACT_EMAIL}`,
+        phoneDisplay: CONTACT_PHONE,
+        phoneHref: "tel:+85511389625",
+        whatsappHref: "https://wa.me/85511389625",
+        telegramHref: "https://t.me/",
+        supportHours: "Mon-Sat 8:30-18:30 (ICT)",
+        supportAddress: "Phnom Penh, Cambodia"
+      }
+    },
+    create: {
+      key: "platform.contact",
+      value: {
+        email: CONTACT_EMAIL,
+        emailHref: `mailto:${CONTACT_EMAIL}`,
+        phoneDisplay: CONTACT_PHONE,
+        phoneHref: "tel:+85511389625",
+        whatsappHref: "https://wa.me/85511389625",
+        telegramHref: "https://t.me/",
+        supportHours: "Mon-Sat 8:30-18:30 (ICT)",
+        supportAddress: "Phnom Penh, Cambodia"
+      }
+    }
+  });
+
 }
 
 main().finally(() => prisma.$disconnect());
