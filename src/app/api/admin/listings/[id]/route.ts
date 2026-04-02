@@ -6,18 +6,10 @@ import { listingSchema } from "@/lib/validators";
 import { failResult, okResult, toUserFacingError } from "@/lib/mutation-result";
 import { logServerError } from "@/lib/observability";
 import { revalidatePath } from "next/cache";
+import { ensureUniqueListingSlug } from "@/lib/listing-slug";
 
 const statusSchema = z.object({ status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]) });
 
-function normalizeSlug(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
 
 function revalidateListingSurfaces(slug?: string | null, previousSlug?: string | null) {
   revalidatePath("/");
@@ -68,7 +60,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   const payload = parsed.data;
-  const slug = normalizeSlug(payload.slug || payload.title);
+  const slug = await ensureUniqueListingSlug(payload.slug || payload.title, id);
   if (!slug) return NextResponse.json(failResult("Slug is required."), { status: 400 });
 
   const { imageUrl, videoUrl, imageUrls, videoUrls, mediaItems, availabilityDate, ...rest } = payload;

@@ -179,10 +179,9 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
     setFeedback({ type: "idle" });
   }
 
-  async function saveListing(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!editor) return;
-
+  async function persistListing(options?: { openPreview?: boolean }) {
+    if (!editor) return false;
+    const openPreview = Boolean(options?.openPreview);
     const payload = {
       slug: toSlug(editor.slug || editor.title),
       title: editor.title,
@@ -224,18 +223,46 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.ok) {
-        setFeedback({ type: "error", message: data?.error ?? "Save failed." });
-        return;
+        const fieldErrors = data?.fieldErrors ? Object.values(data.fieldErrors as Record<string, string[]>).flat().join(" ") : "";
+        setFeedback({ type: "error", message: fieldErrors || data?.error || "Save failed." });
+        return false;
       }
 
+      const savedListing = data?.data as { id?: string; slug?: string } | undefined;
+      const savedId = savedListing?.id ?? editor.listingId;
+      const savedSlug = savedListing?.slug ?? payload.slug;
+
       setFeedback({ type: "ok", message: data?.message ?? "Saved." });
-      setEditor(null);
+      setEditor((prev) =>
+        prev
+          ? {
+              ...prev,
+              mode: "edit",
+              listingId: savedId,
+              slug: savedSlug
+            }
+          : prev
+      );
       router.refresh();
+      if (openPreview && savedSlug) {
+        window.open(`/listings/${savedSlug}?preview=1`, "_blank", "noopener,noreferrer");
+      }
+      return true;
     } catch (error) {
       setFeedback({ type: "error", message: error instanceof Error ? error.message : "Save failed." });
+      return false;
     } finally {
       setIsSaving(false);
     }
+  }
+
+  async function saveListing(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await persistListing();
+  }
+
+  async function previewListing() {
+    await persistListing({ openPreview: true });
   }
 
   async function deleteListing(row: AdminListingRow) {
@@ -382,7 +409,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
                         <button className="btn btn-ghost" type="button" onClick={() => setStatus(x.id, "DRAFT")} disabled={isSaving}>Unpublish</button>
                         <button className="btn btn-ghost" type="button" onClick={() => setStatus(x.id, "ARCHIVED")} disabled={isSaving}>Archive</button>
                         <button className="btn btn-ghost" type="button" onClick={() => duplicateListing(x)} disabled={isSaving}>Duplicate</button>
-                        <a className="btn btn-ghost" href={`/listings/${x.slug}`} target="_blank" rel="noreferrer">Preview</a>
+                        <a className="btn btn-ghost" href={`/listings/${x.slug}?preview=1`} target="_blank" rel="noreferrer">Preview</a>
                         <button className="btn btn-accent" type="button" onClick={() => deleteListing(x)} disabled={isSaving}>Delete</button>
                       </div>
                     </td>
@@ -424,7 +451,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
           <div className="hero-actions">
             <button className="btn btn-primary" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : editor.mode === "create" ? "Create listing" : "Save listing"}</button>
             <button className="btn btn-ghost" type="button" onClick={() => setEditor(null)} disabled={isSaving}>Cancel</button>
-            <a className="btn btn-ghost" href={`/listings/${editor.slug || ""}`} target="_blank" rel="noreferrer">Preview</a>
+            <button className="btn btn-ghost" type="button" onClick={previewListing} disabled={isSaving || !editor.title.trim()}>Preview</button>
           </div>
         </form>
       )}
