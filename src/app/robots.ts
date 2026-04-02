@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { getSafeSiteUrl } from "@/lib/env";
 
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rightbricks.online";
+  const base = getSafeSiteUrl();
   return {
     rules: { userAgent: "*", allow: "/" },
     sitemap: `${base}/sitemap.xml`

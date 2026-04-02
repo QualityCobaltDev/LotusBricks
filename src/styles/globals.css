@@ -260,3 +260,16 @@ summary { cursor: pointer; font-weight: 600; color: var(--blue-700); }
   .inline-admin-form { grid-template-columns: 1fr; }
   .password-row { grid-template-columns: 1fr; }
 }
+
+.consent-banner {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: min(520px, calc(100vw - 2rem));
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  z-index: 70;
+}

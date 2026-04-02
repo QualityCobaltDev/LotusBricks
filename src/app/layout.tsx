@@ -4,6 +4,10 @@ import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { getContactSettings } from "@/lib/site-settings";
 import { getSafeSiteUrl } from "@/lib/env";
+import { ConsentBanner } from "@/components/site/consent-banner";
+import { AnalyticsProvider } from "@/components/site/analytics-provider";
+import { EventTracker } from "@/components/site/event-tracker";
+import { buildWebSiteJsonLd } from "@/lib/metadata";
 
 const siteUrl = getSafeSiteUrl();
 
@@ -33,7 +37,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const contact = await getContactSettings();
   const dashboardHref = "/login/customer";
-  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "dev";
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
   const orgLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -45,14 +49,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   };
 
 
+  const webSiteLd = buildWebSiteJsonLd();
+
   return (
     <html lang="en">
       <body>
         <a href="#main-content" className="skip-link">Skip to main content</a>
         <SiteHeader dashboardHref={dashboardHref} />
         <main id="main-content">{children}</main>
+        <ConsentBanner />
+        <AnalyticsProvider />
+        <EventTracker />
         <SiteFooter email={contact.email} emailHref={contact.emailHref} phoneDisplay={contact.phoneDisplay} phoneHref={contact.phoneHref} whatsappHref={contact.whatsappHref} telegramHref={contact.telegramHref} appVersion={appVersion} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteLd) }} />
       </body>
     </html>
   );

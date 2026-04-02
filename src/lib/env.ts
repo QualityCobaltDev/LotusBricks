@@ -53,5 +53,5 @@ export function requireServerEnv<T extends keyof z.infer<typeof serverSchema>>(.
 
 export function getSafeSiteUrl() {
   const parsed = getPublicEnv();
-  return parsed.success ? parsed.data.NEXT_PUBLIC_SITE_URL : "http://localhost:3000";
+  return parsed.success ? parsed.data.NEXT_PUBLIC_SITE_URL : "https://rightbricks.online";
 }
