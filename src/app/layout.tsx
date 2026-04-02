@@ -7,6 +7,7 @@ import { getSafeSiteUrl } from "@/lib/env";
 import { ConsentBanner } from "@/components/site/consent-banner";
 import { AnalyticsProvider } from "@/components/site/analytics-provider";
 import { EventTracker } from "@/components/site/event-tracker";
+import { FloatingContactCta } from "@/components/site/floating-contact";
 import { buildWebSiteJsonLd } from "@/lib/metadata";
 
 const siteUrl = getSafeSiteUrl();
@@ -64,6 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ConsentBanner />
         <AnalyticsProvider />
         <EventTracker />
+        <FloatingContactCta />
         <SiteFooter
           email={contact.email}
           emailHref={contact.emailHref}

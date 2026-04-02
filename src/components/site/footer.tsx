@@ -22,12 +22,23 @@ export function SiteFooter({
 }) {
   return (
     <footer className="site-footer">
+      <Reveal className="shell footer-cta" y={12}>
+        <div>
+          <h3>Ready to generate qualified property leads?</h3>
+          <p>Launch your listing with RightBricks and get direct enquiries from serious buyers, renters, and investors in Cambodia.</p>
+        </div>
+        <div className="hero-actions">
+          <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="footer-list-property">List Your Property</Link>
+          <Link href="/contact" className="btn btn-outline" data-track-event="contact_form_start" data-track-label="footer-contact">Contact Us</Link>
+        </div>
+      </Reveal>
+
       <div className="shell footer-grid">
         <Reveal>
           <div>
             <h3>RightBricks</h3>
             <p>
-              Cambodia’s trusted marketplace for buyers, renters, sellers, landlords, and developers seeking verified listings and structured property workflows.
+              Trusted platform serving Cambodia&apos;s real estate market with verified listings, transparent communication, and responsive support.
             </p>
             <p className="muted">✉️ <a href={emailHref}>{email}</a> · ☎️ <a href={phoneHref}>{phoneDisplay}</a></p>
             <p className="muted">💬 <a href={whatsappHref}>WhatsApp</a> · 📲 <a href={telegramHref}>Telegram</a></p>
@@ -35,12 +46,12 @@ export function SiteFooter({
         </Reveal>
         <Reveal delay={80}>
           <div>
-            <h4>Explore</h4>
+            <h4>Quick actions</h4>
             <ul>
-              <li><Link href="/listings">Listings</Link></li>
-              <li><Link href="/pricing">Pricing</Link></li>
-              <li><Link href="/about">About</Link></li>
-              <li><Link href="/contact">Contact</Link></li>
+              <li><Link href="/pricing">List Your Property</Link></li>
+              <li><Link href="/listings">Browse Listings</Link></li>
+              <li><Link href="/contact">Contact Sales</Link></li>
+              <li><Link href="/about">Why RightBricks</Link></li>
             </ul>
           </div>
         </Reveal>

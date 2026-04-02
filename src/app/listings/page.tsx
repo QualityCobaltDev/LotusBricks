@@ -81,8 +81,8 @@ export default async function ListingsPage({
   return (
     <section className="shell section">
       <Reveal y={16}><div className="section-head">
-        <h1>Browse verified listings</h1>
-        <p className="muted">Search Phnom Penh, Siem Reap, Sihanoukville, and other growth corridors with confidence signals on every listing.</p>
+        <h1>Browse verified listings across Cambodia</h1>
+        <p className="muted">Find high-fit properties fast, then enquire directly with owners, agents, or the RightBricks advisory team.</p>
       </div></Reveal>
 
       <Reveal delay={80} y={12}><form className="filter-bar" method="GET" aria-label="Listings filters">
@@ -116,7 +116,7 @@ export default async function ListingsPage({
           <option value="featured">Featured</option><option value="newest">Newest</option><option value="price_asc">Price: Low to high</option><option value="price_desc">Price: High to low</option>
         </select>
         <button className="btn btn-primary" type="submit" data-track-event="apply_filter" data-track-label="listings-filter-apply">Apply</button>
-        <Link href="/listings" className="btn btn-ghost">Reset</Link>
+        <Link href="/listings" className="btn btn-ghost" data-track-event="apply_filter" data-track-label="listings-reset">Reset</Link>
       </form></Reveal>
 
       {hasFilters && <p className="muted">Active filters applied. Use reset to return to full inventory.</p>}
@@ -130,7 +130,8 @@ export default async function ListingsPage({
           </div>
           <div className="hero-actions" style={{ marginTop: "1rem" }}>
             <button className="btn btn-ghost" type="button" data-cta="listings-load-more">Load more</button>
-            <Link className="btn btn-ghost" href="/contact" data-cta="listings-request-help">Request live assistance</Link>
+            <Link className="btn btn-ghost" href="/contact" data-cta="listings-request-help" data-track-event="contact_form_start" data-track-label="listings-help">Need help shortlisting?</Link>
+            <Link className="btn btn-primary" href="/pricing" data-track-event="choose_tier" data-track-label="listings-list-property">List Your Property</Link>
           </div>
         </>
       ) : inventoryState === "unavailable" ? (
@@ -142,8 +143,11 @@ export default async function ListingsPage({
       ) : (
         <article className="empty-state">
           <h3>No listings matched this filter set</h3>
-          <p>Try removing one or two constraints, or return to the verified default inventory.</p>
-          <Link href="/listings" className="btn btn-ghost">Back to full inventory</Link>
+          <p>Try removing one or two constraints, then enquire on matching listings in seconds.</p>
+          <div className="hero-actions" style={{ justifyContent: "center" }}>
+            <Link href="/listings" className="btn btn-ghost">Back to full inventory</Link>
+            <Link href="/contact" className="btn btn-primary" data-track-event="contact_form_start" data-track-label="empty-state-contact">Get help from an advisor</Link>
+          </div>
         </article>
       )}
     </section>

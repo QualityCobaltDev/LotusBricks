@@ -41,9 +41,7 @@ export const PLAN_CONFIG: Record<PlanKey, PlanConfig> = {
     videosPerListing: 2,
     contactOnly: false,
     ctaLabel: "Choose Tier 2",
-    ctaHref: "/contact?plan=tier-2",
-    featured: true,
-    badge: "Most Popular"
+    ctaHref: "/contact?plan=tier-2"
   },
   TIER_3: {
     key: "TIER_3",

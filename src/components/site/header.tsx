@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/site/theme-toggle";
 
 const navItems = [
-  { href: "/listings", label: "Listings" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/about", label: "About" },
+  { href: "/listings", label: "Browse Listings" },
+  { href: "/pricing", label: "List Property" },
+  { href: "/about", label: "Why RightBricks" },
   { href: "/contact", label: "Contact" }
 ];
 
@@ -38,7 +38,7 @@ export function SiteHeader() {
           <span className="brand-mark">RB</span>
           <span>
             RightBricks
-            <small>Verified property intelligence</small>
+            <small>Cambodia&apos;s verified property platform</small>
           </span>
         </Link>
 
@@ -52,8 +52,8 @@ export function SiteHeader() {
 
         <div className="nav-ctas">
           <ThemeToggle />
-          <Link href="/listings" className="btn btn-outline">Browse</Link>
-          <Link href="/contact" className="btn btn-primary">Enquire now</Link>
+          <Link href="/listings" className="btn btn-outline" data-track-event="click_browse_listings" data-track-label="header-browse">View Listings</Link>
+          <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="header-list-property">List Your Property</Link>
           <button aria-label={open ? "Close menu" : "Open menu"} className="mobile-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>☰</button>
         </div>
       </div>
@@ -73,7 +73,7 @@ export function SiteHeader() {
         <div style={{ transitionDelay: "320ms" }}>
           <ThemeToggle />
         </div>
-        <Link className="btn btn-primary" href="/contact" onClick={() => setOpen(false)} style={{ transitionDelay: "360ms" }}>Enquire now</Link>
+        <Link className="btn btn-primary" href="/pricing" onClick={() => setOpen(false)} style={{ transitionDelay: "360ms" }} data-track-event="choose_tier" data-track-label="mobile-list-property">List Your Property</Link>
       </div>
     </header>
   );
