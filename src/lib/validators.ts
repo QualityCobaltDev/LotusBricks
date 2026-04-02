@@ -4,6 +4,8 @@ import { getPlanByKey } from "@/lib/plans";
 const maxPhotos = getPlanByKey("TIER_1").photosPerListing;
 const maxVideos = getPlanByKey("TIER_1").videosPerListing;
 
+const mediaUrlSchema = z.string().url().refine((value) => /^https?:\/\//.test(value), "Media URL must be an absolute http(s) URL.");
+
 export const loginSchema = z.object({ email: z.string().email(), password: z.string().min(8), role: z.enum(["ADMIN", "CUSTOMER"]).optional() });
 export const registerSchema = z.object({ fullName: z.string().min(2), email: z.string().email(), password: z.string().min(8), selectedPlan: z.string().optional().default("TIER_1") });
 export const listingSchema = z.object({
@@ -77,15 +79,29 @@ export const listingSchema = z.object({
   sortOrder: z.coerce.number().int().optional(),
   featured: z.coerce.boolean().optional().default(false),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
-  imageUrls: z.array(z.string().url()).max(maxPhotos).optional().default([]),
-  videoUrls: z.array(z.string().url()).max(maxVideos).optional().default([]),
-  imageUrl: z.string().url().optional().or(z.literal("")),
-  videoUrl: z.string().url().optional().or(z.literal(""))
+  imageUrls: z.array(mediaUrlSchema).max(maxPhotos).optional().default([]),
+  videoUrls: z.array(mediaUrlSchema).max(maxVideos).optional().default([]),
+  imageUrl: mediaUrlSchema.optional().or(z.literal("")),
+  videoUrl: mediaUrlSchema.optional().or(z.literal("")),
+  mediaItems: z.array(z.object({
+    url: mediaUrlSchema,
+    kind: z.enum(["image", "video"]),
+    alt: z.string().optional(),
+    caption: z.string().optional(),
+    thumbnail: mediaUrlSchema.optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    isPrimary: z.boolean().optional(),
+    sortOrder: z.coerce.number().int().optional(),
+    sourceType: z.enum(["seed", "upload"]).optional()
+  })).optional().default([])
 }).superRefine((payload, ctx) => {
   const legacyImages = payload.imageUrl ? [payload.imageUrl] : [];
   const legacyVideos = payload.videoUrl ? [payload.videoUrl] : [];
-  const images = payload.imageUrls.length ? payload.imageUrls : legacyImages;
-  const videos = payload.videoUrls.length ? payload.videoUrls : legacyVideos;
+  const mediaImages = payload.mediaItems.filter((item) => item.kind === "image").map((item) => item.url);
+  const mediaVideos = payload.mediaItems.filter((item) => item.kind === "video").map((item) => item.url);
+  const images = mediaImages.length ? mediaImages : payload.imageUrls.length ? payload.imageUrls : legacyImages;
+  const videos = mediaVideos.length ? mediaVideos : payload.videoUrls.length ? payload.videoUrls : legacyVideos;
 
   if (images.length > maxPhotos) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["imageUrls"], message: `Maximum ${maxPhotos} photos per listing.` });

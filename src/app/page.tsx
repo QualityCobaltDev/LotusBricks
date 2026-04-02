@@ -33,7 +33,7 @@ export default async function HomePage() {
       db.siteContent.findUnique({ where: { key: "homepage.hero" }, select: { title: true, body: true } }),
       db.listing.findMany({
         where: { status: "PUBLISHED" },
-        include: { media: { orderBy: { sortOrder: "asc" }, take: 1 } },
+        include: { media: { orderBy: { sortOrder: "asc" }, take: 8 } },
         orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
         take: 6
       })

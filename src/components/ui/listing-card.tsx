@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getCardThumbnail, hasVideoMedia, normalizeListingMedia } from "@/lib/listing-media";
 
 type ListingCardProps = {
   listing: {
@@ -17,12 +18,14 @@ type ListingCardProps = {
     furnishing?: string | null;
     availability?: string;
     featured: boolean;
-    media?: { url: string }[];
+    media?: { id?: string; kind?: string; url: string; thumbnail?: string | null; isPrimary?: boolean; sortOrder?: number; sourceType?: string | null }[];
   };
 };
 
 export function ListingCard({ listing }: ListingCardProps) {
-  const image = listing.media?.[0]?.url ?? "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80";
+  const media = normalizeListingMedia(listing.media, listing.title);
+  const image = getCardThumbnail(media);
+  const hasVideo = hasVideoMedia(media);
 
   return (
     <article className="listing-card">
@@ -30,6 +33,10 @@ export function ListingCard({ listing }: ListingCardProps) {
         <Image src={image} alt={`${listing.title} in ${listing.district}, ${listing.city}`} loading="lazy" className="listing-media" width={640} height={420} />
         <span className="pill">Verified</span>
         {listing.featured && <span className="pill dark">Featured</span>}
+        <div className="media-badges">
+          {hasVideo && <span className="pill subtle">Video</span>}
+          {media.length > 1 && <span className="pill subtle">{media.length} media</span>}
+        </div>
       </div>
       <div className="listing-content">
         <p className="price">${listing.priceUsd.toLocaleString()}{listing.priceSuffix ?? ""}</p>

@@ -10,6 +10,7 @@ import {
 } from "@prisma/client";
 import { createHash } from "node:crypto";
 import { PLAN_CONFIG, STANDARD_PLAN_ORDER, formatUsd } from "../src/lib/plans";
+import { DEMO_LISTING_MEDIA } from "../src/lib/listing-media";
 
 const prisma = new PrismaClient();
 
@@ -73,51 +74,6 @@ type SeedListing = {
   sortOrder: number;
   similarListings: string[];
 };
-
-const mediaAngles = [
-  "Exterior front view",
-  "Living room main angle",
-  "Kitchen and dining area",
-  "Master bedroom",
-  "Ensuite bathroom",
-  "Balcony or terrace view",
-  "Secondary bedroom",
-  "Guest bathroom",
-  "Building amenities",
-  "Neighborhood frontage"
-];
-
-function createGallery(slug: string, title: string) {
-  return mediaAngles.map((caption, index) => ({
-    kind: "image",
-    url: `/media/properties/${slug}/photo-${String(index + 1).padStart(2, "0")}.jpg`,
-    alt: `${title} - ${caption.toLowerCase()}`,
-    caption,
-    isPrimary: index === 0,
-    sortOrder: index + 1
-  }));
-}
-
-function createVideos(slug: string, title: string) {
-  return [
-    {
-      kind: "video",
-      url: `/media/properties/${slug}/video-01.mp4`,
-      thumbnail: `/media/properties/${slug}/video-01-thumb.jpg`,
-      title: `${title} full property walkthrough`,
-      description: "Full property walkthrough",
-      sortOrder: 11
-    },
-    {
-      kind: "video",
-      url: `/media/properties/${slug}/video-02.mp4`,
-      thumbnail: `/media/properties/${slug}/video-02-thumb.jpg`,
-      title: `${title} neighborhood and exterior overview`,
-      description: "Neighborhood and exterior overview",
-      sortOrder: 12
-    }
-  ];
-}
 
 const CONTACT_PHONE = "(+855) 011 389 625";
 const CONTACT_EMAIL = "contact@rightbricks.online";
@@ -768,8 +724,8 @@ async function main() {
         outdoorFeatures: item.outdoorFeatures,
         securityFeatures: item.securityFeatures,
         lifestyleFeatures: item.lifestyleFeatures,
-        floorPlanImage: `/media/properties/${item.slug}/floorplan.jpg`,
-        brochurePdf: `/media/properties/${item.slug}/brochure.pdf`,
+        floorPlanImage: null,
+        brochurePdf: null,
         availabilityDate: item.availabilityDate,
         viewingAvailability: item.viewingAvailability,
         agentName: item.agentName,
@@ -781,7 +737,7 @@ async function main() {
         enquirySubjectTemplate: item.enquirySubjectTemplate,
         seoTitle: item.seoTitle,
         seoDescription: item.seoDescription,
-        openGraphImage: `/media/properties/${item.slug}/photo-01.jpg`,
+        openGraphImage: DEMO_LISTING_MEDIA[item.slug]?.[0]?.url ?? null,
         structuredData: {
           "@context": "https://schema.org",
           "@type": "RealEstateListing",
@@ -803,10 +759,11 @@ async function main() {
       }
     });
 
-    const gallery = createGallery(item.slug, item.title).map((media) => ({ ...media, listingId: created.id }));
-    const videos = createVideos(item.slug, item.title).map((media) => ({ ...media, listingId: created.id, isPrimary: false, alt: null, caption: null }));
+    const curatedMedia = (DEMO_LISTING_MEDIA[item.slug] ?? []).map((media) => ({ ...media, listingId: created.id }));
 
-    await prisma.listingMedia.createMany({ data: [...gallery, ...videos] as any[] });
+    if (curatedMedia.length) {
+      await prisma.listingMedia.createMany({ data: curatedMedia as any[] });
+    }
   }
 
   await prisma.pricingPlan.deleteMany();

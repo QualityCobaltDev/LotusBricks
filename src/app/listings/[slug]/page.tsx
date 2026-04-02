@@ -7,6 +7,7 @@ import { InquiryForm } from "@/components/ui/inquiry-form";
 import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
 import { Prisma } from "@prisma/client";
+import { getPrimaryMedia, normalizeListingMedia, hasVideoMedia, MEDIA_FALLBACK_IMAGE, getYouTubeEmbedUrl } from "@/lib/listing-media";
 
 const asStringArray = (value: Prisma.JsonValue | null | undefined) =>
   Array.isArray(value) ? value.map((item) => String(item)) : [];
@@ -72,8 +73,9 @@ export default async function ListingDetail({ params }: Props) {
 
   if (!listing || listing.status !== "PUBLISHED") return notFound();
 
-  const gallery = listing.media.filter((m) => m.kind === "image");
-  const videos = listing.media.filter((m) => m.kind === "video");
+  const normalizedMedia = normalizeListingMedia(listing.media, listing.title);
+  const videos = normalizedMedia.filter((m) => m.type === "video");
+  const primary = getPrimaryMedia(normalizedMedia);
 
   const keySellingPoints = asStringArray(listing.keySellingPoints);
   const idealFor = asStringArray(listing.idealFor);
@@ -107,11 +109,12 @@ export default async function ListingDetail({ params }: Props) {
           <p>{listing.heroDescription ?? listing.summary}</p>
         </div>
         <p className="price">${listing.priceUsd.toLocaleString()}{listing.priceSuffix ?? ""}</p>
+        {hasVideoMedia(normalizedMedia) && <p className="muted">Includes video tour</p>}
       </div>
 
       <div className="detail-layout">
         <div>
-          <Image src={gallery[0]?.url ?? "/media/fallbacks/property-placeholder.jpg"} alt={gallery[0]?.alt ?? listing.title} className="detail-hero" width={1200} height={720} priority />
+          <Image src={primary?.posterUrl ?? primary?.url ?? MEDIA_FALLBACK_IMAGE} alt={primary?.altText ?? listing.title} className="detail-hero" width={1200} height={720} priority />
           <div className="hero-actions">
             <button className="btn btn-primary" type="button">Enquire Now</button>
             <a className="btn btn-ghost" href="https://wa.me/85511389625">WhatsApp</a>
@@ -119,7 +122,7 @@ export default async function ListingDetail({ params }: Props) {
             <a className="btn btn-ghost" href="tel:+85511389625">Call Now</a>
           </div>
           <div className="thumb-row">
-            {gallery.slice(1, 5).map((m) => <Image key={m.id} src={m.url} alt={m.alt ?? `${listing.title} gallery`} className="thumb" loading="lazy" width={240} height={140} />)}
+            {normalizedMedia.slice(1, 5).map((m) => m.type === "image" ? (<Image key={m.id ?? m.url} src={m.url} alt={m.altText} className="thumb" loading="lazy" width={240} height={140} />) : (<div key={m.id ?? m.url} className="thumb video-thumb">▶ Video</div>))}
           </div>
           <div className="spec-grid">
             <article><strong>{listing.bedrooms || "N/A"}</strong><span>Bedrooms</span></article>
@@ -162,21 +165,31 @@ export default async function ListingDetail({ params }: Props) {
           <article className="card-pad section">
             <h2>Gallery</h2>
             <div className="thumb-row" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
-              {gallery.map((m) => <Image key={m.id} src={m.url} alt={m.alt ?? `${listing.title} image`} className="thumb" width={280} height={180} />)}
+              {normalizedMedia.length ? normalizedMedia.map((m) => m.type === "image" ? (<Image key={m.id ?? m.url} src={m.url} alt={m.altText} className="thumb" width={280} height={180} />) : (<div key={m.id ?? m.url} className="thumb video-thumb">▶ Video Tour</div>)) : <div className="media-fallback-panel">Curated media is being prepared for this listing.</div>}
             </div>
           </article>
 
           <article className="card-pad section">
             <h2>Video tours</h2>
             <div className="two-col">
-              {videos.map((v) => (
-                <div key={v.id}>
-                  <video controls preload="metadata" poster={v.thumbnail ?? undefined} style={{ width: "100%", borderRadius: "12px" }}>
-                    <source src={v.url} type="video/mp4" />
-                  </video>
-                  <p><strong>{v.title}</strong><br />{v.description}</p>
-                </div>
-              ))}
+              {videos.length ? videos.map((v) => {
+                const embedUrl = getYouTubeEmbedUrl(v.url);
+                if (!embedUrl) return null;
+                return (
+                  <div key={v.id ?? v.url}>
+                    <iframe
+                      src={embedUrl}
+                      title={v.title ?? `${listing.title} video tour`}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      style={{ width: "100%", borderRadius: "12px", aspectRatio: "16 / 9", border: 0 }}
+                    />
+                    <p><strong>{v.title ?? "Property tour"}</strong><br />{v.description ?? "Curated walkthrough"}</p>
+                  </div>
+                );
+              }) : <p className="muted">This listing currently has no video media.</p>}
             </div>
           </article>
 

@@ -63,7 +63,7 @@ export default async function ListingsPage({
             : sort === "newest"
               ? [{ createdAt: "desc" }]
               : [{ featured: "desc" }, { createdAt: "desc" }],
-      include: { media: { where: { kind: "image" }, orderBy: { sortOrder: "asc" }, take: 1 } },
+      include: { media: { orderBy: { sortOrder: "asc" }, take: 8 } },
       take: 18
     });
     } catch (error) {

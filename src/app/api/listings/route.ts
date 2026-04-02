@@ -27,9 +27,13 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const plan = getPlanByKey(user.planTier);
-    const { imageUrl, videoUrl, imageUrls, videoUrls, availabilityDate, ...payload } = parsed.data;
-    const images = imageUrls.length ? imageUrls : imageUrl ? [imageUrl] : [];
-    const videos = videoUrls.length ? videoUrls : videoUrl ? [videoUrl] : [];
+    const { imageUrl, videoUrl, imageUrls, videoUrls, mediaItems, availabilityDate, ...payload } = parsed.data;
+    const normalizedItems = mediaItems.length
+      ? mediaItems
+      : [
+        ...((imageUrls.length ? imageUrls : imageUrl ? [imageUrl] : []).map((url) => ({ url, kind: "image" as const, alt: undefined, caption: undefined, thumbnail: undefined, title: undefined, description: undefined, isPrimary: undefined, sortOrder: undefined, sourceType: undefined }))),
+        ...((videoUrls.length ? videoUrls : videoUrl ? [videoUrl] : []).map((url) => ({ url, kind: "video" as const, alt: undefined, caption: undefined, thumbnail: undefined, title: undefined, description: undefined, isPrimary: undefined, sortOrder: undefined, sourceType: undefined })))
+      ];
 
     const existingById = payload.id ? await db.listing.findUnique({ where: { id: payload.id }, select: { id: true, ownerId: true } }) : null;
     const existingBySlug = await db.listing.findUnique({ where: { slug: payload.slug }, select: { id: true, ownerId: true } });
@@ -77,10 +81,19 @@ export async function POST(req: Request) {
       });
 
     await db.listingMedia.deleteMany({ where: { listingId: listing.id } });
-    const media = [
-      ...images.map((url, index) => ({ listingId: listing.id, url, kind: "image", sortOrder: index + 1 })),
-      ...videos.map((url, index) => ({ listingId: listing.id, url, kind: "video", sortOrder: images.length + index + 1 }))
-    ];
+    const media = normalizedItems.map((item, index) => ({
+      listingId: listing.id,
+      url: item.url,
+      kind: item.kind,
+      alt: item.alt,
+      caption: item.caption,
+      thumbnail: item.thumbnail,
+      title: item.title,
+      description: item.description,
+      isPrimary: item.isPrimary ?? index === 0,
+      sortOrder: item.sortOrder ?? index + 1,
+      sourceType: item.sourceType ?? "upload"
+    }));
     if (media.length) await db.listingMedia.createMany({ data: media });
     return NextResponse.json(listing);
   } catch (error) {
