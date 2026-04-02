@@ -1,14 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/metadata";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
 
-export const metadata: Metadata = {
-  title: "Verified Listings",
-  description: "Browse verified properties in Cambodia with filters for location, price, type, and bedrooms.",
-  alternates: { canonical: "/listings" }
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Verified Property Listings Cambodia",
+  description: "Explore verified apartments, villas, and investment property listings across Cambodia.",
+  path: "/listings"
+});
 
 export default async function ListingsPage({
   searchParams
@@ -24,6 +25,7 @@ export default async function ListingsPage({
   const sort = params.sort ?? "featured";
 
   let listings: Awaited<ReturnType<typeof db.listing.findMany>> = [];
+  let inventoryState: "live" | "unavailable" = "live";
 
   if (isDatabaseConfigured()) {
     try {
@@ -49,8 +51,11 @@ export default async function ListingsPage({
       take: 18
     });
     } catch (error) {
+      inventoryState = "unavailable";
       logServerError("listings-page", error, { q, min, max, beds });
     }
+  } else {
+    inventoryState = "unavailable";
   }
 
   const hasFilters = Boolean(q || city || min || max || beds);
@@ -73,7 +78,7 @@ export default async function ListingsPage({
         <select name="sort" defaultValue={sort}>
           <option value="featured">Featured</option><option value="newest">Newest</option><option value="price_asc">Price: Low to high</option><option value="price_desc">Price: High to low</option>
         </select>
-        <button className="btn btn-primary" type="submit">Apply</button>
+        <button className="btn btn-primary" type="submit" data-track-event="apply_filter" data-track-label="listings-filter-apply">Apply</button>
         <Link href="/listings" className="btn btn-ghost">Reset</Link>
       </form>
 
@@ -91,6 +96,12 @@ export default async function ListingsPage({
             <button className="btn btn-ghost" type="button" data-cta="listings-save-search">Save search</button>
           </div>
         </>
+      ) : inventoryState === "unavailable" ? (
+        <article className="empty-state">
+          <h3>Inventory is temporarily unavailable</h3>
+          <p>Our listing feed is being refreshed. Please try again shortly or contact our team for current verified opportunities.</p>
+          <Link href="/contact" className="btn btn-primary">Request live assistance</Link>
+        </article>
       ) : (
         <article className="empty-state">
           <h3>No listings matched this filter set</h3>

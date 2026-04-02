@@ -82,3 +82,7 @@ export const pricingSettingsSchema = z.record(z.enum(["TIER_1", "TIER_2", "TIER_
   featured: z.boolean().optional(),
   isActive: z.boolean().optional()
 }));
+
+
+export const passwordResetRequestSchema = z.object({ email: z.string().email() });
+export const passwordResetConfirmSchema = z.object({ token: z.string().min(20), password: z.string().min(8) });

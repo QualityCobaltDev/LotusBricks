@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CONTACT } from "@/lib/contact";
+import { trackEvent } from "@/lib/analytics/events";
 
 type ContactFormProps = {
   listingId?: string;
@@ -11,9 +12,11 @@ type ContactFormProps = {
 
 export function ContactForm({ listingId = "", selectedPlan = "", inquiryType = "CONTACT" }: ContactFormProps) {
   const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
+  const [started, setStarted] = useState(false);
 
   async function onSubmit(formData: FormData) {
     setStatus("idle");
+    trackEvent("contact_form_submit", { inquiryType, selectedPlan });
     const res = await fetch("/api/inquiries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -22,7 +25,7 @@ export function ContactForm({ listingId = "", selectedPlan = "", inquiryType = "
         selectedPlan: selectedPlan || String(formData.get("selectedPlan") ?? ""),
         inquiryType,
         honeypot: String(formData.get("website") ?? ""),
-        sourcePage: typeof window !== "undefined" ? window.location.pathname : "/contact",
+        sourcePage: typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "/contact",
         fullName: String(formData.get("fullName")),
         email: String(formData.get("email")),
         phone: String(formData.get("phone") ?? ""),
@@ -34,8 +37,14 @@ export function ContactForm({ listingId = "", selectedPlan = "", inquiryType = "
     setStatus(res.ok ? "ok" : "error");
   }
 
+  function onStart() {
+    if (started) return;
+    setStarted(true);
+    trackEvent("contact_form_start", { inquiryType, selectedPlan });
+  }
+
   return (
-    <form action={onSubmit} className="stack-form">
+    <form action={onSubmit} className="stack-form" onFocusCapture={onStart}>
       <label htmlFor="fullName">Full name<input id="fullName" name="fullName" required /></label>
       <label htmlFor="email">Email<input id="email" name="email" type="email" required aria-describedby="reply-help" /></label>
       <small id="reply-help" className="muted">Replies are sent from {CONTACT.email}.</small>

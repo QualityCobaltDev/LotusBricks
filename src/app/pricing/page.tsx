@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/metadata";
 import { faqs } from "@/lib/site/content";
 import { formatUsd } from "@/lib/plans";
 import { getPricingPlans } from "@/lib/pricing-settings";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description: "Transparent RightBricks pricing with separate sign-up fees and contact-first custom plans.",
-  alternates: { canonical: "/pricing" }
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Pricing Plans",
+  description: "Compare listing plans and select the right RightBricks tier for your portfolio.",
+  path: "/pricing"
+});
 
 export default async function PricingPage() {
   const plans = await getPricingPlans();
@@ -44,7 +45,7 @@ export default async function PricingPage() {
               <li>{plan.photosPerListing} Photos per listing</li>
               <li>{plan.videosPerListing} Videos per listing</li>
             </ul>
-            <a href={plan.ctaHref} className={`btn ${plan.contactOnly ? "btn-ghost" : "btn-primary"}`}>{plan.contactOnly ? "Contact Us" : plan.ctaLabel}</a>
+            <a href={plan.ctaHref} className={`btn ${plan.contactOnly ? "btn-ghost" : "btn-primary"}`} data-track-event="choose_tier" data-track-label={plan.key}>{plan.contactOnly ? "Contact Us" : plan.ctaLabel}</a>
           </article>
         ))}
       </div>

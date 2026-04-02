@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/metadata";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
 import { trustStats, testimonials } from "@/lib/site/content";
@@ -9,11 +10,11 @@ import { Prisma } from "@prisma/client";
 import { getPricingPlans } from "@/lib/pricing-settings";
 import { formatUsd } from "@/lib/plans";
 
-export const metadata: Metadata = {
-  title: "Home",
-  description: "RightBricks is Cambodia's verified property marketplace for buyers, investors, agencies, and developers.",
-  alternates: { canonical: "/" }
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Verified Property Marketplace Cambodia",
+  description: "RightBricks helps buyers, investors, and developers discover verified listings with trusted advisory support.",
+  path: "/"
+});
 
 const guides = [
   { title: "Phnom Penh investment guide", href: "/resources/phnom-penh-investment-guide", text: "Yield signals, district-by-district trends, and acquisition checkpoints." },
@@ -53,7 +54,7 @@ export default async function HomePage() {
               "RightBricks pairs verified listing data, documentation-first workflows, and responsive advisory support to help you move faster with less risk."}
           </p>
           <div className="hero-actions">
-            <Link href="/listings" className="btn btn-primary" data-cta="home-primary">Browse verified listings</Link>
+            <Link href="/listings" className="btn btn-primary" data-cta="home-primary" data-track-event="click_browse_listings" data-track-label="home-primary">Browse verified listings</Link>
             <Link href="/contact" className="btn btn-ghost" data-cta="home-secondary">Book advisory call</Link>
           </div>
         </div>
@@ -123,7 +124,7 @@ export default async function HomePage() {
         <h2>Ready for your next property move?</h2>
         <p>Explore verified inventory, save high-fit opportunities, and reach advisors without delay.</p>
         <div className="hero-actions">
-          <Link href="/listings" className="btn btn-primary">Explore listings</Link>
+          <Link href="/listings" className="btn btn-primary" data-track-event="click_browse_listings" data-track-label="home-footer-cta">Explore listings</Link>
           <Link href="/contact" className="btn btn-ghost">Speak to RightBricks</Link>
         </div>
       </section>

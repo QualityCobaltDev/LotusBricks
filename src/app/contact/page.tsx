@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/metadata";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { ContactForm } from "@/components/ui/contact-form";
 import { logServerError } from "@/lib/observability";
 import { getContactSettings } from "@/lib/site-settings";
 import { CONTACT } from "@/lib/contact";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Contact RightBricks at contact@rightbricks.online or (+855) 011 389 625. WhatsApp and Telegram available.",
-  alternates: { canonical: "/contact" }
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Contact RightBricks",
+  description: "Contact RightBricks sales and support team via email, phone, WhatsApp, or Telegram.",
+  path: "/contact"
+});
+
+function normalizePlan(value: string) {
+  const plan = value.trim().toUpperCase().replaceAll("-", "_");
+  if (plan === "TIER1") return "TIER_1";
+  if (plan === "TIER2") return "TIER_2";
+  if (plan === "TIER3") return "TIER_3";
+  return plan;
+}
 
 type ContactPageProps = {
   searchParams: Promise<{ plan?: string; tierNeeds?: string }>;
@@ -55,7 +64,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           <p className="muted">What happens next: we review your goals, confirm fit, and reply with next-step options.</p>
           <ContactForm
             listingId={fallbackListing?.id ?? ""}
-            selectedPlan={(params.plan ?? "").toUpperCase()}
+            selectedPlan={normalizePlan(params.plan ?? "")}
             inquiryType={isCustomPlan ? "CUSTOM_PLAN" : "CONTACT"}
           />
         </article>
