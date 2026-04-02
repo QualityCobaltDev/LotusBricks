@@ -8,6 +8,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { getStaggerDelay } from "@/lib/motion";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = buildMetadata({
   title: "Verified Property Listings Cambodia",

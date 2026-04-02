@@ -92,6 +92,12 @@ const toSlug = (value: string) =>
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 
+const buildPreviewHref = (slug: string, status: "DRAFT" | "PUBLISHED" | "ARCHIVED") => {
+  const encodedSlug = encodeURIComponent(slug);
+  if (status === "PUBLISHED") return `/listings/${encodedSlug}`;
+  return `/listings/${encodedSlug}?preview=1`;
+};
+
 export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
@@ -228,9 +234,10 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
         return false;
       }
 
-      const savedListing = data?.data as { id?: string; slug?: string } | undefined;
+      const savedListing = data?.data as { id?: string; slug?: string; status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" } | undefined;
       const savedId = savedListing?.id ?? editor.listingId;
       const savedSlug = savedListing?.slug ?? payload.slug;
+      const savedStatus = savedListing?.status ?? editor.status;
 
       setFeedback({ type: "ok", message: data?.message ?? "Saved." });
       setEditor((prev) =>
@@ -245,7 +252,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       );
       router.refresh();
       if (openPreview && savedSlug) {
-        window.open(`/listings/${savedSlug}?preview=1`, "_blank", "noopener,noreferrer");
+        window.open(buildPreviewHref(savedSlug, savedStatus), "_blank", "noopener,noreferrer");
       }
       return true;
     } catch (error) {
@@ -409,7 +416,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
                         <button className="btn btn-ghost" type="button" onClick={() => setStatus(x.id, "DRAFT")} disabled={isSaving}>Unpublish</button>
                         <button className="btn btn-ghost" type="button" onClick={() => setStatus(x.id, "ARCHIVED")} disabled={isSaving}>Archive</button>
                         <button className="btn btn-ghost" type="button" onClick={() => duplicateListing(x)} disabled={isSaving}>Duplicate</button>
-                        <a className="btn btn-ghost" href={`/listings/${x.slug}?preview=1`} target="_blank" rel="noreferrer">Preview</a>
+                        <button className="btn btn-ghost" type="button" onClick={() => window.open(buildPreviewHref(x.slug, x.status), "_blank", "noopener,noreferrer")} disabled={isSaving}>Preview</button>
                         <button className="btn btn-accent" type="button" onClick={() => deleteListing(x)} disabled={isSaving}>Delete</button>
                       </div>
                     </td>
