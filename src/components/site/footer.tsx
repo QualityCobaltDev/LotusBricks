@@ -44,6 +44,7 @@ export function SiteFooter({
             <li><Link href="/legal/privacy">Privacy policy</Link></li>
             <li><Link href="/legal/terms">Terms</Link></li>
             <li><Link href="/legal/accessibility">Accessibility</Link></li>
+            <li><Link href="/login/admin">Admin Access</Link></li>
           </ul>
         </div>
       </div>

@@ -36,7 +36,6 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const contact = await getContactSettings();
-  const dashboardHref = "/login/customer";
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
   const orgLd = {
     "@context": "https://schema.org",
@@ -55,7 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body>
         <a href="#main-content" className="skip-link">Skip to main content</a>
-        <SiteHeader dashboardHref={dashboardHref} />
+        <SiteHeader />
         <main id="main-content">{children}</main>
         <ConsentBanner />
         <AnalyticsProvider />

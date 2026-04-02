@@ -14,20 +14,20 @@ export function middleware(req: NextRequest) {
   const role = parseRole(token);
   const { pathname } = req.nextUrl;
 
-  if (!role && (pathname.startsWith("/account") || pathname.startsWith("/admin"))) {
-    return NextResponse.redirect(new URL("/login/customer", req.url));
+  if (!role && pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/login/admin", req.url));
   }
 
   if (role === "CUSTOMER" && pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/account", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (role === "ADMIN" && pathname.startsWith("/account")) {
+  if (pathname.startsWith("/account") || pathname === "/login/customer" || pathname === "/sign-in") {
+    return NextResponse.redirect(new URL("/listings", req.url));
+  }
+
+  if (role === "ADMIN" && pathname === "/login/admin") {
     return NextResponse.redirect(new URL("/admin/dashboard", req.url));
-  }
-
-  if (role && (pathname === "/sign-in" || pathname === "/login/customer" || pathname === "/login/admin")) {
-    return NextResponse.redirect(new URL(role === "ADMIN" ? "/admin/dashboard" : "/account", req.url));
   }
 
   return NextResponse.next();
