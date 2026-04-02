@@ -24,13 +24,6 @@ type ListingCardProps = {
   };
 };
 
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80";
-
-function isLikelyMediaUrl(url?: string | null) {
-  if (!url) return false;
-  return url.startsWith("/") || /^https?:\/\//i.test(url);
-}
-
 export function ListingCard({ listing }: ListingCardProps) {
   const media = normalizeListingMedia(listing.media, listing.title);
   const image = getCardThumbnail(media);
@@ -59,7 +52,7 @@ export function ListingCard({ listing }: ListingCardProps) {
           {listing.category && <span>{listing.category.toLowerCase()}</span>}
         </div>
         {listing.availability && <p className="muted">Status: {listing.availability.replaceAll("_", " ").toLowerCase()}</p>}
-        <div className="hero-actions">
+        <div className="hero-actions listing-actions">
           <Link href={`/listings/${listing.slug}` as any} className="btn btn-primary" data-cta="listing-view-details">View details</Link>
           <Link href={`/listings/${listing.slug}` as any} className="btn btn-ghost" data-cta="listing-enquire">Enquire</Link>
         </div>

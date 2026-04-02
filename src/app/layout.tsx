@@ -47,19 +47,32 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     sameAs: ["https://wa.me/85511389625", "https://t.me/"]
   };
 
-
   const webSiteLd = buildWebSiteJsonLd();
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              '(function(){try{var key="rightbricks-theme";var stored=localStorage.getItem(key);var theme=stored||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=theme;}catch(e){}})();'
+          }}
+        />
         <a href="#main-content" className="skip-link">Skip to main content</a>
         <SiteHeader />
         <main id="main-content">{children}</main>
         <ConsentBanner />
         <AnalyticsProvider />
         <EventTracker />
-        <SiteFooter email={contact.email} emailHref={contact.emailHref} phoneDisplay={contact.phoneDisplay} phoneHref={contact.phoneHref} whatsappHref={contact.whatsappHref} telegramHref={contact.telegramHref} appVersion={appVersion} />
+        <SiteFooter
+          email={contact.email}
+          emailHref={contact.emailHref}
+          phoneDisplay={contact.phoneDisplay}
+          phoneHref={contact.phoneHref}
+          whatsappHref={contact.whatsappHref}
+          telegramHref={contact.telegramHref}
+          appVersion={appVersion}
+        />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteLd) }} />
       </body>

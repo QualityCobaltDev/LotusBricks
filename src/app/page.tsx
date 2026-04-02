@@ -9,6 +9,7 @@ import { isPrismaSchemaMismatch, logServerError } from "@/lib/observability";
 import { Prisma } from "@prisma/client";
 import { getPricingPlans } from "@/lib/pricing-settings";
 import { formatUsd } from "@/lib/plans";
+import { Reveal } from "@/components/ui/reveal";
 
 export const metadata: Metadata = buildMetadata({
   title: "Verified Property Marketplace Cambodia",
@@ -46,7 +47,7 @@ export default async function HomePage() {
   return (
     <>
       <section className="hero shell">
-        <div>
+        <Reveal>
           <span className="eyebrow">Verified property intelligence for Cambodia</span>
           <h1>{hero?.title ?? "Invest, buy, and lease with higher confidence"}</h1>
           <p>
@@ -55,24 +56,28 @@ export default async function HomePage() {
           </p>
           <div className="hero-actions">
             <Link href="/listings" className="btn btn-primary" data-cta="home-primary" data-track-event="click_browse_listings" data-track-label="home-primary">Browse verified listings</Link>
-            <Link href="/contact" className="btn btn-ghost" data-cta="home-secondary">Book advisory call</Link>
+            <Link href="/contact" className="btn btn-outline" data-cta="home-secondary">Book advisory call</Link>
           </div>
-        </div>
-        <div className="hero-card">
-          <Image src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1400&q=80" alt="Premium property exterior" fill priority sizes="(max-width: 960px) 100vw, 50vw" />
-          <div className="hero-overlay">
-            <strong>Verified listings. Real momentum.</strong>
-            <span>Clear facts, trust signals, and direct inquiry pathways.</span>
+        </Reveal>
+        <Reveal delay={100} className="hero-visual-wrap">
+          <div className="hero-card">
+            <Image src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1400&q=80" alt="Premium property exterior" fill priority sizes="(max-width: 960px) 100vw, 50vw" />
+            <div className="hero-overlay">
+              <strong>Verified listings. Real momentum.</strong>
+              <span>Clear facts, trust signals, and direct inquiry pathways.</span>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <section className="shell stat-grid">
-        {trustStats.map((item) => (
-          <article key={item.label} className="stat-card">
-            <p>{item.value}</p>
-            <span>{item.label}</span>
-          </article>
+        {trustStats.map((item, index) => (
+          <Reveal key={item.label} delay={index * 80}>
+            <article className="stat-card">
+              <p>{item.value}</p>
+              <span>{item.label}</span>
+            </article>
+          </Reveal>
         ))}
       </section>
 
@@ -81,19 +86,18 @@ export default async function HomePage() {
           <h2>Featured listings</h2>
           <Link href="/listings">View all listings</Link>
         </div>
-        <div className="listing-grid">{featured.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div>
+        <div className="listing-grid">{featured.map((listing, index) => <Reveal key={listing.id} delay={index * 90}><ListingCard listing={listing} /></Reveal>)}</div>
       </section>
 
       <section className="shell section two-col">
-        <div className="card-pad"><h2>How RightBricks works</h2><ol><li>Browse verified listings with structured filters.</li><li>Review pricing context, media, and facts in one page.</li><li>Inquire instantly and get a human response within hours.</li></ol></div>
-        <div className="card-pad"><h2>Why teams choose us</h2><ul className="check-list"><li>Verification-first listing standards.</li><li>Investor-aware insights, not generic listing copy.</li><li>Fast, accountable support via email, phone, WhatsApp, and Telegram.</li></ul></div>
+        <Reveal><div className="card-pad"><h2>How RightBricks works</h2><ol><li>Browse verified listings with structured filters.</li><li>Review pricing context, media, and facts in one page.</li><li>Inquire instantly and get a human response within hours.</li></ol></div></Reveal>
+        <Reveal delay={100}><div className="card-pad"><h2>Why teams choose us</h2><ul className="check-list"><li>Verification-first listing standards.</li><li>Investor-aware insights, not generic listing copy.</li><li>Fast, accountable support via email, phone, WhatsApp, and Telegram.</li></ul></div></Reveal>
       </section>
 
       <section className="shell section">
         <div className="section-head"><h2>Market intelligence & resources</h2></div>
-        <div className="grid">{guides.map((g) => <article className="card" key={g.title}><h3>{g.title}</h3><p className="muted">{g.text}</p><Link href={g.href as any}>Read more</Link></article>)}</div>
+        <div className="grid">{guides.map((g, index) => <Reveal key={g.title} delay={index * 80}><article className="card"><h3>{g.title}</h3><p className="muted">{g.text}</p><Link href={g.href as any}>Read more</Link></article></Reveal>)}</div>
       </section>
-
 
       <section className="shell section">
         <div className="section-head">
@@ -101,12 +105,14 @@ export default async function HomePage() {
           <Link href="/pricing">View full pricing</Link>
         </div>
         <div className="pricing-grid">
-          {pricingPreview.map((plan) => (
-            <article key={plan.key} className="pricing-card">
-              <h3>{plan.name}</h3>
-              {plan.contactOnly ? <p className="muted">Contact Us for Pricing</p> : <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} Sign-Up Fee`}</p>}
-              <a href={plan.ctaHref} className="btn btn-ghost">{plan.contactOnly ? "Contact Us" : plan.ctaLabel}</a>
-            </article>
+          {pricingPreview.map((plan, index) => (
+            <Reveal key={plan.key} delay={index * 90}>
+              <article className="pricing-card">
+                <h3>{plan.name}</h3>
+                {plan.contactOnly ? <p className="muted">Contact Us for Pricing</p> : <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} Sign-Up Fee`}</p>}
+                <a href={plan.ctaHref} className="btn btn-outline">{plan.contactOnly ? "Contact Us" : plan.ctaLabel}</a>
+              </article>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -114,20 +120,20 @@ export default async function HomePage() {
       <section className="shell section">
         <div className="section-head"><h2>Trusted by active market participants</h2></div>
         <div className="quote-grid">
-          {testimonials.map((t) => (
-            <blockquote key={t.name} className="card-pad">“{t.quote}”<footer>{t.name} · {t.role}</footer></blockquote>
+          {testimonials.map((t, index) => (
+            <Reveal key={t.name} delay={index * 90}><blockquote className="card-pad">“{t.quote}”<footer>{t.name} · {t.role}</footer></blockquote></Reveal>
           ))}
         </div>
       </section>
 
-      <section className="shell cta-band">
+      <Reveal className="shell cta-band">
         <h2>Ready for your next property move?</h2>
         <p>Explore verified inventory, save high-fit opportunities, and reach advisors without delay.</p>
         <div className="hero-actions">
           <Link href="/listings" className="btn btn-primary" data-track-event="click_browse_listings" data-track-label="home-footer-cta">Explore listings</Link>
-          <Link href="/contact" className="btn btn-ghost">Speak to RightBricks</Link>
+          <Link href="/contact" className="btn btn-outline">Speak to RightBricks</Link>
         </div>
-      </section>
+      </Reveal>
     </>
   );
 }
