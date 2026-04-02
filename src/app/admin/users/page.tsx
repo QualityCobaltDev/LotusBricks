@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/server/guards";
 import { db } from "@/lib/db";
+import { UserRowForm } from "@/components/admin/user-row-form";
 
 export default async function AdminUsers() {
   await requireAdmin();
@@ -19,7 +20,7 @@ export default async function AdminUsers() {
       </div>
       <div className="card-pad admin-table-wrap">
         <table className="comparison-table">
-          <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Listings</th><th>Saved properties</th><th>Linked leads</th><th>Tier</th></tr></thead>
+          <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Listings</th><th>Saved properties</th><th>Linked leads</th><th>Tier</th><th>Actions</th></tr></thead>
           <tbody>
             {users.map((u) => (
               <tr key={u.id}>
@@ -30,6 +31,17 @@ export default async function AdminUsers() {
                 <td>{u.favorites.length}</td>
                 <td>{u.inquiries.length}</td>
                 <td>{u.planTier}</td>
+                <td>
+                  <UserRowForm
+                    id={u.id}
+                    fullName={u.fullName}
+                    email={u.email}
+                    phone={u.phone}
+                    role={u.role}
+                    isActive={u.isActive}
+                    planTier={u.planTier}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>

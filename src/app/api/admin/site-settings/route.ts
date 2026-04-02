@@ -1,35 +1,65 @@
+import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logAuditEvent } from "@/lib/admin-control";
+import { failResult, okResult, toUserFacingError } from "@/lib/mutation-result";
+import { logServerError } from "@/lib/observability";
 
 const KEY = "admin.brand-settings.v1";
 
+const brandSettingsSchema = z.object({
+  siteName: z.string().min(2),
+  tagline: z.string().default(""),
+  supportEmail: z.string().email(),
+  displayPhone: z.string().min(3),
+  phoneLink: z.string().min(3),
+  whatsappLink: z.string().min(3),
+  telegramLink: z.string().min(3),
+  supportHours: z.string().default(""),
+  address: z.string().default(""),
+  maintenanceBanner: z.string().default("")
+});
+
 export async function GET() {
   const session = await getSession();
-  if (session?.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (session?.role !== "ADMIN") return NextResponse.json(failResult("Forbidden"), { status: 403 });
   const setting = await db.siteSetting.findUnique({ where: { key: KEY } });
-  return NextResponse.json(setting?.value ?? {});
+  return NextResponse.json(okResult((setting?.value as Record<string, unknown>) ?? {}));
 }
 
 export async function PUT(req: Request) {
   const session = await getSession();
-  if (session?.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  const value = await req.json();
+  if (session?.role !== "ADMIN") return NextResponse.json(failResult("Forbidden"), { status: 403 });
 
-  await db.siteSetting.upsert({
-    where: { key: KEY },
-    create: { key: KEY, value: value as never },
-    update: { value: value as never }
-  });
+  const parsed = brandSettingsSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json(failResult("Invalid payload", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
+  }
 
-  await logAuditEvent({
-    at: new Date().toISOString(),
-    actor: session.userId,
-    action: "UPDATE",
-    objectType: "SETTINGS",
-    summary: "Updated global brand settings"
-  });
+  try {
+    const row = await db.siteSetting.upsert({
+      where: { key: KEY },
+      create: { key: KEY, value: parsed.data as never },
+      update: { value: parsed.data as never }
+    });
 
-  return NextResponse.json({ ok: true });
+    try {
+      await logAuditEvent({
+        at: new Date().toISOString(),
+        actor: session.userId,
+        action: "UPDATE",
+        objectType: "SETTINGS",
+        summary: "Updated global brand settings"
+      });
+    } catch (auditError) {
+      logServerError("admin-site-settings-audit", auditError, { actor: session.userId });
+    }
+
+    return NextResponse.json(okResult(row, "Global settings saved."));
+  } catch (error) {
+    logServerError("admin-site-settings-put", error);
+    const result = toUserFacingError(error, "Unable to save global settings.");
+    return NextResponse.json(result, { status: 500 });
+  }
 }

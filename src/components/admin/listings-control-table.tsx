@@ -1,14 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Listing, ListingMedia, User } from "@prisma/client";
 
 type Row = Listing & { media: ListingMedia[]; owner: Pick<User, "fullName" | "planTier"> | null };
 
 export function ListingsControlTable({ rows }: { rows: Row[] }) {
+  const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [query, setQuery] = useState("");
+  const [feedback, setFeedback] = useState<{ type: "idle" | "ok" | "error"; message?: string }>({ type: "idle" });
 
   const filtered = useMemo(
     () => rows.filter((row) => (statusFilter === "ALL" || row.status === statusFilter) && row.title.toLowerCase().includes(query.toLowerCase())),
@@ -20,14 +23,25 @@ export function ListingsControlTable({ rows }: { rows: Row[] }) {
     const ok = window.confirm(`Apply ${action} to ${selected.length} listing(s)?`);
     if (!ok) return;
 
-    const res = await fetch("/api/admin/listings-bulk", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: selected, action })
-    });
+    try {
+      const res = await fetch("/api/admin/listings-bulk", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected, action })
+      });
+      const data = await res.json().catch(() => null);
 
-    if (res.ok) window.location.reload();
-    else alert("Bulk action failed.");
+      if (!res.ok || !data?.ok) {
+        setFeedback({ type: "error", message: data?.error ?? "Bulk action failed." });
+        return;
+      }
+
+      setFeedback({ type: "ok", message: data?.message ?? "Bulk action completed." });
+      setSelected([]);
+      router.refresh();
+    } catch (error) {
+      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Bulk action failed." });
+    }
   }
 
   function toggle(id: string, checked: boolean) {
@@ -48,6 +62,8 @@ export function ListingsControlTable({ rows }: { rows: Row[] }) {
         <button className="btn btn-ghost" type="button" onClick={() => runBulk("archive")}>Bulk archive</button>
         <button className="btn btn-accent" type="button" onClick={() => runBulk("delete")}>Bulk delete</button>
       </div>
+      {feedback.type === "ok" && <p className="form-ok">{feedback.message}</p>}
+      {feedback.type === "error" && <p className="form-error">{feedback.message}</p>}
 
       <div className="admin-table-wrap">
         <table className="comparison-table">

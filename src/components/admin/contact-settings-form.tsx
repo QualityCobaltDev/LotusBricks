@@ -15,10 +15,13 @@ type ContactSettings = {
 };
 
 export function ContactSettingsForm({ initial }: { initial: ContactSettings }) {
-  const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
+  const [status, setStatus] = useState<{ type: "idle" | "ok" | "error"; message?: string }>({ type: "idle" });
+  const [isSaving, setIsSaving] = useState(false);
 
   async function onSubmit(formData: FormData) {
-    setStatus("idle");
+    setStatus({ type: "idle" });
+    setIsSaving(true);
+
     const payload = {
       phoneDisplay: CONTACT.phoneDisplay,
       phoneHref: CONTACT.phoneHref,
@@ -26,16 +29,27 @@ export function ContactSettingsForm({ initial }: { initial: ContactSettings }) {
       emailHref: CONTACT.emailHref,
       whatsappHref: CONTACT.whatsappHref,
       telegramHref: CONTACT.telegramHref,
-      supportHours: String(formData.get("supportHours") ?? ""),
-      supportAddress: String(formData.get("supportAddress") ?? "")
+      supportHours: String(formData.get("supportHours") ?? "").trim(),
+      supportAddress: String(formData.get("supportAddress") ?? "").trim()
     };
 
-    const res = await fetch("/api/admin/contact-settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    setStatus(res.ok ? "ok" : "error");
+    try {
+      const res = await fetch("/api/admin/contact-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setStatus({ type: "error", message: data?.error ?? "Unable to update settings." });
+        return;
+      }
+      setStatus({ type: "ok", message: data?.message ?? "Settings updated." });
+    } catch (error) {
+      setStatus({ type: "error", message: error instanceof Error ? error.message : "Request failed." });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -50,9 +64,9 @@ export function ContactSettingsForm({ initial }: { initial: ContactSettings }) {
       <label>Telegram<input value={CONTACT.telegramHref} disabled readOnly /></label>
       <label>Support hours<input name="supportHours" defaultValue={initial.supportHours} /></label>
       <label>Support address<textarea name="supportAddress" defaultValue={initial.supportAddress} /></label>
-      <button className="btn btn-primary" type="submit">Save contact settings</button>
-      {status === "ok" && <p className="form-ok">Settings updated.</p>}
-      {status === "error" && <p className="form-error">Unable to update settings.</p>}
+      <button className="btn btn-primary" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : "Save contact settings"}</button>
+      {status.type === "ok" && <p className="form-ok">{status.message}</p>}
+      {status.type === "error" && <p className="form-error">Save failed: {status.message}</p>}
     </form>
   );
 }
