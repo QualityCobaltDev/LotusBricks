@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logAuditEvent } from "@/lib/admin-control";
@@ -19,6 +20,8 @@ export async function PATCH(req: Request) {
   if (!parsed.success) return NextResponse.json(failResult("Invalid payload", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
 
   try {
+    console.info("[admin-listings-bulk] request_start", { actor: session.userId, action: parsed.data.action, ids: parsed.data.ids });
+
     if (parsed.data.action === "delete") {
       await db.listing.deleteMany({ where: { id: { in: parsed.data.ids } } });
     } else {
@@ -42,6 +45,11 @@ export async function PATCH(req: Request) {
     } catch (auditError) {
       logServerError("admin-listings-bulk-audit", auditError);
     }
+
+    revalidatePath("/");
+    revalidatePath("/listings");
+    revalidatePath("/sitemap.xml");
+    console.info("[admin-listings-bulk] cache_revalidated", { action: parsed.data.action, count: parsed.data.ids.length });
 
     return NextResponse.json(okResult(undefined, "Listing bulk action completed."));
   } catch (error) {
