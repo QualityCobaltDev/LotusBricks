@@ -12,7 +12,7 @@ type ListingStatusCount = {
 
 type AdminListingRecord = Prisma.ListingGetPayload<{
   include: {
-    media: { select: { id: true } };
+    media: { select: { id: true; kind: true; url: true } };
     owner: { select: { fullName: true; planTier: true } };
   };
 }>;
@@ -22,10 +22,26 @@ function normalizeAdminListingRows(rows: AdminListingRecord[]): AdminListingRow[
     id: row.id,
     slug: row.slug,
     title: row.title || "Untitled listing",
+    summary: row.summary,
+    description: row.description,
+    city: row.city,
+    district: row.district,
+    listingType: row.listingType,
+    category: row.category,
     status: row.status,
+    currency: row.currency,
+    priceUsd: row.priceUsd,
+    bedrooms: row.bedrooms,
+    bathrooms: row.bathrooms,
+    areaSqm: row.areaSqm,
+    featured: row.featured,
+    seoTitle: row.seoTitle,
+    seoDescription: row.seoDescription,
     ownerName: row.owner?.fullName ?? "Unassigned",
     ownerPlanTier: row.owner?.planTier ?? null,
     mediaCount: Array.isArray(row.media) ? row.media.length : 0,
+    mediaUrls: Array.isArray(row.media) ? row.media.filter((item) => item.kind === "image").map((item) => item.url) : [],
+    videoUrls: Array.isArray(row.media) ? row.media.filter((item) => item.kind === "video").map((item) => item.url) : [],
     updatedAtIso: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : new Date().toISOString()
   }));
 }
@@ -46,7 +62,7 @@ export default async function AdminListings() {
       db.listing.findMany({
         orderBy: { updatedAt: "desc" },
         include: {
-          media: { select: { id: true } },
+          media: { select: { id: true, kind: true, url: true } },
           owner: { select: { fullName: true, planTier: true } }
         }
       }),
