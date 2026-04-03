@@ -4,16 +4,10 @@ import { getSession } from "@/lib/auth";
 import { listingSchema } from "@/lib/validators";
 import { failResult, okResult, toUserFacingError } from "@/lib/mutation-result";
 import { logServerError } from "@/lib/observability";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicListings } from "@/lib/admin-revalidate";
 import { ensureUniqueListingSlug } from "@/lib/listing-slug";
 import { getIntentFromListingType, getVerificationReadiness } from "@/lib/listing-validation";
 
-function revalidateListingSurfaces(slug?: string | null) {
-  revalidatePath("/");
-  revalidatePath("/listings");
-  revalidatePath("/sitemap.xml");
-  if (slug) revalidatePath(`/listings/${slug}`);
-}
 
 export async function GET() {
   const session = await getSession();
@@ -64,8 +58,9 @@ export async function POST(req: Request) {
   const readiness = getVerificationReadiness({ ...payload, listingIntent, priceFrequency, mediaCount: normalizedItems.length } as never);
 
   try {
-    const listing = await db.listing.create({
-      data: {
+    const listing = await db.$transaction(async (tx) => {
+      const created = await tx.listing.create({
+        data: {
         ...rest,
         slug,
         listingIntent,
@@ -76,24 +71,27 @@ export async function POST(req: Request) {
         lastReviewedAt: lastReviewedAt ? new Date(lastReviewedAt) : null,
         publishedAt: rest.status === "PUBLISHED" ? new Date() : null
       }
+      });
+
+      await tx.listingSlugHistory.upsert({ where: { slug: created.slug }, update: {}, create: { slug: created.slug, listingId: created.id } });
+
+      if (normalizedItems.length) {
+        await tx.listingMedia.createMany({
+          data: normalizedItems.map((item, index) => ({
+            listingId: created.id,
+            url: item.url,
+            kind: item.kind,
+            isPrimary: index === 0,
+            sortOrder: index + 1,
+            sourceType: "upload"
+          }))
+        });
+      }
+
+      return created;
     });
 
-    await db.listingSlugHistory.upsert({ where: { slug: listing.slug }, update: {}, create: { slug: listing.slug, listingId: listing.id } });
-
-    if (normalizedItems.length) {
-      await db.listingMedia.createMany({
-        data: normalizedItems.map((item, index) => ({
-          listingId: listing.id,
-          url: item.url,
-          kind: item.kind,
-          isPrimary: index === 0,
-          sortOrder: index + 1,
-          sourceType: "upload"
-        }))
-      });
-    }
-
-    revalidateListingSurfaces(listing.slug);
+    revalidatePublicListings(listing.slug);
     return NextResponse.json(okResult({ ...listing, readiness }, "Listing created successfully."));
   } catch (error) {
     logServerError("admin-listings-create", error, { slug });

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { logAuditEvent } from "@/lib/admin-control";
 import { failResult, okResult, toUserFacingError } from "@/lib/mutation-result";
 import { logServerError } from "@/lib/observability";
+import { revalidatePublicContent } from "@/lib/admin-revalidate";
 
 const KEY = "admin.brand-settings.v1";
 
@@ -32,7 +33,14 @@ export async function PUT(req: Request) {
   const session = await getSession();
   if (session?.role !== "ADMIN") return NextResponse.json(failResult("Forbidden"), { status: 403 });
 
-  const parsed = brandSettingsSchema.safeParse(await req.json());
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(failResult("Invalid JSON payload", { fieldErrors: { body: ["Request body must be valid JSON."] } }), { status: 400 });
+  }
+
+  const parsed = brandSettingsSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(failResult("Invalid payload", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
   }
@@ -56,6 +64,7 @@ export async function PUT(req: Request) {
       logServerError("admin-site-settings-audit", auditError, { actor: session.userId });
     }
 
+    revalidatePublicContent();
     return NextResponse.json(okResult(row, "Global settings saved."));
   } catch (error) {
     logServerError("admin-site-settings-put", error);

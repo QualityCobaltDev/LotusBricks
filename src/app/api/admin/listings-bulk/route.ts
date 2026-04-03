@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicListings } from "@/lib/admin-revalidate";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logAuditEvent } from "@/lib/admin-control";
@@ -17,7 +17,14 @@ export async function PATCH(req: Request) {
   const session = await getSession();
   if (session?.role !== "ADMIN") return NextResponse.json(failResult("Forbidden"), { status: 403 });
 
-  const parsed = bulkListingSchema.safeParse(await req.json());
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(failResult("Invalid JSON payload."), { status: 400 });
+  }
+
+  const parsed = bulkListingSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json(failResult("Invalid payload", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
 
   try {
@@ -62,9 +69,7 @@ export async function PATCH(req: Request) {
       logServerError("admin-listings-bulk-audit", auditError);
     }
 
-    revalidatePath("/");
-    revalidatePath("/listings");
-    revalidatePath("/sitemap.xml");
+    revalidatePublicListings();
 
     return NextResponse.json(okResult(undefined, "Listing bulk action completed."));
   } catch (error) {
