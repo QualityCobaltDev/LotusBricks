@@ -27,15 +27,63 @@ const guides = [
   { title: "Developer listing playbook", href: "/resources/developer-listing-playbook", text: "How to present verified media and convert qualified inquiries faster." }
 ];
 
-const outcomes = [
-  "Higher visibility across Cambodia's active property audience",
-  "Faster lead response with direct enquiry routing",
-  "Premium presentation with verified listing standards",
-  "Clear pricing with transparent listing packages"
+const trustStrip = [
+  "Verified listings",
+  "Direct enquiries",
+  "Professional presentation",
+  "Fast response handling",
+  "Built for owners, agents, and developers"
+];
+
+const howItWorksSteps = [
+  {
+    title: "Submit your property",
+    text: "Choose a tier and share your listing details, photos, and requirements."
+  },
+  {
+    title: "Professional structuring",
+    text: "RightBricks verifies and formats your listing for clear, premium presentation."
+  },
+  {
+    title: "Receive serious enquiries",
+    text: "Qualified buyers and renters contact you directly through a trusted enquiry path."
+  },
+  {
+    title: "Close faster",
+    text: "Respond quickly with support from our team and move high-intent conversations forward."
+  }
+];
+
+const differentiation = [
+  {
+    title: "Verification-first listing quality",
+    text: "Every listing is reviewed to support accurate, dependable presentation before promotion."
+  },
+  {
+    title: "Serious buyer and renter intent",
+    text: "Designed to reduce noise and increase direct contact from qualified prospects."
+  },
+  {
+    title: "Premium visibility across Cambodia",
+    text: "A cleaner, commercially mature environment that elevates property perception."
+  },
+  {
+    title: "Hands-on professional support",
+    text: "From onboarding to enquiry flow, the RightBricks team helps keep momentum high."
+  }
+];
+
+const listingBenefits = [
+  { title: "Premium exposure", text: "Position your property where serious market participants are actively searching." },
+  { title: "Structured presentation", text: "Consistent layouts, verified details, and polished media improve trust at first glance." },
+  { title: "Direct buyer interest", text: "Receive enquiries from people ready to discuss details and schedule next steps." },
+  { title: "Fast support", text: "Get responsive assistance for onboarding, edits, and listing optimization." },
+  { title: "Flexible tier options", text: "Choose listing access that matches a single property, portfolio, or development pipeline." },
+  { title: "Multi-region visibility", text: "Reach qualified audiences across Phnom Penh and other high-intent Cambodia markets." }
 ];
 
 const trustBreakdown = [
-  { title: "Identity & ownership checks", text: "Listings are reviewed for accountable owner/agent contact before promotion." },
+  { title: "Identity & ownership checks", text: "Listings are reviewed for accountable owner or agent contact before promotion." },
   { title: "Media quality verification", text: "Core photos, floor area, and media consistency are validated to reduce mismatched expectations." },
   { title: "Pricing recency controls", text: "Listings surface update markers so buyers and renters can assess freshness quickly." }
 ];
@@ -69,10 +117,10 @@ export default async function HomePage() {
         </ParallaxLayer>
         <Reveal>
           <span className="eyebrow">Cambodia&apos;s trusted property listing platform</span>
-          <h1>{hero?.title ?? "List your property, attract qualified leads, and close faster"}</h1>
+          <h1>{hero?.title ?? "Showcase your property professionally and attract qualified enquiries in Cambodia"}</h1>
           <p>
             {hero?.body ??
-              "RightBricks helps property owners, agencies, and developers showcase verified listings with high-trust presentation, direct enquiries, and sales-focused support."}
+              "RightBricks helps property owners, landlords, agencies, and developers publish verified listings, capture direct buyer and tenant interest, and close faster with professional support."}
           </p>
           <div className="hero-actions">
             <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="home-list-property">List Your Property</Link>
@@ -80,9 +128,9 @@ export default async function HomePage() {
             <a href={buildContactHref({ source: "homepage" })} className="btn btn-ghost" data-track-event="homepage_cta_click" data-track-label="home-contact">Contact Us</a>
           </div>
           <ul className="trust-inline">
-            <li>Direct owner/agent enquiries</li>
-            <li>Fast response from RightBricks team</li>
-            <li>No-obligation consultation</li>
+            <li>No obligation consultation</li>
+            <li>Fast onboarding support</li>
+            <li>Built for serious property exposure</li>
           </ul>
         </Reveal>
         <Reveal delay={140} className="hero-visual-wrap" y={24}>
@@ -98,29 +146,52 @@ export default async function HomePage() {
         </Reveal>
       </section>
 
+      <section className="shell trust-strip" aria-label="RightBricks trust signals">
+        {trustStrip.map((item, index) => (
+          <Reveal key={item} delay={getStaggerDelay(index)}>
+            <div className="trust-strip-item">
+              <span aria-hidden="true" className="trust-strip-icon">✓</span>
+              <span>{item}</span>
+            </div>
+          </Reveal>
+        ))}
+      </section>
+
       <PlatformPotential />
 
-      <section className="shell section two-col">
-        <Reveal>
-          <div className="card-pad">
-            <h2>One platform for sellers and serious buyers</h2>
-            <ul className="check-list">
-              {outcomes.map((item) => <li key={item}>{item}</li>)}
-            </ul>
-            <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="why-list-cta">Get Started</Link>
-          </div>
-        </Reveal>
-        <Reveal delay={100}>
-          <div className="card-pad">
-            <h2>How it works</h2>
-            <ol>
-              <li>Choose your listing tier and share your property details.</li>
-              <li>RightBricks verifies your listing and publishes with premium structure.</li>
-              <li>Receive enquiries and schedule viewings through a clear contact path.</li>
-            </ol>
-            <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="how-it-works-cta">Talk to Sales</a>
-          </div>
-        </Reveal>
+      <section className="shell section">
+        <div className="section-head">
+          <h2>How RightBricks works</h2>
+          <p className="muted">A clear process built for owners, agencies, and developers who want results without friction.</p>
+        </div>
+        <div className="step-grid">
+          {howItWorksSteps.map((step, index) => (
+            <Reveal key={step.title} delay={getStaggerDelay(index)}>
+              <article className="card-pad step-card">
+                <span className="step-badge">Step {index + 1}</span>
+                <h3>{step.title}</h3>
+                <p className="muted">{step.text}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <section className="shell section">
+        <div className="section-head">
+          <h2>Why property professionals choose RightBricks</h2>
+          <p className="muted">Built as a serious growth channel for premium listing visibility and trusted lead flow.</p>
+        </div>
+        <div className="grid">
+          {differentiation.map((item, index) => (
+            <Reveal key={item.title} delay={getStaggerDelay(index)}>
+              <article className="card-pad">
+                <h3>{item.title}</h3>
+                <p className="muted">{item.text}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
       </section>
 
       <section className="shell section">
@@ -150,9 +221,27 @@ export default async function HomePage() {
 
       <section className="shell section">
         <div className="section-head">
+          <h2>Listing value designed for sellers and developers</h2>
+          <p className="muted">Every listing package is built to improve trust, increase visibility, and drive qualified conversations.</p>
+        </div>
+        <div className="grid">
+          {listingBenefits.map((item, index) => (
+            <Reveal key={item.title} delay={getStaggerDelay(index)}>
+              <article className="card-pad">
+                <h3>{item.title}</h3>
+                <p className="muted">{item.text}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <section className="shell section">
+        <div className="section-head">
           <h2>Listing plans built for growth</h2>
           <Link href="/pricing">Compare all tiers</Link>
         </div>
+        <p className="muted narrow">Start with a tier that fits your current goals, then scale as your inventory and enquiry volume grows.</p>
         <div className="pricing-grid">
           {pricingPreview.map((plan, index) => (
             <Reveal key={plan.key} delay={getStaggerDelay(index)}>
@@ -174,20 +263,28 @@ export default async function HomePage() {
 
       <section className="shell section">
         <div className="section-head"><h2>Trusted by active market participants</h2></div>
+        <div className="trusted-by">
+          <span>Trusted by:</span>
+          <span>Owners</span>
+          <span>Landlords</span>
+          <span>Agencies</span>
+          <span>Developers</span>
+        </div>
         <div className="quote-grid">
           {testimonials.map((t, index) => (
-            <Reveal key={t.name} delay={getStaggerDelay(index)}><blockquote className="card-pad">“{t.quote}”<footer>{t.name} · {t.role}</footer></blockquote></Reveal>
+            <Reveal key={t.name} delay={getStaggerDelay(index)}><blockquote className="card-pad testimonial-card">“{t.quote}”<footer>{t.name} · {t.role}</footer></blockquote></Reveal>
           ))}
         </div>
       </section>
 
       <Reveal className="shell cta-band">
-        <h2>Start converting more leads with RightBricks</h2>
-        <p>Choose a plan, launch your listing, and let verified visibility drive serious enquiries.</p>
+        <h2>Ready to attract serious property enquiries?</h2>
+        <p>Start showcasing your property professionally and get in front of the right audience.</p>
         <div className="hero-actions">
           <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="home-footer-list">List Your Property</Link>
-          <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="home-footer-contact">Contact Us</a>
+          <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="home-footer-contact">Contact the Team</a>
         </div>
+        <p className="cta-note">No obligation consultation. Fast response from the RightBricks team.</p>
       </Reveal>
     </>
   );
