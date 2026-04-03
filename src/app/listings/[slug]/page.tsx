@@ -12,9 +12,10 @@ import { getSession } from "@/lib/auth";
 import { normalizeListingSlug } from "@/lib/listing-slug";
 import { resolveListingSlug } from "@/lib/listing-routing";
 import { getVerificationReadiness } from "@/lib/listing-validation";
-import { buildBreadcrumbJsonLd, buildPageTitle } from "@/lib/metadata";
+import { buildAbsoluteUrl, buildBreadcrumbJsonLd, buildListingJsonLd, buildPageTitle } from "@/lib/metadata";
 import { getCanonicalSiteUrl } from "@/lib/env";
 import { CONTACT } from "@/lib/contact";
+import { buildListingsFilterHref, SEO_CATEGORIES, SEO_REGIONS } from "@/lib/seo-growth";
 
 const asStringArray = (value: Prisma.JsonValue | null | undefined) =>
   Array.isArray(value) ? value.map((item) => String(item)) : [];
@@ -26,23 +27,23 @@ export const revalidate = 0;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!isDatabaseConfigured()) {
-    return { title: "Listing" };
+    return { title: "Listing", robots: { index: false, follow: false } };
   }
 
   const { slug: rawSlug } = await params;
   const slug = normalizeListingSlug(rawSlug);
-  if (!slug) return { title: "Listing not found" };
+  if (!slug) return { title: "Listing not found", robots: { index: false, follow: false } };
   let listing: { title: string; city: string; seoTitle: string | null; seoDescription: string | null; summary: string; openGraphImage: string | null; slug: string } | null = null;
 
   try {
     const resolved = await resolveListingSlug(slug);
-    if (!resolved) return { title: "Listing not found" };
+    if (!resolved) return { title: "Listing not found", robots: { index: false, follow: false } };
     listing = await db.listing.findUnique({ where: { slug: resolved.slug } });
   } catch (error) {
     logServerError("listing-metadata", error, { slug });
   }
 
-  if (!listing) return { title: "Listing not found" };
+  if (!listing) return { title: "Listing not found", robots: { index: false, follow: false } };
 
   const metadataTitle = buildPageTitle(listing.seoTitle ?? `${listing.title} ${listing.city ? `in ${listing.city}` : ""}`.trim());
   const metadataDescription = listing.seoDescription ?? listing.summary;
@@ -55,14 +56,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: metadataTitle,
       description: metadataDescription,
       url: `${getCanonicalSiteUrl()}/listings/${listing.slug}`,
-      type: "website",
-      images: listing.openGraphImage ? [listing.openGraphImage] : undefined
+      type: "article",
+      images: listing.openGraphImage ? [listing.openGraphImage] : ["/og-default.png"]
     },
     twitter: {
       card: "summary_large_image",
       title: metadataTitle,
       description: metadataDescription,
-      images: listing.openGraphImage ? [listing.openGraphImage] : undefined
+      images: listing.openGraphImage ? [listing.openGraphImage] : ["/og-default.png"]
     }
   };
 }
@@ -142,21 +143,35 @@ export default async function ListingDetail({
   const breadcrumbLd = buildBreadcrumbJsonLd([
     { name: "Home", path: "/" },
     { name: "Listings", path: "/listings" },
+    { name: listing.city, path: buildListingsFilterHref({ regionName: listing.city }) },
     { name: listing.title, path: `/listings/${listing.slug}` }
   ]);
 
   const canonicalUrl = `${getCanonicalSiteUrl()}/listings/${listing.slug}`;
 
+  const fallbackListingLd = buildListingJsonLd({
+    name: listing.title,
+    description: listing.summary,
+    path: `/listings/${listing.slug}`,
+    priceUsd: listing.priceUsd,
+    currency: listing.currency || "USD",
+    image: primary?.posterUrl ?? primary?.url ?? undefined,
+    city: listing.city,
+    country: listing.country,
+    bedrooms: listing.bedrooms,
+    bathrooms: listing.bathrooms,
+    areaSqm: listing.areaSqm,
+    listingType: listing.listingType,
+    category: listing.category
+  });
+
   const ld: Record<string, unknown> =
     listing.structuredData && typeof listing.structuredData === "object" && !Array.isArray(listing.structuredData)
       ? listing.structuredData as Record<string, unknown>
-      : {
-          "@context": "https://schema.org",
-          "@type": "RealEstateListing",
-          name: listing.title,
-          description: listing.summary,
-          offers: { "@type": "Offer", price: listing.priceUsd, priceCurrency: listing.currency || "USD" }
-        };
+      : fallbackListingLd;
+
+  const matchedCategory = SEO_CATEGORIES.find((item) => item.listingCategory === listing.category);
+  const matchedRegion = SEO_REGIONS.find((item) => item.name.toLowerCase() === listing.city.toLowerCase());
 
   return (
     <section className="shell section">
@@ -169,6 +184,12 @@ export default async function ListingDetail({
           <h1>{listing.title}</h1>
           <p className="muted">{[listing.streetAddress, listing.district, listing.city, listing.country].filter(Boolean).join(", ")}</p>
           <p>{listing.heroDescription ?? listing.summary}</p>
+      {matchedCategory && matchedRegion && (
+        <p className="muted" style={{ marginBottom: "0.75rem" }}>
+          Explore more: <Link href={`/discover/${matchedRegion.slug}/${matchedCategory.slug}`}>More {matchedCategory.name.toLowerCase()} in {matchedRegion.name}</Link>
+        </p>
+      )}
+
           <div className="trust-row">
             <span>Verification: {listing.verificationState.replaceAll("_", " ").toLowerCase()}</span>
             <span>Readiness: {readiness.score}%</span>
@@ -326,7 +347,7 @@ export default async function ListingDetail({
         </div>
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ ...ld, url: canonicalUrl }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ ...ld, url: canonicalUrl, mainEntityOfPage: buildAbsoluteUrl(`/listings/${listing.slug}`) }) }} />
     </section>
   );
 }

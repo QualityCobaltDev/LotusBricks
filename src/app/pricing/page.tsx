@@ -8,7 +8,7 @@ import { getStaggerDelay } from "@/lib/motion";
 import { buildContactHref } from "@/lib/routing";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Pricing Plans",
+  title: "Pricing Plans for Property Listings",
   description: "Compare RightBricks listing tiers and choose the best plan to generate qualified enquiries.",
   path: "/pricing"
 });

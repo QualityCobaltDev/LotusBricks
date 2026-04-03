@@ -24,8 +24,10 @@ test("page title cleanup prevents duplicate brand suffixes", () => {
 test("robots and sitemap resolve to canonical host", async () => {
   const robotsOutput = robots();
   assert.equal(robotsOutput.sitemap, "https://rightbricks.online/sitemap.xml");
+  assert.equal(robotsOutput.host, "https://rightbricks.online");
 
   const map = await sitemap();
   assert.equal(map.some((entry) => entry.url === "https://rightbricks.online/resources"), true);
+  assert.equal(map.some((entry) => entry.url === "https://rightbricks.online/discover/phnom-penh/condos"), true);
   assert.equal(map.some((entry) => entry.url.includes("www.rightbricks.online")), false);
 });

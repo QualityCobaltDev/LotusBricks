@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { getContactSettings } from "@/lib/site-settings";
+import { buildMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Privacy Policy",
+  description: "How RightBricks collects, uses, and protects personal data across listing and enquiry workflows.",
+  path: "/legal/privacy"
+});
 
 const sections = [
   {
@@ -42,6 +51,7 @@ export default async function PrivacyPage() {
       <article className="card-pad">
         <h2>Contact</h2>
         <p>Privacy requests: <a href={contact.emailHref}>{contact.email}</a> · <a href={contact.phoneHref}>{contact.phoneDisplay}</a>.</p>
+        <p className="muted">Related policies: <Link href="/legal/terms">Terms of Service</Link> · <Link href="/legal/accessibility">Accessibility Statement</Link>.</p>
       </article>
     </section>
   );

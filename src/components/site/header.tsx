@@ -10,6 +10,7 @@ const navItems = [
   { href: "/pricing", label: "List Property" },
   { href: "/about", label: "Why RightBricks" },
   { href: "/contact", label: "Contact" },
+  { href: "/discover", label: "Discover" },
   { href: "/resources", label: "Resources" }
 ];
 

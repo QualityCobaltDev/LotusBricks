@@ -6,7 +6,7 @@ import { getContactSettings } from "@/lib/site-settings";
 import { COMPANY_POSITIONING, CONTACT_PROCESS, TRUST_BADGES } from "@/lib/trust";
 
 export const metadata: Metadata = buildMetadata({
-  title: "About",
+  title: "About RightBricks Cambodia",
   description: "Learn how RightBricks delivers verified property intelligence and trusted marketplace workflows across Cambodia.",
   path: "/about"
 });
