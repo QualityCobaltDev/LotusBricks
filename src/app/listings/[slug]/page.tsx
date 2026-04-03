@@ -145,13 +145,16 @@ export default async function ListingDetail({
 
   const canonicalUrl = `${getCanonicalSiteUrl()}/listings/${listing.slug}`;
 
-  const ld = listing.structuredData ?? {
-    "@context": "https://schema.org",
-    "@type": "RealEstateListing",
-    name: listing.title,
-    description: listing.summary,
-    offers: { "@type": "Offer", price: listing.priceUsd, priceCurrency: listing.currency || "USD" }
-  };
+  const ld: Record<string, unknown> =
+    listing.structuredData && typeof listing.structuredData === "object" && !Array.isArray(listing.structuredData)
+      ? listing.structuredData as Record<string, unknown>
+      : {
+          "@context": "https://schema.org",
+          "@type": "RealEstateListing",
+          name: listing.title,
+          description: listing.summary,
+          offers: { "@type": "Offer", price: listing.priceUsd, priceCurrency: listing.currency || "USD" }
+        };
 
   return (
     <section className="shell section">
