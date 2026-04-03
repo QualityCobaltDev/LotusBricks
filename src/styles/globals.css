@@ -228,7 +228,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .hero::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
-  background: var(--gradient-surface); filter: blur(0); pointer-events: none; opacity: 0; animation: hero-surface-in .7s var(--ease-standard) forwards;
+  background: #ffffff; filter: none; pointer-events: none; opacity: 1; animation: none;
 }
 .hero-backdrop { position: absolute; inset: 0; z-index: -2; pointer-events: none; will-change: transform; }
 .hero-backdrop-orb {
@@ -239,8 +239,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   right: 8%;
   top: -6%;
   border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%);
-  animation: float-orb 7s ease-in-out infinite alternate;
+  display: none;
 }
 @keyframes hero-surface-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes float-orb { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 16px, 0); } }
