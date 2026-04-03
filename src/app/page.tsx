@@ -12,6 +12,7 @@ import { formatUsd } from "@/lib/plans";
 import { Reveal } from "@/components/ui/reveal";
 import { ParallaxLayer } from "@/components/ui/parallax-layer";
 import { getStaggerDelay } from "@/lib/motion";
+import { normalizePublicHref } from "@/lib/routing";
 
 export const metadata: Metadata = buildMetadata({
   title: "List Property & Get Qualified Leads in Cambodia",
@@ -144,7 +145,7 @@ export default async function HomePage() {
                 <h3>{plan.name}</h3>
                 {plan.contactOnly ? <p className="muted">Custom pricing for multi-project portfolios</p> : <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} sign-up`}</p>}
                 <p className="muted">{plan.contactOnly ? "Best for enterprise portfolios and high-volume inventory." : `Includes ${plan.listingLimit} active listing${plan.listingLimit === 1 ? "" : "s"}, ${plan.photosPerListing} photos, and ${plan.videosPerListing} videos per listing.`}</p>
-                <a href={plan.ctaHref} className="btn btn-outline" data-track-event="choose_tier" data-track-label={`home-${plan.key.toLowerCase()}`}>{plan.contactOnly ? "Contact Us" : "Choose Plan"}</a>
+                <a href={normalizePublicHref(plan.ctaHref)} className="btn btn-outline" data-track-event="choose_tier" data-track-label={`home-${plan.key.toLowerCase()}`}>{plan.contactOnly ? "Contact Us" : "Choose Plan"}</a>
               </article>
             </Reveal>
           ))}

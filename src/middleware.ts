@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getCanonicalRedirectUrl } from "@/lib/routing";
 
 function parseRole(token: string | undefined): "ADMIN" | "CUSTOMER" | null {
   if (!token) return null;
@@ -10,6 +11,17 @@ function parseRole(token: string | undefined): "ADMIN" | "CUSTOMER" | null {
 }
 
 export function middleware(req: NextRequest) {
+  const canonicalRedirect = getCanonicalRedirectUrl({
+    host: req.headers.get("host"),
+    pathname: req.nextUrl.pathname,
+    search: req.nextUrl.search,
+    protocol: req.nextUrl.protocol
+  });
+
+  if (canonicalRedirect) {
+    return NextResponse.redirect(canonicalRedirect, 301);
+  }
+
   const token = req.cookies.get("rb_session")?.value;
   const role = parseRole(token);
   const { pathname } = req.nextUrl;
@@ -34,5 +46,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/account/:path*", "/sign-in", "/login/customer", "/login/admin"]
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"]
 };

@@ -9,6 +9,7 @@ import { AnalyticsProvider } from "@/components/site/analytics-provider";
 import { EventTracker } from "@/components/site/event-tracker";
 import { FloatingContactCta } from "@/components/site/floating-contact";
 import { buildWebSiteJsonLd } from "@/lib/metadata";
+import { getPublicAppVersion } from "@/lib/routing";
 
 const siteUrl = getSafeSiteUrl();
 
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const contact = await getContactSettings();
-  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
+  const appVersion = getPublicAppVersion(process.env.NEXT_PUBLIC_APP_VERSION);
   const orgLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
