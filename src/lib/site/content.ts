@@ -1,31 +1,31 @@
 export const platformPotentialStats = [
-  { value: "Up to 12,000+", label: "Potential monthly listing views" },
-  { value: "Up to 9,000+", label: "Potential monthly buyer enquiries" },
-  { value: "30+", label: "Active high-demand regions" },
-  { value: "< 2 hrs", label: "Potential response time from leads" }
+  { value: "Verification-first", label: "Listing intake and review workflow" },
+  { value: "Direct channels", label: "Email, phone, WhatsApp, and Telegram support" },
+  { value: "Structured media", label: "Consistent listing presentation standards" },
+  { value: "Operational support", label: "Responsive follow-up during business hours" }
 ];
 
 export const platformPotentialDisclaimer =
-  "Figures shown represent estimated platform potential based on projected usage, property visibility, and market demand.";
+  "RightBricks focuses on operational quality standards rather than guaranteed outcomes or inflated performance claims.";
 
 export const testimonials = [
   {
     quote:
-      "RightBricks helped us evaluate properties faster with complete documentation and transparent pricing history.",
-    name: "Elena Park",
-    role: "Investment Director, Northgate Capital"
+      "The platform structure makes it easier for our team to manage serious enquiries and reduce unqualified noise.",
+    name: "Agency Partner Feedback",
+    role: "Phnom Penh Market"
   },
   {
     quote:
-      "The listing quality is exceptional. We moved from discovery to signed lease in nine days with zero surprises.",
-    name: "Marcus Greene",
-    role: "Operations Lead, Orbit Mobility"
+      "The verification workflow and clear contact paths improve confidence before scheduling viewings.",
+    name: "Seller Advisory Feedback",
+    role: "Residential Listings"
   },
   {
     quote:
-      "As a relocation advisor, I trust RightBricks because every listing is media-rich, current, and professionally verified.",
-    name: "Lina Darzi",
-    role: "Senior Relocation Consultant"
+      "Support is direct and practical, especially when onboarding listings that need polished presentation.",
+    name: "Developer Partner Feedback",
+    role: "Project Marketing"
   }
 ];
 

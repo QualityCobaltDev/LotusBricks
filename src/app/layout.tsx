@@ -70,6 +70,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           phoneHref={contact.phoneHref}
           whatsappHref={contact.whatsappHref}
           telegramHref={contact.telegramHref}
+          supportHours={contact.supportHours}
+          supportAddress={contact.supportAddress}
           appVersion={appVersion}
         />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />

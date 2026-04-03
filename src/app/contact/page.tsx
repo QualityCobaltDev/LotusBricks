@@ -4,7 +4,7 @@ import { db, isDatabaseConfigured } from "@/lib/db";
 import { ContactForm } from "@/components/ui/contact-form";
 import { logServerError } from "@/lib/observability";
 import { getContactSettings } from "@/lib/site-settings";
-import { CONTACT } from "@/lib/contact";
+import { CONTACT_CONFIDENCE_POINTS, CONTACT_PROCESS, TRUST_BADGES } from "@/lib/trust";
 import { normalizeContactPlan, normalizeContactSource } from "@/lib/routing";
 
 export const metadata: Metadata = buildMetadata({
@@ -45,7 +45,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
     <section className="shell section">
       <div className="section-head narrow">
         <h1>Contact RightBricks sales & advisory team</h1>
-        <p className="muted">{CONTACT.availabilityLine} {CONTACT.responseTime} No obligation and direct support.</p>
+        <p className="muted">{CONTACT_CONFIDENCE_POINTS.join(" · ")}. WhatsApp and Telegram are available for urgent coordination.</p>
       </div>
 
       <div className="two-col">
@@ -54,10 +54,12 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           <p>Email: <a href={contact.emailHref} data-track-event="email_click" data-track-label="contact-page-email">{contact.email}</a></p>
           <p>Phone: <a href={contact.phoneHref} data-track-event="call_click" data-track-label="contact-page-phone">{contact.phoneDisplay}</a></p>
           <p>
-            <a className="btn btn-ghost" href={CONTACT.whatsappHref} data-track-event="whatsapp_click" data-track-label="contact-page-whatsapp">WhatsApp</a>{" "}
-            <a className="btn btn-ghost" href={CONTACT.telegramHref} data-track-event="telegram_click" data-track-label="contact-page-telegram">Telegram</a>
+            <a className="btn btn-ghost" href={contact.whatsappHref} data-track-event="whatsapp_click" data-track-label="contact-page-whatsapp">WhatsApp</a>{" "}
+            <a className="btn btn-ghost" href={contact.telegramHref} data-track-event="telegram_click" data-track-label="contact-page-telegram">Telegram</a>
           </p>
-          <p className="muted">We respond quickly and route you to the right specialist.</p>
+          <ul className="check-list">
+            {TRUST_BADGES.slice(0, 3).map((item) => <li key={item}>{item}</li>)}
+          </ul>
           {contact.supportHours && <p>Support hours: {contact.supportHours}</p>}
           {contact.supportAddress && <p>Office: {contact.supportAddress}</p>}
         </article>
@@ -72,6 +74,18 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
           />
         </article>
       </div>
+
+      <article className="card-pad" style={{ marginTop: "1rem" }}>
+        <h2>What happens after you contact us</h2>
+        <div className="grid">
+          {CONTACT_PROCESS.map((step) => (
+            <div key={step.title}>
+              <h3>{step.title}</h3>
+              <p className="muted">{step.text}</p>
+            </div>
+          ))}
+        </div>
+      </article>
     </section>
   );
 }
