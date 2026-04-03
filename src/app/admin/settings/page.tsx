@@ -11,14 +11,14 @@ export default async function AdminSettingsPage() {
   const [contact, emailLogs, brandSettings, smtpSettings] = await Promise.all([
     getContactSettings(),
     db.emailLog.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
-    db.siteSetting.findUnique({ where: { key: "admin.brand-settings.v1" } }),
+    db.siteSetting.findUnique({ where: { key: "admin.brand-settings.v2" } }),
     getSmtpSettings()
   ]);
 
   return (
     <section className="section two-col">
       <div className="stack-form">
-        <BrandSettingsForm initial={(brandSettings?.value as Record<string, string> | undefined) ?? {}} />
+        <BrandSettingsForm initial={(brandSettings?.value as Record<string, string | number> | undefined) ?? {}} />
         <ContactSettingsForm initial={contact} />
         <SmtpSettingsForm initial={smtpSettings ?? {}} />
       </div>

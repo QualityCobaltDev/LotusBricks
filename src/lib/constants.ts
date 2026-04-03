@@ -10,3 +10,5 @@ export const DEFAULT_CONTACT = {
 };
 
 export const CONTACT_SETTING_KEY = "platform.contact";
+
+export const BRAND_SETTING_KEY = "admin.brand-settings.v2";

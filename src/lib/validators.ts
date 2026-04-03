@@ -5,7 +5,7 @@ import { getIntentFromListingType, getVerificationReadiness, validateListingCons
 const maxPhotos = getPlanByKey("TIER_1").photosPerListing;
 const maxVideos = getPlanByKey("TIER_1").videosPerListing;
 
-const mediaUrlSchema = z.string().url().refine((value) => /^https?:\/\//.test(value), "Media URL must be an absolute http(s) URL.");
+const mediaUrlSchema = z.string().refine((value) => /^https?:\/\//.test(value) || /^\/uploads\/[a-z0-9-_/]+$/i.test(value), "Media URL must be an absolute http(s) URL or a managed upload path.");
 
 export const loginSchema = z.object({ email: z.string().email(), password: z.string().min(8), role: z.enum(["ADMIN", "CUSTOMER"]).optional() });
 export const registerSchema = z.object({ fullName: z.string().min(2), email: z.string().email(), password: z.string().min(8), selectedPlan: z.string().optional().default("TIER_1") });
