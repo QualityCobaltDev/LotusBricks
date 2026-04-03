@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/site/theme-toggle";
@@ -14,7 +15,7 @@ const navItems = [
   { href: "/resources", label: "Resources" }
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ brandName = "RightBricks", tagline = "Cambodia's verified property platform", logoUrl }: { brandName?: string; tagline?: string; logoUrl?: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -42,11 +43,15 @@ export function SiteHeader() {
     <header className={`site-header ${scrolled ? "is-scrolled" : ""} ${compact ? "is-compact" : ""}`}>
       <div className="shell nav-shell">
         <div className="nav-left">
-          <Link href="/" className="brand" aria-label="RightBricks homepage">
-            <span className="brand-mark" aria-hidden="true">RB</span>
+          <Link href="/" className="brand" aria-label={`${brandName} homepage`}>
+            {logoUrl ? (
+              <Image src={logoUrl} alt={brandName} width={156} height={52} style={{ objectFit: "contain", maxHeight: 44, width: "auto" }} />
+            ) : (
+              <span className="brand-mark" aria-hidden="true">RB</span>
+            )}
             <span className="brand-copy">
-              <strong>RightBricks</strong>
-              <small>Cambodia&apos;s verified property platform</small>
+              <strong>{brandName}</strong>
+              <small>{tagline}</small>
             </span>
           </Link>
         </div>

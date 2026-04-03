@@ -8,6 +8,7 @@ import { logServerError } from "@/lib/observability";
 import { revalidatePublicListings } from "@/lib/admin-revalidate";
 import { ensureUniqueListingSlug } from "@/lib/listing-slug";
 import { getIntentFromListingType, getVerificationReadiness } from "@/lib/listing-validation";
+import { removeStoredAssetByUrl } from "@/lib/asset-storage";
 
 const statusSchema = z.object({ status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]) });
 
@@ -65,8 +66,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const readiness = getVerificationReadiness({ ...payload, listingIntent, priceFrequency, mediaCount: normalizedItems.length } as never);
 
   try {
-    const existing = await db.listing.findUnique({ where: { id }, select: { slug: true } });
+    const existing = await db.listing.findUnique({ where: { id }, include: { media: { select: { url: true } } } });
     if (!existing) return NextResponse.json(failResult("Listing not found."), { status: 404 });
+
+    const nextUrls = new Set(normalizedItems.map((item) => item.url));
+    const removedUrls = existing.media.map((item) => item.url).filter((url) => !nextUrls.has(url));
 
     const listing = await db.$transaction(async (tx) => {
       const updated = await tx.listing.update({
@@ -106,6 +110,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return updated;
     });
 
+    await Promise.all(removedUrls.map((url) => removeStoredAssetByUrl(url)));
     revalidatePublicListings(listing.slug, existing.slug);
     return NextResponse.json(okResult({ ...listing, readiness }, "Listing saved successfully."));
   } catch (error) {
@@ -168,10 +173,11 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
 
   const { id } = await params;
   try {
-    const existing = await db.listing.findUnique({ where: { id }, select: { slug: true } });
+    const existing = await db.listing.findUnique({ where: { id }, include: { media: { select: { url: true } } } });
     if (!existing) return NextResponse.json(failResult("Listing not found."), { status: 404 });
 
     await db.listing.delete({ where: { id } });
+    await Promise.all(existing.media.map((item) => removeStoredAssetByUrl(item.url)));
     revalidatePublicListings(null, existing.slug);
     return NextResponse.json(okResult(undefined, "Listing deleted."));
   } catch (error) {

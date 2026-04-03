@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
@@ -15,18 +16,13 @@ export type AdminListingRow = {
   listingIntent?: "SALE" | "RENT" | "INVESTMENT" | "LEASE";
   category?: "VILLA" | "CONDO" | "APARTMENT" | "TOWNHOUSE" | "PENTHOUSE" | "OFFICE" | "SHOPHOUSE" | "LAND" | "WAREHOUSE";
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
-  priceFrequency?: "TOTAL" | "MONTHLY" | "WEEKLY" | "DAILY" | "YEARLY";
-  verificationState?: "UNVERIFIED" | "IN_REVIEW" | "VERIFIED";
-  docsReviewed?: boolean;
-  locationConfirmed?: boolean;
-  mediaVerified?: boolean;
-  categoryOverrideJustification?: string;
   currency?: string;
   priceUsd?: number;
   bedrooms?: number;
   bathrooms?: number;
   areaSqm?: number;
   featured?: boolean;
+  verificationState?: "UNVERIFIED" | "IN_REVIEW" | "VERIFIED";
   readinessScore?: number;
   seoTitle?: string | null;
   seoDescription?: string | null;
@@ -56,21 +52,21 @@ type EditorState = {
   bathrooms: number;
   areaSqm: number;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
-  priceFrequency?: "TOTAL" | "MONTHLY" | "WEEKLY" | "DAILY" | "YEARLY";
-  verificationState?: "UNVERIFIED" | "IN_REVIEW" | "VERIFIED";
-  docsReviewed?: boolean;
-  locationConfirmed?: boolean;
-  mediaVerified?: boolean;
-  categoryOverrideJustification?: string;
   featured: boolean;
   seoTitle: string;
   seoDescription: string;
-  imageUrls: string;
-  videoUrls: string;
-  contactPhone: string;
-  contactEmail: string;
-  internalNotes: string;
+  listingImages: string[];
+  primaryImageIndex: number;
 };
+
+const toSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 
 const defaultEditor = (): EditorState => ({
   mode: "create",
@@ -89,97 +85,31 @@ const defaultEditor = (): EditorState => ({
   bathrooms: 1,
   areaSqm: 50,
   status: "DRAFT",
-  priceFrequency: "TOTAL",
-  verificationState: "UNVERIFIED",
-  docsReviewed: false,
-  locationConfirmed: false,
-  mediaVerified: false,
-  categoryOverrideJustification: "",
   featured: false,
   seoTitle: "",
   seoDescription: "",
-  imageUrls: "",
-  videoUrls: "",
-  contactPhone: "",
-  contactEmail: "",
-  internalNotes: ""
+  listingImages: [],
+  primaryImageIndex: 0
 });
-
-const toSlug = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-
-const buildPreviewHref = (slug: string, status: "DRAFT" | "PUBLISHED" | "ARCHIVED") => {
-  const encodedSlug = encodeURIComponent(slug);
-  if (status === "PUBLISHED") return `/listings/${encodedSlug}`;
-  return `/listings/${encodedSlug}?preview=1`;
-};
 
 export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
   const router = useRouter();
-  const [selected, setSelected] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [sortBy, setSortBy] = useState<"latest" | "status" | "price">("latest");
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [feedback, setFeedback] = useState<{ type: "idle" | "ok" | "error"; message?: string; fieldErrors?: Record<string, string[]> }>({ type: "idle" });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const filtered = useMemo(() => {
-    const base = rows.filter(
-      (row) =>
-        (statusFilter === "ALL" || row.status === statusFilter) &&
-        `${row.title} ${row.slug} ${row.city ?? ""} ${row.district ?? ""}`.toLowerCase().includes(query.toLowerCase())
-    );
-
-    return base.sort((a, b) => {
-      if (sortBy === "status") return a.status.localeCompare(b.status);
-      if (sortBy === "price") return (b.priceUsd ?? 0) - (a.priceUsd ?? 0);
-      return Date.parse(b.updatedAtIso) - Date.parse(a.updatedAtIso);
-    });
-  }, [rows, statusFilter, query, sortBy]);
-
-  const getFieldError = (field: string) => feedback.fieldErrors?.[field]?.[0];
-
-  async function runBulk(action: "publish" | "archive" | "delete") {
-    if (!selected.length) return;
-    const ok = window.confirm(`Apply ${action} to ${selected.length} listing(s)?`);
-    if (!ok) return;
-
-    try {
-      const res = await fetch("/api/admin/listings-bulk", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selected, action })
-      });
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.ok) {
-        setFeedback({ type: "error", message: data?.error ?? "Bulk action failed." });
-        return;
-      }
-
-      setFeedback({ type: "ok", message: data?.message ?? "Bulk action completed." });
-      setSelected([]);
-      router.refresh();
-    } catch (error) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Bulk action failed." });
-    }
-  }
-
-  function toggle(id: string, checked: boolean) {
-    setSelected((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)));
-  }
-
-  function openCreate() {
-    setEditor(defaultEditor());
-    setFeedback({ type: "idle" });
-  }
+  const filtered = useMemo(
+    () =>
+      rows.filter(
+        (row) =>
+          (statusFilter === "ALL" || row.status === statusFilter) &&
+          `${row.title} ${row.slug} ${row.city ?? ""} ${row.district ?? ""}`.toLowerCase().includes(query.toLowerCase())
+      ),
+    [rows, query, statusFilter]
+  );
 
   function openEdit(row: AdminListingRow) {
     setEditor({
@@ -193,32 +123,60 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       city: row.city ?? "Phnom Penh",
       district: row.district ?? "Chamkarmon",
       listingType: row.listingType ?? "SALE",
-      category: row.category ?? "CONDO",
       listingIntent: row.listingIntent ?? "SALE",
+      category: row.category ?? "CONDO",
       priceUsd: row.priceUsd ?? 100000,
       currency: row.currency ?? "USD",
       bedrooms: row.bedrooms ?? 1,
       bathrooms: row.bathrooms ?? 1,
       areaSqm: row.areaSqm ?? 50,
       status: row.status,
-      priceFrequency: "TOTAL",
-      verificationState: row.verificationState ?? "UNVERIFIED",
-      docsReviewed: false,
-      locationConfirmed: false,
-      mediaVerified: false,
-      categoryOverrideJustification: "",
       featured: Boolean(row.featured),
       seoTitle: row.seoTitle ?? "",
       seoDescription: row.seoDescription ?? "",
-      imageUrls: (row.mediaUrls ?? []).join("\n"),
-      videoUrls: (row.videoUrls ?? []).join("\n")
+      listingImages: row.mediaUrls ?? [],
+      primaryImageIndex: 0
     });
-    setFeedback({ type: "idle" });
   }
 
-  async function persistListing(options?: { openPreview?: boolean }) {
-    if (!editor) return false;
-    const openPreview = Boolean(options?.openPreview);
+  async function uploadListingImages(files: FileList | null) {
+    if (!files?.length || !editor) return;
+    setIsUploading(true);
+    setFeedback({ type: "idle" });
+
+    const uploaded: string[] = [];
+    try {
+      for (const file of Array.from(files)) {
+        const form = new FormData();
+        form.set("kind", "listing");
+        form.set("file", file);
+        const res = await fetch("/api/admin/assets/image", { method: "POST", body: form });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok || !data?.data?.url) {
+          throw new Error(data?.error ?? `Upload failed for ${file.name}`);
+        }
+        uploaded.push(String(data.data.url));
+      }
+
+      setEditor((prev) => (prev ? { ...prev, listingImages: [...prev.listingImages, ...uploaded] } : prev));
+      setFeedback({ type: "ok", message: `Uploaded ${uploaded.length} image(s). Save listing to publish these changes.` });
+    } catch (error) {
+      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Failed to upload images." });
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  function normalizeImagesForSave(images: string[], primary: number) {
+    if (!images.length) return [];
+    const safePrimary = Math.max(0, Math.min(primary, images.length - 1));
+    return [images[safePrimary], ...images.filter((_, idx) => idx !== safePrimary)];
+  }
+
+  async function saveListing(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editor) return;
+
     const payload = {
       slug: toSlug(editor.slug || editor.title),
       title: editor.title,
@@ -233,29 +191,20 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       listingType: editor.listingType,
       listingIntent: editor.listingIntent,
       category: editor.category,
-      priceFrequency: editor.priceFrequency,
       availability: "AVAILABLE",
       country: "Cambodia",
       currency: editor.currency,
       status: editor.status,
-      verificationState: editor.verificationState,
-      docsReviewed: editor.docsReviewed,
-      locationConfirmed: editor.locationConfirmed,
-      mediaVerified: editor.mediaVerified,
-      categoryOverrideJustification: editor.categoryOverrideJustification || undefined,
+      verificationState: "UNVERIFIED",
       featured: editor.featured,
       seoTitle: editor.seoTitle || editor.title,
       seoDescription: editor.seoDescription || editor.summary,
-      imageUrls: editor.imageUrls.split("\n").map((x) => x.trim()).filter(Boolean),
-      videoUrls: editor.videoUrls.split("\n").map((x) => x.trim()).filter(Boolean),
-      contactPhone: editor.contactPhone || undefined,
-      contactEmail: editor.contactEmail || undefined,
-      notes: editor.internalNotes || undefined
+      imageUrls: normalizeImagesForSave(editor.listingImages, editor.primaryImageIndex),
+      videoUrls: []
     };
 
     setIsSaving(true);
     setFeedback({ type: "idle" });
-
     try {
       const endpoint = editor.mode === "create" ? "/api/admin/listings" : `/api/admin/listings/${editor.listingId}`;
       const method = editor.mode === "create" ? "POST" : "PUT";
@@ -265,137 +214,15 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
         body: JSON.stringify(payload)
       });
       const data = await res.json().catch(() => null);
-
       if (!res.ok || !data?.ok) {
-        const fieldErrors = (data?.fieldErrors as Record<string, string[]> | undefined) ?? undefined;
-        const fieldMessages = fieldErrors ? Object.values(fieldErrors).flat() : [];
-        setFeedback({ type: "error", fieldErrors, message: fieldMessages.join(" ") || data?.error || "Save failed." });
-        return false;
+        setFeedback({ type: "error", message: data?.error ?? "Save failed.", fieldErrors: data?.fieldErrors ?? undefined });
+        return;
       }
-
-      const savedListing = data?.data as { id?: string; slug?: string; status?: "DRAFT" | "PUBLISHED" | "ARCHIVED" } | undefined;
-      const savedId = savedListing?.id ?? editor.listingId;
-      const savedSlug = savedListing?.slug ?? payload.slug;
-      const savedStatus = savedListing?.status ?? editor.status;
-
       setFeedback({ type: "ok", message: data?.message ?? "Saved." });
-      setEditor((prev) =>
-        prev
-          ? {
-              ...prev,
-              mode: "edit",
-              listingId: savedId,
-              slug: savedSlug
-            }
-          : prev
-      );
+      setEditor(null);
       router.refresh();
-      if (openPreview && savedSlug) {
-        window.open(buildPreviewHref(savedSlug, savedStatus), "_blank", "noopener,noreferrer");
-      }
-      return true;
     } catch (error) {
       setFeedback({ type: "error", message: error instanceof Error ? error.message : "Save failed." });
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function saveListing(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    await persistListing();
-  }
-
-  async function previewListing() {
-    await persistListing({ openPreview: true });
-  }
-
-  async function deleteListing(row: AdminListingRow) {
-    const ok = window.confirm(`Delete \"${row.title}\" permanently?`);
-    if (!ok) return;
-
-    setIsSaving(true);
-    try {
-      const res = await fetch(`/api/admin/listings/${row.id}`, { method: "DELETE" });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) {
-        setFeedback({ type: "error", message: data?.error ?? "Delete failed." });
-        return;
-      }
-      setFeedback({ type: "ok", message: data?.message ?? "Listing deleted." });
-      router.refresh();
-    } catch (error) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Delete failed." });
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function setStatus(id: string, status: "DRAFT" | "PUBLISHED" | "ARCHIVED") {
-    setIsSaving(true);
-    try {
-      const res = await fetch(`/api/admin/listings/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) {
-        setFeedback({ type: "error", message: data?.error ?? "Status update failed." });
-        return;
-      }
-      setFeedback({ type: "ok", message: data?.message ?? "Status updated." });
-      router.refresh();
-    } catch (error) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Status update failed." });
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function duplicateListing(row: AdminListingRow) {
-    const payload = {
-      slug: `${row.slug}-${Date.now()}`,
-      title: `${row.title} (Copy)`,
-      summary: row.summary ?? "Premium property listing summary.",
-      description: row.description ?? "Premium property listing description with key details.",
-      city: row.city ?? "Phnom Penh",
-      district: row.district ?? "Chamkarmon",
-      priceUsd: row.priceUsd ?? 100000,
-      bedrooms: row.bedrooms ?? 1,
-      bathrooms: row.bathrooms ?? 1,
-      areaSqm: row.areaSqm ?? 50,
-      listingType: row.listingType ?? "SALE",
-      category: row.category ?? "CONDO",
-      listingIntent: row.listingIntent ?? "SALE",
-      availability: "AVAILABLE",
-      country: "Cambodia",
-      currency: row.currency ?? "USD",
-      status: "DRAFT",
-      featured: false,
-      seoTitle: row.seoTitle ?? `${row.title} copy`,
-      seoDescription: row.seoDescription ?? row.summary ?? "",
-      imageUrls: row.mediaUrls ?? [],
-      videoUrls: row.videoUrls ?? []
-    };
-
-    setIsSaving(true);
-    try {
-      const res = await fetch("/api/admin/listings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) {
-        setFeedback({ type: "error", message: data?.error ?? "Duplicate failed." });
-        return;
-      }
-      setFeedback({ type: "ok", message: "Listing duplicated to draft." });
-      router.refresh();
-    } catch (error) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Duplicate failed." });
     } finally {
       setIsSaving(false);
     }
@@ -411,103 +238,89 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
           <option value="PUBLISHED">Published</option>
           <option value="ARCHIVED">Archived</option>
         </select>
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as "latest" | "status" | "price")}>
-          <option value="latest">Sort: latest</option>
-          <option value="status">Sort: status</option>
-          <option value="price">Sort: price</option>
-        </select>
-        <button className="btn btn-primary" type="button" onClick={openCreate}>Create listing</button>
-        <button className="btn btn-ghost" type="button" onClick={() => runBulk("publish")} disabled={isSaving}>Bulk publish</button>
-        <button className="btn btn-ghost" type="button" onClick={() => runBulk("archive")} disabled={isSaving}>Bulk archive</button>
-        <button className="btn btn-accent" type="button" onClick={() => runBulk("delete")} disabled={isSaving}>Bulk delete</button>
+        <button className="btn btn-primary" type="button" onClick={() => setEditor(defaultEditor())}>Create listing</button>
       </div>
       {feedback.type === "ok" && <p className="form-ok">{feedback.message}</p>}
       {feedback.type === "error" && <p className="form-error">{feedback.message}</p>}
-      {feedback.fieldErrors ? <ul className="form-error">{Object.entries(feedback.fieldErrors).flatMap(([field, errors]) => errors.map((err) => <li key={`${field}-${err}`}>{field}: {err}</li>))}</ul> : null}
 
-      {rows.length === 0 ? (
-        <article className="empty-state" style={{ marginTop: "1rem" }}>
-          <h3>No listings yet</h3>
-          <p>Create your first listing to start managing publication workflows.</p>
-          <button className="btn btn-primary" type="button" onClick={openCreate}>Create first listing</button>
-        </article>
-      ) : (
-        <div className="admin-table-wrap">
-          <table className="comparison-table">
-            <thead>
-              <tr><th><input type="checkbox" onChange={(e) => setSelected(e.target.checked ? filtered.map((x) => x.id) : [])} /></th><th>Listing</th><th>Status</th><th>Verified</th><th>Owner</th><th>Plan</th><th>Media</th><th>Price</th><th>Updated</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-              {filtered.map((x) => {
-                const dateLabel = Number.isNaN(Date.parse(x.updatedAtIso)) ? "Unknown" : new Date(x.updatedAtIso).toISOString().slice(0, 10);
-                return (
-                  <tr key={x.id}>
-                    <td><input checked={selected.includes(x.id)} type="checkbox" onChange={(e) => toggle(x.id, e.target.checked)} /></td>
-                    <td><strong>{x.title}</strong><br /><small>{x.slug}</small></td>
-                    <td>{x.status}</td>
-                    <td>{x.verificationState ?? "UNVERIFIED"}{typeof x.readinessScore === "number" ? ` (${x.readinessScore}%)` : ""}</td>
-                    <td>{x.ownerName}</td>
-                    <td>{x.ownerPlanTier ?? "N/A"}</td>
-                    <td>{x.mediaCount}</td>
-                    <td>{x.priceUsd ? `$${x.priceUsd.toLocaleString()}` : "-"}</td>
-                    <td>{dateLabel}</td>
-                    <td>
-                      <div style={{ display: "grid", gap: 4 }}>
-                        <button className="btn btn-ghost" type="button" onClick={() => openEdit(x)}>Edit</button>
-                        <button className="btn btn-ghost" type="button" onClick={() => setStatus(x.id, "PUBLISHED")} disabled={isSaving}>Publish</button>
-                        <button className="btn btn-ghost" type="button" onClick={() => setStatus(x.id, "DRAFT")} disabled={isSaving}>Unpublish</button>
-                        <button className="btn btn-ghost" type="button" onClick={() => setStatus(x.id, "ARCHIVED")} disabled={isSaving}>Archive</button>
-                        <button className="btn btn-ghost" type="button" onClick={() => duplicateListing(x)} disabled={isSaving}>Duplicate</button>
-                        <button className="btn btn-ghost" type="button" onClick={() => window.open(buildPreviewHref(x.slug, x.status), "_blank", "noopener,noreferrer")} disabled={isSaving}>Preview</button>
-                        <button className="btn btn-accent" type="button" onClick={() => deleteListing(x)} disabled={isSaving}>Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="admin-table-wrap">
+        <table className="comparison-table">
+          <thead>
+            <tr><th>Listing</th><th>Status</th><th>Media</th><th>Price</th><th>Updated</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {filtered.map((row) => (
+              <tr key={row.id}>
+                <td><strong>{row.title}</strong><br /><small>{row.slug}</small></td>
+                <td>{row.status}</td>
+                <td>{row.mediaCount}</td>
+                <td>{row.priceUsd ? `$${row.priceUsd.toLocaleString()}` : "-"}</td>
+                <td>{new Date(row.updatedAtIso).toISOString().slice(0, 10)}</td>
+                <td><button className="btn btn-ghost" type="button" onClick={() => openEdit(row)}>Edit</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {editor && (
         <form onSubmit={saveListing} className="stack-form card-pad" style={{ marginTop: "1rem" }}>
           <h3>{editor.mode === "create" ? "Create Listing" : "Edit Listing"}</h3>
           <div className="grid">
-            <label>Title<input value={editor.title} onChange={(e) => setEditor((prev) => prev ? { ...prev, title: e.target.value } : null)} required />{getFieldError("title") ? <small className="form-error">{getFieldError("title")}</small> : null}</label>
-            <label>Slug<input value={editor.slug} onChange={(e) => setEditor((prev) => prev ? { ...prev, slug: toSlug(e.target.value) } : null)} required />{getFieldError("slug") ? <small className="form-error">{getFieldError("slug")}</small> : null}</label>
-            <label>Summary<input value={editor.summary} onChange={(e) => setEditor((prev) => prev ? { ...prev, summary: e.target.value } : null)} required />{getFieldError("summary") ? <small className="form-error">{getFieldError("summary")}</small> : null}</label>
-            <label>Description<textarea value={editor.description} onChange={(e) => setEditor((prev) => prev ? { ...prev, description: e.target.value } : null)} required />{getFieldError("description") ? <small className="form-error">{getFieldError("description")}</small> : null}</label>
+            <label>Title<input value={editor.title} onChange={(e) => setEditor((prev) => prev ? { ...prev, title: e.target.value } : null)} required /></label>
+            <label>Slug<input value={editor.slug} onChange={(e) => setEditor((prev) => prev ? { ...prev, slug: toSlug(e.target.value) } : null)} required /></label>
+            <label>Summary<input value={editor.summary} onChange={(e) => setEditor((prev) => prev ? { ...prev, summary: e.target.value } : null)} required /></label>
+            <label>Description<textarea value={editor.description} onChange={(e) => setEditor((prev) => prev ? { ...prev, description: e.target.value } : null)} required /></label>
             <label>City<input value={editor.city} onChange={(e) => setEditor((prev) => prev ? { ...prev, city: e.target.value } : null)} required /></label>
             <label>District<input value={editor.district} onChange={(e) => setEditor((prev) => prev ? { ...prev, district: e.target.value } : null)} required /></label>
-            <label>Listing Type<select value={editor.listingType} onChange={(e) => setEditor((prev) => prev ? { ...prev, listingType: e.target.value as EditorState["listingType"] } : null)}><option value="SALE">Sale</option><option value="RENT">Rent</option><option value="COMMERCIAL">Commercial</option><option value="LAND">Land</option><option value="LUXURY">Luxury</option><option value="INVESTMENT">Investment</option></select></label>
-            <label>Listing intent<select value={editor.listingIntent} onChange={(e) => setEditor((prev) => prev ? { ...prev, listingIntent: e.target.value as EditorState["listingIntent"] } : null)}><option value="SALE">Sale</option><option value="RENT">Rent</option><option value="INVESTMENT">Investment</option><option value="LEASE">Lease</option></select></label>
-            <label>Category<select value={editor.category} onChange={(e) => setEditor((prev) => prev ? { ...prev, category: e.target.value as EditorState["category"] } : null)}><option value="CONDO">Condo</option><option value="APARTMENT">Apartment</option><option value="VILLA">Villa</option><option value="TOWNHOUSE">Townhouse</option><option value="PENTHOUSE">Penthouse</option><option value="OFFICE">Office</option><option value="SHOPHOUSE">Shophouse</option><option value="LAND">Land</option><option value="WAREHOUSE">Warehouse</option></select></label>
-            <label>Price<input type="number" value={editor.priceUsd} onChange={(e) => setEditor((prev) => prev ? { ...prev, priceUsd: Number(e.target.value) } : null)} required />{getFieldError("priceUsd") ? <small className="form-error">{getFieldError("priceUsd")}</small> : null}</label>
-            <label>Currency<input value={editor.currency} onChange={(e) => setEditor((prev) => prev ? { ...prev, currency: e.target.value } : null)} required /></label>
+            <label>Price<input type="number" value={editor.priceUsd} onChange={(e) => setEditor((prev) => prev ? { ...prev, priceUsd: Number(e.target.value) } : null)} required /></label>
             <label>Bedrooms<input type="number" value={editor.bedrooms} onChange={(e) => setEditor((prev) => prev ? { ...prev, bedrooms: Number(e.target.value) } : null)} required /></label>
             <label>Bathrooms<input type="number" value={editor.bathrooms} onChange={(e) => setEditor((prev) => prev ? { ...prev, bathrooms: Number(e.target.value) } : null)} required /></label>
             <label>Area sqm<input type="number" value={editor.areaSqm} onChange={(e) => setEditor((prev) => prev ? { ...prev, areaSqm: Number(e.target.value) } : null)} required /></label>
-            <label>Price frequency<select value={editor.priceFrequency} onChange={(e) => setEditor((prev) => prev ? { ...prev, priceFrequency: e.target.value as EditorState["priceFrequency"] } : null)}><option value="TOTAL">Total</option><option value="MONTHLY">Monthly</option><option value="WEEKLY">Weekly</option><option value="DAILY">Daily</option><option value="YEARLY">Yearly</option></select></label>
             <label>Status<select value={editor.status} onChange={(e) => setEditor((prev) => prev ? { ...prev, status: e.target.value as EditorState["status"] } : null)}><option value="DRAFT">Draft</option><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option></select></label>
-            <label>SEO title<input value={editor.seoTitle} onChange={(e) => setEditor((prev) => prev ? { ...prev, seoTitle: e.target.value } : null)} /></label>
-            <label>SEO description<textarea value={editor.seoDescription} onChange={(e) => setEditor((prev) => prev ? { ...prev, seoDescription: e.target.value } : null)} /></label>
-            <label>Cover/gallery image URLs (one per line)<textarea value={editor.imageUrls} onChange={(e) => setEditor((prev) => prev ? { ...prev, imageUrls: e.target.value } : null)} />{getFieldError("imageUrls") ? <small className="form-error">{getFieldError("imageUrls")}</small> : null}</label>
-            <label>Video URLs (one per line)<textarea value={editor.videoUrls} onChange={(e) => setEditor((prev) => prev ? { ...prev, videoUrls: e.target.value } : null)} />{getFieldError("videoUrls") ? <small className="form-error">{getFieldError("videoUrls")}</small> : null}</label>
-            <label>Contact phone<input value={editor.contactPhone} onChange={(e) => setEditor((prev) => prev ? { ...prev, contactPhone: e.target.value } : null)} /></label>
-            <label>Contact email<input value={editor.contactEmail} onChange={(e) => setEditor((prev) => prev ? { ...prev, contactEmail: e.target.value } : null)} />{getFieldError("contactEmail") ? <small className="form-error">{getFieldError("contactEmail")}</small> : null}</label>
-            <label>Verification state<select value={editor.verificationState} onChange={(e) => setEditor((prev) => prev ? { ...prev, verificationState: e.target.value as EditorState["verificationState"] } : null)}><option value="UNVERIFIED">Unverified</option><option value="IN_REVIEW">In review</option><option value="VERIFIED">Verified</option></select></label>
-            <label>Category override justification<textarea value={editor.categoryOverrideJustification} onChange={(e) => setEditor((prev) => prev ? { ...prev, categoryOverrideJustification: e.target.value } : null)} /></label>
-            <label className="remember"><input type="checkbox" checked={editor.docsReviewed} onChange={(e) => setEditor((prev) => prev ? { ...prev, docsReviewed: e.target.checked } : null)} /> Docs reviewed</label>
-            <label className="remember"><input type="checkbox" checked={editor.locationConfirmed} onChange={(e) => setEditor((prev) => prev ? { ...prev, locationConfirmed: e.target.checked } : null)} /> Location confirmed</label>
-            <label className="remember"><input type="checkbox" checked={editor.mediaVerified} onChange={(e) => setEditor((prev) => prev ? { ...prev, mediaVerified: e.target.checked } : null)} /> Media verified</label>
-            <label>Internal notes<textarea value={editor.internalNotes} onChange={(e) => setEditor((prev) => prev ? { ...prev, internalNotes: e.target.value } : null)} /></label>
             <label className="remember"><input type="checkbox" checked={editor.featured} onChange={(e) => setEditor((prev) => prev ? { ...prev, featured: e.target.checked } : null)} /> Featured</label>
           </div>
+
+          <article className="card-pad">
+            <h4>Listing media</h4>
+            <p className="muted">Upload JPG/PNG/WEBP/GIF up to 8MB. Reorder images and pick a featured image before saving.</p>
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple onChange={(e) => void uploadListingImages(e.currentTarget.files)} disabled={isUploading || isSaving} />
+            {isUploading && <p className="muted">Uploading images…</p>}
+            <div className="thumb-row" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", marginTop: 12 }}>
+              {editor.listingImages.map((url, index) => (
+                <article key={`${url}-${index}`} className="card-pad" style={{ padding: 10 }}>
+                  <Image src={url} alt={`Listing image ${index + 1}`} width={220} height={130} style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 8 }} />
+                  <label className="remember"><input type="radio" checked={editor.primaryImageIndex === index} onChange={() => setEditor((prev) => prev ? { ...prev, primaryImageIndex: index } : null)} /> Featured image</label>
+                  <div className="hero-actions" style={{ gap: 6 }}>
+                    <button type="button" className="btn btn-ghost" disabled={index === 0} onClick={() => setEditor((prev) => {
+                      if (!prev || index === 0) return prev;
+                      const next = [...prev.listingImages];
+                      [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                      const primary = prev.primaryImageIndex === index ? index - 1 : prev.primaryImageIndex === index - 1 ? index : prev.primaryImageIndex;
+                      return { ...prev, listingImages: next, primaryImageIndex: primary };
+                    })}>↑</button>
+                    <button type="button" className="btn btn-ghost" disabled={index === editor.listingImages.length - 1} onClick={() => setEditor((prev) => {
+                      if (!prev || index >= prev.listingImages.length - 1) return prev;
+                      const next = [...prev.listingImages];
+                      [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                      const primary = prev.primaryImageIndex === index ? index + 1 : prev.primaryImageIndex === index + 1 ? index : prev.primaryImageIndex;
+                      return { ...prev, listingImages: next, primaryImageIndex: primary };
+                    })}>↓</button>
+                    <button type="button" className="btn btn-accent" onClick={() => setEditor((prev) => {
+                      if (!prev) return prev;
+                      const next = prev.listingImages.filter((_, i) => i !== index);
+                      const primary = next.length === 0 ? 0 : Math.max(0, Math.min(prev.primaryImageIndex > index ? prev.primaryImageIndex - 1 : prev.primaryImageIndex, next.length - 1));
+                      return { ...prev, listingImages: next, primaryImageIndex: primary };
+                    })}>Delete</button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </article>
+
           <div className="hero-actions">
-            <button className="btn btn-primary" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : editor.mode === "create" ? "Create listing" : "Save listing"}</button>
+            <button className="btn btn-primary" type="submit" disabled={isSaving || isUploading}>{isSaving ? "Saving…" : editor.mode === "create" ? "Create listing" : "Save listing"}</button>
             <button className="btn btn-ghost" type="button" onClick={() => setEditor(null)} disabled={isSaving}>Cancel</button>
-            <button className="btn btn-ghost" type="button" onClick={previewListing} disabled={isSaving || !editor.title.trim()}>Preview</button>
           </div>
         </form>
       )}

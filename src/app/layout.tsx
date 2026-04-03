@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
-import { getContactSettings } from "@/lib/site-settings";
+import { getBrandSettings, getContactSettings } from "@/lib/site-settings";
 import { getCanonicalSiteUrl } from "@/lib/env";
 import { ConsentBanner } from "@/components/site/consent-banner";
 import { AnalyticsProvider } from "@/components/site/analytics-provider";
@@ -13,31 +13,43 @@ import { getPublicAppVersion } from "@/lib/routing";
 
 const siteUrl = getCanonicalSiteUrl();
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Verified Property Marketplace in Cambodia",
-    template: "%s | RightBricks"
-  },
-  description:
-    "Discover verified properties with transparent pricing, premium media, and investor-ready insights across Cambodia.",
-  openGraph: {
-    title: "Verified Property Marketplace in Cambodia",
-    description: "Verified property intelligence for buyers, renters, agencies, and investors.",
-    url: siteUrl,
-    siteName: "RightBricks",
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Verified Property Marketplace",
-    description: "Verified property marketplace and intelligence platform."
-  },
-  alternates: { canonical: "/" }
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const brand = await getBrandSettings();
+  const faviconHref = brand.faviconUrl.includes("?")
+    ? `${brand.faviconUrl}&v=${brand.assetVersion}`
+    : `${brand.faviconUrl}?v=${brand.assetVersion}`;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: "Verified Property Marketplace in Cambodia",
+      template: `%s | ${brand.siteName}`
+    },
+    description:
+      "Discover verified properties with transparent pricing, premium media, and investor-ready insights across Cambodia.",
+    openGraph: {
+      title: "Verified Property Marketplace in Cambodia",
+      description: "Verified property intelligence for buyers, renters, agencies, and investors.",
+      url: siteUrl,
+      siteName: brand.siteName,
+      type: "website"
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Verified Property Marketplace",
+      description: "Verified property marketplace and intelligence platform."
+    },
+    icons: {
+      icon: faviconHref,
+      shortcut: faviconHref,
+      apple: faviconHref
+    },
+    alternates: { canonical: "/" }
+  };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const contact = await getContactSettings();
+  const [contact, brand] = await Promise.all([getContactSettings(), getBrandSettings()]);
   const appVersion = getPublicAppVersion(process.env.NEXT_PUBLIC_APP_VERSION);
   const orgLd = buildOrganizationJsonLd({
     email: contact.email,
@@ -57,7 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
         />
         <a href="#main-content" className="skip-link">Skip to main content</a>
-        <SiteHeader />
+        <SiteHeader brandName={brand.siteName} tagline={brand.tagline} logoUrl={brand.headerLogoUrl || undefined} />
         <main id="main-content">{children}</main>
         <ConsentBanner />
         <AnalyticsProvider />
