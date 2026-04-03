@@ -52,6 +52,7 @@ export function SiteFooter({
               <li><Link href="/listings">Browse Listings</Link></li>
               <li><Link href="/contact">Contact Sales</Link></li>
               <li><Link href="/about">Why RightBricks</Link></li>
+              <li><Link href="/resources">Resources</Link></li>
             </ul>
           </div>
         </Reveal>

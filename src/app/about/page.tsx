@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { trustStats } from "@/lib/site/content";
+import { buildMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: "About",
   description: "Learn how RightBricks delivers verified property intelligence and trusted marketplace workflows across Cambodia.",
-  alternates: { canonical: "/about" }
-};
+  path: "/about"
+});
 
 export default function AboutPage() {
   return (

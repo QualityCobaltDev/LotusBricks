@@ -3,26 +3,26 @@ import "../styles/globals.css";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { getContactSettings } from "@/lib/site-settings";
-import { getSafeSiteUrl } from "@/lib/env";
+import { getCanonicalSiteUrl } from "@/lib/env";
 import { ConsentBanner } from "@/components/site/consent-banner";
 import { AnalyticsProvider } from "@/components/site/analytics-provider";
 import { EventTracker } from "@/components/site/event-tracker";
 import { FloatingContactCta } from "@/components/site/floating-contact";
-import { buildWebSiteJsonLd } from "@/lib/metadata";
+import { buildOrganizationJsonLd, buildWebSiteJsonLd } from "@/lib/metadata";
 import { getPublicAppVersion } from "@/lib/routing";
 
-const siteUrl = getSafeSiteUrl();
+const siteUrl = getCanonicalSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "RightBricks | Verified Property Marketplace",
+    default: "Verified Property Marketplace in Cambodia",
     template: "%s | RightBricks"
   },
   description:
     "Discover verified properties with transparent pricing, premium media, and investor-ready insights across Cambodia.",
   openGraph: {
-    title: "RightBricks | Verified Property Marketplace",
+    title: "Verified Property Marketplace in Cambodia",
     description: "Verified property intelligence for buyers, renters, agencies, and investors.",
     url: siteUrl,
     siteName: "RightBricks",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "RightBricks",
+    title: "Verified Property Marketplace",
     description: "Verified property marketplace and intelligence platform."
   },
   alternates: { canonical: "/" }
@@ -39,15 +39,11 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const contact = await getContactSettings();
   const appVersion = getPublicAppVersion(process.env.NEXT_PUBLIC_APP_VERSION);
-  const orgLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "RightBricks",
-    url: siteUrl,
+  const orgLd = buildOrganizationJsonLd({
     email: contact.email,
     telephone: "+85511389625",
     sameAs: ["https://wa.me/85511389625", "https://t.me/"]
-  };
+  });
 
   const webSiteLd = buildWebSiteJsonLd();
 

@@ -51,7 +51,26 @@ export function requireServerEnv<T extends keyof z.infer<typeof serverSchema>>(.
   }, {} as Pick<z.infer<typeof serverSchema>, T>);
 }
 
+function normalizeUrl(url: string) {
+  try {
+    return new URL(url);
+  } catch {
+    return new URL("https://rightbricks.online");
+  }
+}
+
 export function getSafeSiteUrl() {
   const parsed = getPublicEnv();
   return parsed.success ? parsed.data.NEXT_PUBLIC_SITE_URL : "https://rightbricks.online";
+}
+
+export function getCanonicalSiteUrl() {
+  const parsed = normalizeUrl(getSafeSiteUrl());
+  const canonicalHost = (process.env.NEXT_PUBLIC_CANONICAL_HOST ?? parsed.hostname).trim().toLowerCase();
+  parsed.hostname = canonicalHost;
+  parsed.port = "";
+  parsed.pathname = "";
+  parsed.search = "";
+  parsed.hash = "";
+  return parsed.toString().replace(/\/$/, "");
 }
