@@ -1,16 +1,25 @@
+import { getCanonicalSiteUrl } from "@/lib/env";
+
 const DEFAULT_CANONICAL_HOST = "rightbricks.online";
 
 export function getCanonicalHost() {
-  return (process.env.NEXT_PUBLIC_CANONICAL_HOST ?? DEFAULT_CANONICAL_HOST).trim().toLowerCase();
+  try {
+    return new URL(getCanonicalSiteUrl()).hostname.toLowerCase();
+  } catch {
+    return (process.env.NEXT_PUBLIC_CANONICAL_HOST ?? DEFAULT_CANONICAL_HOST).trim().toLowerCase();
+  }
 }
 
 export function getCanonicalRedirectUrl(input: { host: string | null; pathname: string; search: string; protocol: string }): string | null {
   const host = (input.host ?? "").toLowerCase();
   const canonicalHost = getCanonicalHost();
-  if (!host || host === canonicalHost) return null;
+  if (!host) return null;
 
   const normalizedHost = host.split(":")[0];
-  if (normalizedHost === `www.${canonicalHost}`) {
+  if (normalizedHost === canonicalHost) return null;
+
+  const wwwVariant = canonicalHost.startsWith("www.") ? canonicalHost.slice(4) : `www.${canonicalHost}`;
+  if (normalizedHost === wwwVariant) {
     return `${input.protocol}//${canonicalHost}${input.pathname}${input.search}`;
   }
 
@@ -27,7 +36,8 @@ export function normalizePublicHref(href: string): string {
     const parsed = new URL(href);
     const canonicalHost = getCanonicalHost();
     const host = parsed.hostname.toLowerCase();
-    if (host === canonicalHost || host === `www.${canonicalHost}`) {
+    const wwwVariant = canonicalHost.startsWith("www.") ? canonicalHost.slice(4) : `www.${canonicalHost}`;
+    if (host === canonicalHost || host === wwwVariant) {
       return `${parsed.pathname}${parsed.search}${parsed.hash}`;
     }
     return href;

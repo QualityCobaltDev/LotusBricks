@@ -4,7 +4,7 @@ import { buildBreadcrumbJsonLd, buildMetadata } from "@/lib/metadata";
 import { RESOURCE_ARTICLES } from "@/lib/resources";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Market Intelligence Resources",
+  title: "Resources Hub",
   description: "Practical property guides, due diligence checklists, and market intelligence for Cambodia.",
   path: "/resources"
 });
@@ -17,6 +17,7 @@ export default function ResourcesPage() {
 
   return (
     <section className="shell section">
+      <nav aria-label="Breadcrumb"><p><Link href="/">Home</Link> / <span>Resources</span></p></nav>
       <div className="section-head narrow">
         <h1>Market intelligence &amp; resources</h1>
         <p className="muted">Decision-ready guides for buyers, investors, and developers in Cambodia.</p>
@@ -26,6 +27,7 @@ export default function ResourcesPage() {
           <article key={resource.slug} className="card">
             <h2>{resource.title}</h2>
             <p className="muted">{resource.summary}</p>
+            <p className="muted">Updated {resource.updatedAt}</p>
             <Link href={`/resources/${resource.slug}` as any}>Read guide</Link>
           </article>
         ))}

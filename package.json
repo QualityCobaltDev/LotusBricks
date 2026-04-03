@@ -20,7 +20,8 @@
     "test:routing": "tsx --test src/lib/__tests__/routing.test.ts",
     "qa:routes": "node scripts/route-integrity-check.mjs",
     "seed:backfill-listing-integrity": "tsx prisma/backfill-listing-integrity.ts",
-    "test:listing-validation": "tsx --test src/lib/__tests__/listing-validation.test.ts"
+    "test:listing-validation": "tsx --test src/lib/__tests__/listing-validation.test.ts",
+    "test:metadata": "tsx --test src/lib/__tests__/metadata.test.ts"
   },
   "dependencies": {
     "@prisma/client": "6.19.2",
