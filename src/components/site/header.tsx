@@ -18,9 +18,14 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [compact, setCompact] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      setCompact(y > 28);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -34,7 +39,7 @@ export function SiteHeader() {
   }, [open]);
 
   return (
-    <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
+    <header className={`site-header ${scrolled ? "is-scrolled" : ""} ${compact ? "is-compact" : ""}`}>
       <div className="shell nav-shell">
         <div className="nav-left">
           <Link href="/" className="brand" aria-label="RightBricks homepage">
