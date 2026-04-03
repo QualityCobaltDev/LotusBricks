@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { db } from "@/lib/db";
 import { CONTACT_SETTING_KEY } from "@/lib/constants";
 import { logServerError } from "@/lib/observability";
@@ -26,7 +25,7 @@ function normalizeContact(value?: Partial<ContactSettings>): ContactSettings {
   };
 }
 
-export const getContactSettingsServer = cache(async (): Promise<ContactSettings> => {
+export async function getContactSettingsServer(): Promise<ContactSettings> {
   if (!process.env.DATABASE_URL) {
     return CONTACT_SETTINGS_FALLBACK;
   }
@@ -38,4 +37,4 @@ export const getContactSettingsServer = cache(async (): Promise<ContactSettings>
     logOnce("site-settings:contact", error, { key: CONTACT_SETTING_KEY });
     return CONTACT_SETTINGS_FALLBACK;
   }
-});
+}

@@ -5,19 +5,11 @@ import { db } from "@/lib/db";
 import { listingSchema } from "@/lib/validators";
 import { failResult, okResult, toUserFacingError } from "@/lib/mutation-result";
 import { logServerError } from "@/lib/observability";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicListings } from "@/lib/admin-revalidate";
 import { ensureUniqueListingSlug } from "@/lib/listing-slug";
 import { getIntentFromListingType, getVerificationReadiness } from "@/lib/listing-validation";
 
 const statusSchema = z.object({ status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]) });
-
-function revalidateListingSurfaces(slug?: string | null, previousSlug?: string | null) {
-  revalidatePath("/");
-  revalidatePath("/listings");
-  revalidatePath("/sitemap.xml");
-  if (slug) revalidatePath(`/listings/${slug}`);
-  if (previousSlug && previousSlug !== slug) revalidatePath(`/listings/${previousSlug}`);
-}
 
 async function assertAdmin() {
   const session = await getSession();
@@ -66,9 +58,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const normalizedItems = mediaItems.length
     ? mediaItems
     : [
-      ...((imageUrls.length ? imageUrls : imageUrl ? [imageUrl] : []).map((url) => ({ url, kind: "image" as const }))),
-      ...((videoUrls.length ? videoUrls : videoUrl ? [videoUrl] : []).map((url) => ({ url, kind: "video" as const })))
-    ];
+        ...((imageUrls.length ? imageUrls : imageUrl ? [imageUrl] : []).map((url) => ({ url, kind: "image" as const }))),
+        ...((videoUrls.length ? videoUrls : videoUrl ? [videoUrl] : []).map((url) => ({ url, kind: "video" as const })))
+      ];
 
   const readiness = getVerificationReadiness({ ...payload, listingIntent, priceFrequency, mediaCount: normalizedItems.length } as never);
 
@@ -76,40 +68,45 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const existing = await db.listing.findUnique({ where: { id }, select: { slug: true } });
     if (!existing) return NextResponse.json(failResult("Listing not found."), { status: 404 });
 
-    const listing = await db.listing.update({
-      where: { id },
-      data: {
-        ...rest,
-        slug,
-        listingIntent,
-        priceFrequency,
-        availabilityDate: availabilityDate ? new Date(availabilityDate) : null,
-        pricingUpdatedAt: pricingUpdatedAt ? new Date(pricingUpdatedAt) : new Date(),
-        lastReviewedAt: lastReviewedAt ? new Date(lastReviewedAt) : null,
-        publishedAt: rest.status === "PUBLISHED" ? new Date() : null
+    const listing = await db.$transaction(async (tx) => {
+      const updated = await tx.listing.update({
+        where: { id },
+        data: {
+          ...rest,
+          slug,
+          listingIntent,
+          priceFrequency,
+          availabilityDate: availabilityDate ? new Date(availabilityDate) : null,
+          pricingUpdatedAt: pricingUpdatedAt ? new Date(pricingUpdatedAt) : new Date(),
+          lastReviewedAt: lastReviewedAt ? new Date(lastReviewedAt) : null,
+          publishedAt: rest.status === "PUBLISHED" ? new Date() : null
+        }
+      });
+
+      if (existing.slug !== slug) {
+        await tx.listingSlugHistory.upsert({ where: { slug: existing.slug }, update: { listingId: id }, create: { slug: existing.slug, listingId: id } });
       }
+
+      await tx.listingSlugHistory.upsert({ where: { slug }, update: { listingId: id }, create: { slug, listingId: id } });
+      await tx.listingMedia.deleteMany({ where: { listingId: id } });
+
+      if (normalizedItems.length) {
+        await tx.listingMedia.createMany({
+          data: normalizedItems.map((item, index) => ({
+            listingId: id,
+            url: item.url,
+            kind: item.kind,
+            isPrimary: index === 0,
+            sortOrder: index + 1,
+            sourceType: "upload"
+          }))
+        });
+      }
+
+      return updated;
     });
 
-    if (existing.slug !== slug) {
-      await db.listingSlugHistory.upsert({ where: { slug: existing.slug }, update: { listingId: id }, create: { slug: existing.slug, listingId: id } });
-    }
-    await db.listingSlugHistory.upsert({ where: { slug }, update: { listingId: id }, create: { slug, listingId: id } });
-
-    await db.listingMedia.deleteMany({ where: { listingId: id } });
-    if (normalizedItems.length) {
-      await db.listingMedia.createMany({
-        data: normalizedItems.map((item, index) => ({
-          listingId: id,
-          url: item.url,
-          kind: item.kind,
-          isPrimary: index === 0,
-          sortOrder: index + 1,
-          sourceType: "upload"
-        }))
-      });
-    }
-
-    revalidateListingSurfaces(listing.slug, existing.slug);
+    revalidatePublicListings(listing.slug, existing.slug);
     return NextResponse.json(okResult({ ...listing, readiness }, "Listing saved successfully."));
   } catch (error) {
     logServerError("admin-listings-update", error, { id, slug });
@@ -157,7 +154,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       select: { id: true, slug: true, status: true }
     });
 
-    revalidateListingSurfaces(listing.slug);
+    revalidatePublicListings(listing.slug);
     return NextResponse.json(okResult(listing, `Listing moved to ${listing.status.toLowerCase()}.`));
   } catch (error) {
     logServerError("admin-listings-status", error, { id, status: parsed.data.status });
@@ -175,7 +172,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
     if (!existing) return NextResponse.json(failResult("Listing not found."), { status: 404 });
 
     await db.listing.delete({ where: { id } });
-    revalidateListingSurfaces(null, existing.slug);
+    revalidatePublicListings(null, existing.slug);
     return NextResponse.json(okResult(undefined, "Listing deleted."));
   } catch (error) {
     logServerError("admin-listings-delete", error, { id });

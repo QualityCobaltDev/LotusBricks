@@ -5,6 +5,7 @@ import { contactSettingsSchema } from "@/lib/validators";
 import { getContactSettings, upsertContactSettings } from "@/lib/site-settings";
 import { logServerError } from "@/lib/observability";
 import { failResult, okResult } from "@/lib/mutation-result";
+import { revalidatePublicContent } from "@/lib/admin-revalidate";
 
 export async function GET() {
   const session = await getSession();
@@ -17,7 +18,14 @@ export async function PUT(req: Request) {
   const session = await getSession();
   if (session?.role !== "ADMIN") return NextResponse.json(failResult("Forbidden"), { status: 403 });
 
-  const parsed = contactSettingsSchema.safeParse(await req.json());
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(failResult("Invalid JSON payload", { fieldErrors: { body: ["Request body must be valid JSON."] } }), { status: 400 });
+  }
+
+  const parsed = contactSettingsSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(failResult("Invalid payload", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
   }
@@ -33,6 +41,7 @@ export async function PUT(req: Request) {
       telegramHref: CONTACT.telegramHref
     });
 
+    revalidatePublicContent();
     return NextResponse.json(okResult(settings, "Contact settings updated."));
   } catch (error) {
     logServerError("admin-contact-settings-put", error);

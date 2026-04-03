@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { logAuditEvent } from "@/lib/admin-control";
 import { failResult, okResult, toUserFacingError } from "@/lib/mutation-result";
 import { logServerError } from "@/lib/observability";
+import { revalidatePublicContent } from "@/lib/admin-revalidate";
 
 const cmsPayloadSchema = z.object({
   key: z.string().min(2),
@@ -25,7 +26,14 @@ export async function PUT(req: Request) {
   const session = await getSession();
   if (session?.role !== "ADMIN") return NextResponse.json(failResult("Forbidden"), { status: 403 });
 
-  const parsed = cmsPayloadSchema.safeParse(await req.json());
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(failResult("Invalid JSON payload.", { fieldErrors: { body: ["Request body must be valid JSON."] } }), { status: 400 });
+  }
+
+  const parsed = cmsPayloadSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(failResult("Invalid payload", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
   }
@@ -50,6 +58,7 @@ export async function PUT(req: Request) {
       logServerError("admin-content-audit", auditError, { section: parsed.data.key });
     }
 
+    revalidatePublicContent();
     return NextResponse.json(okResult(row, "Content section updated."));
   } catch (error) {
     logServerError("admin-content-put", error, { section: parsed.data.key });

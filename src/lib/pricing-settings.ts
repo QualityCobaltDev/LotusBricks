@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { db } from "@/lib/db";
 import { logServerError } from "@/lib/observability";
 import { PLAN_CONFIG, PLAN_ORDER, type PlanConfig, type PlanKey } from "@/lib/plans";
@@ -23,7 +22,7 @@ function resolvePlans(overrides?: PricingOverrides) {
   return PLAN_ORDER.map((key) => sanitizeOverride(PLAN_CONFIG[key], overrides?.[key])).filter((plan) => plan.isActive !== false);
 }
 
-const getPricingPlansServer = cache(async (): Promise<PlanConfig[]> => {
+async function getPricingPlansServer(): Promise<PlanConfig[]> {
   if (!process.env.DATABASE_URL) {
     return resolvePlans();
   }
@@ -38,7 +37,7 @@ const getPricingPlansServer = cache(async (): Promise<PlanConfig[]> => {
     }
     return resolvePlans();
   }
-});
+}
 
 export async function getPricingPlans(): Promise<PlanConfig[]> {
   return getPricingPlansServer();

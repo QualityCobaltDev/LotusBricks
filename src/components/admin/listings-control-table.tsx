@@ -127,7 +127,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
   const [sortBy, setSortBy] = useState<"latest" | "status" | "price">("latest");
   const [query, setQuery] = useState("");
   const [editor, setEditor] = useState<EditorState | null>(null);
-  const [feedback, setFeedback] = useState<{ type: "idle" | "ok" | "error"; message?: string; fieldErrors?: string[] }>({ type: "idle" });
+  const [feedback, setFeedback] = useState<{ type: "idle" | "ok" | "error"; message?: string; fieldErrors?: Record<string, string[]> }>({ type: "idle" });
   const [isSaving, setIsSaving] = useState(false);
 
   const filtered = useMemo(() => {
@@ -143,6 +143,8 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       return Date.parse(b.updatedAtIso) - Date.parse(a.updatedAtIso);
     });
   }, [rows, statusFilter, query, sortBy]);
+
+  const getFieldError = (field: string) => feedback.fieldErrors?.[field]?.[0];
 
   async function runBulk(action: "publish" | "archive" | "delete") {
     if (!selected.length) return;
@@ -265,8 +267,9 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.ok) {
-        const fieldErrors = data?.fieldErrors ? Object.values(data.fieldErrors as Record<string, string[]>).flat() : [];
-        setFeedback({ type: "error", fieldErrors, message: fieldErrors.join(" ") || data?.error || "Save failed." });
+        const fieldErrors = (data?.fieldErrors as Record<string, string[]> | undefined) ?? undefined;
+        const fieldMessages = fieldErrors ? Object.values(fieldErrors).flat() : [];
+        setFeedback({ type: "error", fieldErrors, message: fieldMessages.join(" ") || data?.error || "Save failed." });
         return false;
       }
 
@@ -420,7 +423,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       </div>
       {feedback.type === "ok" && <p className="form-ok">{feedback.message}</p>}
       {feedback.type === "error" && <p className="form-error">{feedback.message}</p>}
-      {feedback.fieldErrors?.length ? <ul className="form-error">{feedback.fieldErrors.map((err) => <li key={err}>{err}</li>)}</ul> : null}
+      {feedback.fieldErrors ? <ul className="form-error">{Object.entries(feedback.fieldErrors).flatMap(([field, errors]) => errors.map((err) => <li key={`${field}-${err}`}>{field}: {err}</li>))}</ul> : null}
 
       {rows.length === 0 ? (
         <article className="empty-state" style={{ marginTop: "1rem" }}>
@@ -471,16 +474,16 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
         <form onSubmit={saveListing} className="stack-form card-pad" style={{ marginTop: "1rem" }}>
           <h3>{editor.mode === "create" ? "Create Listing" : "Edit Listing"}</h3>
           <div className="grid">
-            <label>Title<input value={editor.title} onChange={(e) => setEditor((prev) => prev ? { ...prev, title: e.target.value } : null)} required /></label>
-            <label>Slug<input value={editor.slug} onChange={(e) => setEditor((prev) => prev ? { ...prev, slug: toSlug(e.target.value) } : null)} required /></label>
-            <label>Summary<input value={editor.summary} onChange={(e) => setEditor((prev) => prev ? { ...prev, summary: e.target.value } : null)} required /></label>
-            <label>Description<textarea value={editor.description} onChange={(e) => setEditor((prev) => prev ? { ...prev, description: e.target.value } : null)} required /></label>
+            <label>Title<input value={editor.title} onChange={(e) => setEditor((prev) => prev ? { ...prev, title: e.target.value } : null)} required />{getFieldError("title") ? <small className="form-error">{getFieldError("title")}</small> : null}</label>
+            <label>Slug<input value={editor.slug} onChange={(e) => setEditor((prev) => prev ? { ...prev, slug: toSlug(e.target.value) } : null)} required />{getFieldError("slug") ? <small className="form-error">{getFieldError("slug")}</small> : null}</label>
+            <label>Summary<input value={editor.summary} onChange={(e) => setEditor((prev) => prev ? { ...prev, summary: e.target.value } : null)} required />{getFieldError("summary") ? <small className="form-error">{getFieldError("summary")}</small> : null}</label>
+            <label>Description<textarea value={editor.description} onChange={(e) => setEditor((prev) => prev ? { ...prev, description: e.target.value } : null)} required />{getFieldError("description") ? <small className="form-error">{getFieldError("description")}</small> : null}</label>
             <label>City<input value={editor.city} onChange={(e) => setEditor((prev) => prev ? { ...prev, city: e.target.value } : null)} required /></label>
             <label>District<input value={editor.district} onChange={(e) => setEditor((prev) => prev ? { ...prev, district: e.target.value } : null)} required /></label>
             <label>Listing Type<select value={editor.listingType} onChange={(e) => setEditor((prev) => prev ? { ...prev, listingType: e.target.value as EditorState["listingType"] } : null)}><option value="SALE">Sale</option><option value="RENT">Rent</option><option value="COMMERCIAL">Commercial</option><option value="LAND">Land</option><option value="LUXURY">Luxury</option><option value="INVESTMENT">Investment</option></select></label>
             <label>Listing intent<select value={editor.listingIntent} onChange={(e) => setEditor((prev) => prev ? { ...prev, listingIntent: e.target.value as EditorState["listingIntent"] } : null)}><option value="SALE">Sale</option><option value="RENT">Rent</option><option value="INVESTMENT">Investment</option><option value="LEASE">Lease</option></select></label>
             <label>Category<select value={editor.category} onChange={(e) => setEditor((prev) => prev ? { ...prev, category: e.target.value as EditorState["category"] } : null)}><option value="CONDO">Condo</option><option value="APARTMENT">Apartment</option><option value="VILLA">Villa</option><option value="TOWNHOUSE">Townhouse</option><option value="PENTHOUSE">Penthouse</option><option value="OFFICE">Office</option><option value="SHOPHOUSE">Shophouse</option><option value="LAND">Land</option><option value="WAREHOUSE">Warehouse</option></select></label>
-            <label>Price<input type="number" value={editor.priceUsd} onChange={(e) => setEditor((prev) => prev ? { ...prev, priceUsd: Number(e.target.value) } : null)} required /></label>
+            <label>Price<input type="number" value={editor.priceUsd} onChange={(e) => setEditor((prev) => prev ? { ...prev, priceUsd: Number(e.target.value) } : null)} required />{getFieldError("priceUsd") ? <small className="form-error">{getFieldError("priceUsd")}</small> : null}</label>
             <label>Currency<input value={editor.currency} onChange={(e) => setEditor((prev) => prev ? { ...prev, currency: e.target.value } : null)} required /></label>
             <label>Bedrooms<input type="number" value={editor.bedrooms} onChange={(e) => setEditor((prev) => prev ? { ...prev, bedrooms: Number(e.target.value) } : null)} required /></label>
             <label>Bathrooms<input type="number" value={editor.bathrooms} onChange={(e) => setEditor((prev) => prev ? { ...prev, bathrooms: Number(e.target.value) } : null)} required /></label>
@@ -489,10 +492,10 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
             <label>Status<select value={editor.status} onChange={(e) => setEditor((prev) => prev ? { ...prev, status: e.target.value as EditorState["status"] } : null)}><option value="DRAFT">Draft</option><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option></select></label>
             <label>SEO title<input value={editor.seoTitle} onChange={(e) => setEditor((prev) => prev ? { ...prev, seoTitle: e.target.value } : null)} /></label>
             <label>SEO description<textarea value={editor.seoDescription} onChange={(e) => setEditor((prev) => prev ? { ...prev, seoDescription: e.target.value } : null)} /></label>
-            <label>Cover/gallery image URLs (one per line)<textarea value={editor.imageUrls} onChange={(e) => setEditor((prev) => prev ? { ...prev, imageUrls: e.target.value } : null)} /></label>
-            <label>Video URLs (one per line)<textarea value={editor.videoUrls} onChange={(e) => setEditor((prev) => prev ? { ...prev, videoUrls: e.target.value } : null)} /></label>
+            <label>Cover/gallery image URLs (one per line)<textarea value={editor.imageUrls} onChange={(e) => setEditor((prev) => prev ? { ...prev, imageUrls: e.target.value } : null)} />{getFieldError("imageUrls") ? <small className="form-error">{getFieldError("imageUrls")}</small> : null}</label>
+            <label>Video URLs (one per line)<textarea value={editor.videoUrls} onChange={(e) => setEditor((prev) => prev ? { ...prev, videoUrls: e.target.value } : null)} />{getFieldError("videoUrls") ? <small className="form-error">{getFieldError("videoUrls")}</small> : null}</label>
             <label>Contact phone<input value={editor.contactPhone} onChange={(e) => setEditor((prev) => prev ? { ...prev, contactPhone: e.target.value } : null)} /></label>
-            <label>Contact email<input value={editor.contactEmail} onChange={(e) => setEditor((prev) => prev ? { ...prev, contactEmail: e.target.value } : null)} /></label>
+            <label>Contact email<input value={editor.contactEmail} onChange={(e) => setEditor((prev) => prev ? { ...prev, contactEmail: e.target.value } : null)} />{getFieldError("contactEmail") ? <small className="form-error">{getFieldError("contactEmail")}</small> : null}</label>
             <label>Verification state<select value={editor.verificationState} onChange={(e) => setEditor((prev) => prev ? { ...prev, verificationState: e.target.value as EditorState["verificationState"] } : null)}><option value="UNVERIFIED">Unverified</option><option value="IN_REVIEW">In review</option><option value="VERIFIED">Verified</option></select></label>
             <label>Category override justification<textarea value={editor.categoryOverrideJustification} onChange={(e) => setEditor((prev) => prev ? { ...prev, categoryOverrideJustification: e.target.value } : null)} /></label>
             <label className="remember"><input type="checkbox" checked={editor.docsReviewed} onChange={(e) => setEditor((prev) => prev ? { ...prev, docsReviewed: e.target.checked } : null)} /> Docs reviewed</label>
