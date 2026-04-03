@@ -88,7 +88,7 @@ export function ContactForm({ listingId = "", selectedPlan = "", source = "direc
       </div>
       <label htmlFor="fullName">Full name<input id="fullName" name="fullName" required /></label>
       <label htmlFor="email">Email<input id="email" name="email" type="email" required aria-describedby="reply-help" /></label>
-      <small id="reply-help" className="muted">We respond quickly from {CONTACT.email}.</small>
+      <small id="reply-help" className="muted form-helper">We respond quickly from {CONTACT.email}.</small>
       <label htmlFor="phone">Phone (optional)<input id="phone" name="phone" placeholder="(+855)" /></label>
       <label htmlFor="preferredContact">Preferred contact method
         <select id="preferredContact" name="preferredContact" defaultValue="EMAIL">

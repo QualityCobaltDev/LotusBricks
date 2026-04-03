@@ -75,7 +75,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
         </article>
       </div>
 
-      <article className="card-pad" style={{ marginTop: "1rem" }}>
+      <article className="card-pad section-card-gap">
         <h2>What happens after you contact us</h2>
         <div className="grid">
           {CONTACT_PROCESS.map((step) => (
