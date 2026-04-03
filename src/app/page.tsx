@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/metadata";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { ListingCard } from "@/components/ui/listing-card";
-import { trustStats, testimonials } from "@/lib/site/content";
+import { testimonials } from "@/lib/site/content";
 import { isPrismaSchemaMismatch, logServerError } from "@/lib/observability";
 import { Prisma } from "@prisma/client";
 import { getPricingPlans } from "@/lib/pricing-settings";
@@ -13,6 +13,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { ParallaxLayer } from "@/components/ui/parallax-layer";
 import { getStaggerDelay } from "@/lib/motion";
 import { buildContactHref } from "@/lib/routing";
+import { PlatformPotential } from "@/components/site/platform-potential";
 
 export const metadata: Metadata = buildMetadata({
   title: "List Property & Get Qualified Leads in Cambodia",
@@ -97,16 +98,7 @@ export default async function HomePage() {
         </Reveal>
       </section>
 
-      <section className="shell stat-grid">
-        {trustStats.map((item, index) => (
-          <Reveal key={item.label} delay={getStaggerDelay(index)}>
-            <article className="stat-card">
-              <p>{item.value}</p>
-              <span>{item.label}</span>
-            </article>
-          </Reveal>
-        ))}
-      </section>
+      <PlatformPotential />
 
       <section className="shell section two-col">
         <Reveal>

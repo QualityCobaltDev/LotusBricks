@@ -1,9 +1,12 @@
-export const trustStats = [
-  { label: "Verified listings", value: "12,400+" },
-  { label: "Monthly qualified inquiries", value: "8,900" },
-  { label: "Metro regions covered", value: "34" },
-  { label: "Average response time", value: "< 2 hrs" }
+export const platformPotentialStats = [
+  { value: "Up to 12,000+", label: "Potential monthly listing views" },
+  { value: "Up to 9,000+", label: "Potential monthly buyer enquiries" },
+  { value: "30+", label: "Active high-demand regions" },
+  { value: "< 2 hrs", label: "Potential response time from leads" }
 ];
+
+export const platformPotentialDisclaimer =
+  "Figures shown represent estimated platform potential based on projected usage, property visibility, and market demand.";
 
 export const testimonials = [
   {
