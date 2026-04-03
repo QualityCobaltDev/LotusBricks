@@ -273,6 +273,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .price { font-size: 1.55rem; font-weight: 800; margin: 0; color: var(--primary); }
 .meta-row { display: flex; gap: .75rem; color: var(--muted-foreground); font-size: .9rem; flex-wrap: wrap; }
 .listing-actions { margin-top: .4rem; }
+.trust-row { display: flex; flex-wrap: wrap; gap: .5rem; font-size: .8rem; color: var(--muted-foreground); }
+.trust-row span { background: color-mix(in srgb, var(--muted) 72%, transparent); border: 1px solid var(--border); padding: .2rem .5rem; border-radius: 999px; }
 
 .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .card-pad, .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow-sm); }
@@ -300,6 +302,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .floating-contact .btn { box-shadow: var(--shadow-md); }
 
 .filter-bar { display: grid; grid-template-columns: 1.4fr repeat(3, .7fr) auto; gap: .6rem; margin: 1rem 0 1.2rem; }
+.filter-drawer { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: .6rem .9rem; box-shadow: var(--shadow-sm); }
+.filter-drawer summary { list-style: none; display: inline-flex; align-items: center; gap: .4rem; }
+.filter-drawer summary::after { content: "▾"; transition: transform var(--motion-hover) var(--ease-swift); }
+.filter-drawer[open] summary::after { transform: rotate(180deg); }
+.filter-bar label { display: grid; gap: .35rem; font-size: .88rem; color: var(--muted-foreground); }
+.filter-actions { display: flex; gap: .6rem; align-items: flex-end; }
 input, textarea, select { width: 100%; border: 1px solid var(--input); border-radius: 12px; padding: .72rem .78rem; background: var(--card); color: var(--foreground); font: inherit; transition: border-color var(--motion-hover) var(--ease-swift), box-shadow var(--motion-hover) var(--ease-swift), background-color var(--motion-hover) var(--ease-swift); }
 label { transition: color var(--motion-micro) var(--ease-swift); }
 label:focus-within { color: var(--primary); }
@@ -308,6 +316,8 @@ input:focus, textarea:focus, select:focus { box-shadow: 0 0 0 3px color-mix(in s
 input:disabled, textarea:disabled, select:disabled, button:disabled { opacity: .6; cursor: not-allowed; }
 .stack-form { display: grid; gap: .8rem; }
 .conversion-form { gap: .95rem; }
+.form-shell label { display: grid; gap: .3rem; font-size: .93rem; }
+.form-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
 .form-context-card {
   display: grid;
   gap: .3rem;
@@ -335,6 +345,9 @@ input:disabled, textarea:disabled, select:disabled, button:disabled { opacity: .
 .spec-grid span { color: var(--muted-foreground); font-size: .85rem; }
 .sticky-card { position: sticky; top: 5.5rem; align-self: start; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow-sm); }
 .compact-form { display: grid; gap: .6rem; }
+.detail-cta-row .btn { min-width: 158px; }
+.verification-module { border-color: color-mix(in srgb, var(--primary) 30%, var(--border)); }
+.sticky-quick-actions { display: grid; }
 
 .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; }
 .pricing-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; display: grid; gap: .8rem; transition: transform var(--motion-hover) var(--ease-swift), box-shadow var(--motion-hover) var(--ease-swift), border-color var(--motion-hover) var(--ease-swift); }
@@ -370,6 +383,7 @@ details[open] summary + p { animation: details-in var(--motion-page) var(--ease-
 
 .skip-link { position: absolute; left: -999px; top: 0; background: var(--foreground); color: var(--background); padding: .6rem .8rem; z-index: 60; }
 .skip-link:focus { left: .6rem; top: .6rem; }
+.sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
 .contact-pill { font-size: .85rem; color: var(--primary); font-weight: 600; }
 .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 .admin-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; }
@@ -427,6 +441,7 @@ details[open] summary + p { animation: details-in var(--motion-page) var(--ease-
   .mobile-toggle { display: inline-flex; }
   
   .filter-bar { grid-template-columns: 1fr 1fr; }
+  .filter-actions { grid-column: 1 / -1; }
   .detail-hero { height: 320px; }
   .three-col { grid-template-columns: 1fr; }
   .kanban-mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -441,6 +456,11 @@ details[open] summary + p { animation: details-in var(--motion-page) var(--ease-
   .mobile-panel { top: 4.05rem; padding: .8rem 4vw 1rem; gap: .7rem; }
   .mobile-panel a { padding: .7rem .2rem; border-bottom: 1px solid var(--border); }
   .hero-actions, .hero-search, .filter-bar, .stat-grid, .pricing-grid, .password-row { grid-template-columns: 1fr; }
+  .form-grid-2 { grid-template-columns: 1fr; }
+  .filter-drawer { padding: .5rem .75rem; }
+  .filter-drawer:not([open]) { padding-bottom: .35rem; }
+  .filter-actions { flex-direction: column; align-items: stretch; }
+  .detail-cta-row .btn { flex: 1 1 100%; }
   .floating-contact { left: .6rem; right: .6rem; bottom: .6rem; display: grid; grid-template-columns: 1fr 1fr; }
   .floating-contact .btn { width: 100%; }
   .hero { padding-top: 3.2rem; }

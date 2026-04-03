@@ -33,6 +33,12 @@ const outcomes = [
   "Clear pricing with transparent listing packages"
 ];
 
+const trustBreakdown = [
+  { title: "Identity & ownership checks", text: "Listings are reviewed for accountable owner/agent contact before promotion." },
+  { title: "Media quality verification", text: "Core photos, floor area, and media consistency are validated to reduce mismatched expectations." },
+  { title: "Pricing recency controls", text: "Listings surface update markers so buyers and renters can assess freshness quickly." }
+];
+
 export default async function HomePage() {
   let hero: { title: string; body: string } | null = null;
   let featured: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
@@ -105,7 +111,7 @@ export default async function HomePage() {
       <section className="shell section two-col">
         <Reveal>
           <div className="card-pad">
-            <h2>Why list with RightBricks</h2>
+            <h2>One platform for sellers and serious buyers</h2>
             <ul className="check-list">
               {outcomes.map((item) => <li key={item}>{item}</li>)}
             </ul>
@@ -123,6 +129,23 @@ export default async function HomePage() {
             <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="how-it-works-cta">Talk to Sales</a>
           </div>
         </Reveal>
+      </section>
+
+      <section className="shell section">
+        <div className="section-head">
+          <h2>What “verified” means on RightBricks</h2>
+          <p className="muted">Verification is operational, not just promotional copy. Each listing shows a trust snapshot and review recency.</p>
+        </div>
+        <div className="grid">
+          {trustBreakdown.map((item, index) => (
+            <Reveal key={item.title} delay={getStaggerDelay(index)}>
+              <article className="card-pad">
+                <h3>{item.title}</h3>
+                <p className="muted">{item.text}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
       </section>
 
       <section className="shell section">

@@ -84,43 +84,80 @@ export default async function ListingsPage({
   return (
     <section className="shell section">
       <Reveal y={16}><div className="section-head">
-        <h1>Browse verified listings across Cambodia</h1>
-        <p className="muted">Find high-fit properties fast, then enquire directly with owners, agents, or the RightBricks advisory team.</p>
+        <h1>Browse verified properties with clear trust signals</h1>
+        <p className="muted">Every live card is structured for fast decision-making: pricing context, verification status, media quality, and direct enquiry paths.</p>
       </div></Reveal>
 
-      <Reveal delay={80} y={12}><form className="filter-bar" method="GET" aria-label="Listings filters">
-        <input name="q" defaultValue={q} placeholder="City, district, keyword" />
-        <input name="city" defaultValue={city} placeholder="City" />
-        <input name="min" type="number" defaultValue={min || ""} placeholder="Min USD" />
-        <input name="max" type="number" defaultValue={max || ""} placeholder="Max USD" />
-        <select name="listingType" defaultValue={listingType}>
-          <option value="">All types</option><option value="SALE">For sale</option><option value="RENT">For rent</option><option value="COMMERCIAL">Commercial</option><option value="LAND">Land</option><option value="LUXURY">Luxury</option><option value="INVESTMENT">Investment</option>
-        </select>
-        <select name="category" defaultValue={category}>
-          <option value="">All categories</option><option value="VILLA">Villa</option><option value="CONDO">Condo</option><option value="APARTMENT">Apartment</option><option value="TOWNHOUSE">Townhouse</option><option value="PENTHOUSE">Penthouse</option><option value="OFFICE">Office</option><option value="SHOPHOUSE">Shophouse</option><option value="LAND">Land</option><option value="WAREHOUSE">Warehouse</option>
-        </select>
-        <select name="beds" defaultValue={beds || ""}>
-          <option value="">Any beds</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option>
-        </select>
-        <select name="baths" defaultValue={baths || ""}>
-          <option value="">Any baths</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option>
-        </select>
-        <select name="furnished" defaultValue={furnished}>
-          <option value="">Any furnishing</option><option value="FULLY_FURNISHED">Fully furnished</option><option value="SEMI_FURNISHED">Semi furnished</option><option value="UNFURNISHED">Unfurnished</option><option value="NOT_APPLICABLE">Not applicable</option>
-        </select>
-        <input name="areaMin" type="number" defaultValue={areaMin || ""} placeholder="Min size sqm" />
-        <input name="areaMax" type="number" defaultValue={areaMax || ""} placeholder="Max size sqm" />
-        <input name="landMin" type="number" defaultValue={landMin || ""} placeholder="Min land sqm" />
-        <input name="landMax" type="number" defaultValue={landMax || ""} placeholder="Max land sqm" />
-        <select name="featured" defaultValue={params.featured ?? ""}>
-          <option value="">Featured: all</option><option value="true">Featured only</option>
-        </select>
-        <select name="sort" defaultValue={sort}>
-          <option value="featured">Featured</option><option value="newest">Newest</option><option value="price_asc">Price: Low to high</option><option value="price_desc">Price: High to low</option>
-        </select>
-        <button className="btn btn-primary" type="submit" data-track-event="apply_filter" data-track-label="listings-filter-apply">Apply</button>
-        <Link href="/listings" className="btn btn-ghost" data-track-event="apply_filter" data-track-label="listings-reset">Reset</Link>
-      </form></Reveal>
+      <Reveal delay={80} y={12}>
+        <details className="filter-drawer" open>
+          <summary>Filter listings</summary>
+          <form className="filter-bar" method="GET" aria-label="Listings filters">
+            <label htmlFor="q">Search keyword
+              <input id="q" name="q" defaultValue={q} placeholder="City, district, keyword" />
+            </label>
+            <label htmlFor="city">City
+              <input id="city" name="city" defaultValue={city} placeholder="City" />
+            </label>
+            <label htmlFor="min">Minimum USD
+              <input id="min" name="min" type="number" defaultValue={min || ""} placeholder="Min USD" />
+            </label>
+            <label htmlFor="max">Maximum USD
+              <input id="max" name="max" type="number" defaultValue={max || ""} placeholder="Max USD" />
+            </label>
+            <label htmlFor="listingType">Listing type
+              <select id="listingType" name="listingType" defaultValue={listingType}>
+                <option value="">All types</option><option value="SALE">For sale</option><option value="RENT">For rent</option><option value="COMMERCIAL">Commercial</option><option value="LAND">Land</option><option value="LUXURY">Luxury</option><option value="INVESTMENT">Investment</option>
+              </select>
+            </label>
+            <label htmlFor="category">Category
+              <select id="category" name="category" defaultValue={category}>
+                <option value="">All categories</option><option value="VILLA">Villa</option><option value="CONDO">Condo</option><option value="APARTMENT">Apartment</option><option value="TOWNHOUSE">Townhouse</option><option value="PENTHOUSE">Penthouse</option><option value="OFFICE">Office</option><option value="SHOPHOUSE">Shophouse</option><option value="LAND">Land</option><option value="WAREHOUSE">Warehouse</option>
+              </select>
+            </label>
+            <label htmlFor="beds">Bedrooms
+              <select id="beds" name="beds" defaultValue={beds || ""}>
+                <option value="">Any beds</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option>
+              </select>
+            </label>
+            <label htmlFor="baths">Bathrooms
+              <select id="baths" name="baths" defaultValue={baths || ""}>
+                <option value="">Any baths</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option>
+              </select>
+            </label>
+            <label htmlFor="furnished">Furnishing
+              <select id="furnished" name="furnished" defaultValue={furnished}>
+                <option value="">Any furnishing</option><option value="FULLY_FURNISHED">Fully furnished</option><option value="SEMI_FURNISHED">Semi furnished</option><option value="UNFURNISHED">Unfurnished</option><option value="NOT_APPLICABLE">Not applicable</option>
+              </select>
+            </label>
+            <label htmlFor="areaMin">Min size (sqm)
+              <input id="areaMin" name="areaMin" type="number" defaultValue={areaMin || ""} placeholder="Min size sqm" />
+            </label>
+            <label htmlFor="areaMax">Max size (sqm)
+              <input id="areaMax" name="areaMax" type="number" defaultValue={areaMax || ""} placeholder="Max size sqm" />
+            </label>
+            <label htmlFor="landMin">Min land (sqm)
+              <input id="landMin" name="landMin" type="number" defaultValue={landMin || ""} placeholder="Min land sqm" />
+            </label>
+            <label htmlFor="landMax">Max land (sqm)
+              <input id="landMax" name="landMax" type="number" defaultValue={landMax || ""} placeholder="Max land sqm" />
+            </label>
+            <label htmlFor="featured">Featured
+              <select id="featured" name="featured" defaultValue={params.featured ?? ""}>
+                <option value="">Featured: all</option><option value="true">Featured only</option>
+              </select>
+            </label>
+            <label htmlFor="sort">Sort by
+              <select id="sort" name="sort" defaultValue={sort}>
+                <option value="featured">Featured</option><option value="newest">Newest</option><option value="price_asc">Price: Low to high</option><option value="price_desc">Price: High to low</option>
+              </select>
+            </label>
+            <div className="filter-actions">
+              <button className="btn btn-primary" type="submit" data-track-event="apply_filter" data-track-label="listings-filter-apply">Apply filters</button>
+              <Link href="/listings" className="btn btn-ghost" data-track-event="apply_filter" data-track-label="listings-reset">Reset</Link>
+            </div>
+          </form>
+        </details>
+      </Reveal>
 
       {hasFilters && <p className="muted">Active filters applied. Use reset to return to full inventory.</p>}
 

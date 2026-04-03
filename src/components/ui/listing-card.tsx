@@ -20,6 +20,12 @@ type ListingCardProps = {
     furnishing?: string | null;
     availability?: string;
     featured: boolean;
+    verificationState?: string;
+    lastReviewedAt?: Date | string | null;
+    pricingUpdatedAt?: Date | string | null;
+    mediaVerified?: boolean;
+    docsReviewed?: boolean;
+    locationConfirmed?: boolean;
     media?: { id?: string; kind?: string; url: string; thumbnail?: string | null; isPrimary?: boolean; sortOrder?: number; sourceType?: string | null }[];
   };
 };
@@ -29,15 +35,21 @@ export function ListingCard({ listing }: ListingCardProps) {
   const image = getCardThumbnail(media);
   const hasVideo = hasVideoMedia(media);
 
+  const trustChecks = [listing.mediaVerified, listing.docsReviewed, listing.locationConfirmed].filter(Boolean).length;
+  const reviewedLabel = listing.lastReviewedAt
+    ? new Date(listing.lastReviewedAt).toISOString().slice(0, 10)
+    : null;
+
   return (
     <article className="listing-card">
       <div className="listing-media-wrap">
         <Image src={image} alt={`${listing.title} in ${listing.district}, ${listing.city}`} loading="lazy" className="listing-media" width={640} height={420} />
-        <span className="pill">Verified</span>
+        <span className="pill">{listing.verificationState ? listing.verificationState.replaceAll("_", " ").toLowerCase() : "verified"}</span>
         {listing.featured && <span className="pill dark">Featured</span>}
         <div className="media-badges">
           {hasVideo && <span className="pill subtle">Video</span>}
           {media.length > 1 && <span className="pill subtle">{media.length} media</span>}
+          {trustChecks > 0 && <span className="pill subtle">{trustChecks}/3 trust checks</span>}
         </div>
       </div>
       <div className="listing-content">
@@ -50,6 +62,10 @@ export function ListingCard({ listing }: ListingCardProps) {
           <span>{listing.bathrooms} bath</span>
           <span>{listing.areaSqm} sqm</span>
           {listing.category && <span>{listing.category.toLowerCase()}</span>}
+        </div>
+        <div className="trust-row">
+          {reviewedLabel && <span>Reviewed: {reviewedLabel}</span>}
+          {listing.pricingUpdatedAt && <span>Price updated</span>}
         </div>
         {listing.availability && <p className="muted">Status: {listing.availability.replaceAll("_", " ").toLowerCase()}</p>}
         <div className="hero-actions listing-actions">
