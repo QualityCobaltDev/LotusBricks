@@ -7,9 +7,9 @@ import { failResult, okResult, toUserFacingError } from "@/lib/mutation-result";
 import { logServerError } from "@/lib/observability";
 import { revalidatePath } from "next/cache";
 import { ensureUniqueListingSlug } from "@/lib/listing-slug";
+import { getIntentFromListingType, getVerificationReadiness } from "@/lib/listing-validation";
 
 const statusSchema = z.object({ status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]) });
-
 
 function revalidateListingSurfaces(slug?: string | null, previousSlug?: string | null) {
   revalidatePath("/");
@@ -52,24 +52,25 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     return NextResponse.json(failResult("Invalid JSON payload."), { status: 400 });
   }
 
-  console.info("[admin-listings-update] request_start", { actor: session.userId, id });
   const parsed = listingSchema.safeParse(body);
-  if (!parsed.success) {
-    console.info("[admin-listings-update] validation_failed", { id, actor: session.userId, issues: parsed.error.flatten().fieldErrors });
-    return NextResponse.json(failResult("Validation failed.", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
-  }
+  if (!parsed.success) return NextResponse.json(failResult("Validation failed.", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
 
   const payload = parsed.data;
   const slug = await ensureUniqueListingSlug(payload.slug || payload.title, id);
   if (!slug) return NextResponse.json(failResult("Slug is required."), { status: 400 });
 
-  const { imageUrl, videoUrl, imageUrls, videoUrls, mediaItems, availabilityDate, ...rest } = payload;
+  const listingIntent = payload.listingIntent ?? getIntentFromListingType(payload.listingType);
+  const priceFrequency = payload.priceFrequency ?? (listingIntent === "RENT" || listingIntent === "LEASE" ? "MONTHLY" : "TOTAL");
+  const { imageUrl, videoUrl, imageUrls, videoUrls, mediaItems, availabilityDate, pricingUpdatedAt, lastReviewedAt, ...rest } = payload;
+
   const normalizedItems = mediaItems.length
     ? mediaItems
     : [
       ...((imageUrls.length ? imageUrls : imageUrl ? [imageUrl] : []).map((url) => ({ url, kind: "image" as const }))),
       ...((videoUrls.length ? videoUrls : videoUrl ? [videoUrl] : []).map((url) => ({ url, kind: "video" as const })))
     ];
+
+  const readiness = getVerificationReadiness({ ...payload, listingIntent, priceFrequency, mediaCount: normalizedItems.length } as never);
 
   try {
     const existing = await db.listing.findUnique({ where: { id }, select: { slug: true } });
@@ -80,10 +81,19 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       data: {
         ...rest,
         slug,
+        listingIntent,
+        priceFrequency,
         availabilityDate: availabilityDate ? new Date(availabilityDate) : null,
+        pricingUpdatedAt: pricingUpdatedAt ? new Date(pricingUpdatedAt) : new Date(),
+        lastReviewedAt: lastReviewedAt ? new Date(lastReviewedAt) : null,
         publishedAt: rest.status === "PUBLISHED" ? new Date() : null
       }
     });
+
+    if (existing.slug !== slug) {
+      await db.listingSlugHistory.upsert({ where: { slug: existing.slug }, update: { listingId: id }, create: { slug: existing.slug, listingId: id } });
+    }
+    await db.listingSlugHistory.upsert({ where: { slug }, update: { listingId: id }, create: { slug, listingId: id } });
 
     await db.listingMedia.deleteMany({ where: { listingId: id } });
     if (normalizedItems.length) {
@@ -99,11 +109,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       });
     }
 
-    console.info("[admin-listings-update] db_success", { id, slug: listing.slug });
     revalidateListingSurfaces(listing.slug, existing.slug);
-    console.info("[admin-listings-update] cache_revalidated", { id, slug: listing.slug, previousSlug: existing.slug });
-
-    return NextResponse.json(okResult(listing, "Listing saved successfully."));
+    return NextResponse.json(okResult({ ...listing, readiness }, "Listing saved successfully."));
   } catch (error) {
     logServerError("admin-listings-update", error, { id, slug });
     return NextResponse.json(toUserFacingError(error, "Unable to save listing."), { status: 500 });
@@ -126,6 +133,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!parsed.success) return NextResponse.json(failResult("Invalid status payload."), { status: 400 });
 
   try {
+    const existing = await db.listing.findUnique({ where: { id }, include: { media: { select: { id: true } } } });
+    if (!existing) return NextResponse.json(failResult("Listing not found."), { status: 404 });
+
+    if (parsed.data.status === "PUBLISHED" && existing.verificationState === "VERIFIED") {
+      const readiness = getVerificationReadiness({ ...existing, mediaCount: existing.media.length });
+      if (!readiness.readyForVerified) {
+        return NextResponse.json(
+          failResult("Verified listing is incomplete and cannot be published.", {
+            fieldErrors: { verificationState: [`Verification readiness ${readiness.score}%. Complete checklist first.`] }
+          }),
+          { status: 400 }
+        );
+      }
+    }
+
     const listing = await db.listing.update({
       where: { id },
       data: {

@@ -12,14 +12,22 @@ export type AdminListingRow = {
   city?: string;
   district?: string;
   listingType?: "SALE" | "RENT" | "COMMERCIAL" | "LAND" | "LUXURY" | "INVESTMENT";
+  listingIntent?: "SALE" | "RENT" | "INVESTMENT" | "LEASE";
   category?: "VILLA" | "CONDO" | "APARTMENT" | "TOWNHOUSE" | "PENTHOUSE" | "OFFICE" | "SHOPHOUSE" | "LAND" | "WAREHOUSE";
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  priceFrequency?: "TOTAL" | "MONTHLY" | "WEEKLY" | "DAILY" | "YEARLY";
+  verificationState?: "UNVERIFIED" | "IN_REVIEW" | "VERIFIED";
+  docsReviewed?: boolean;
+  locationConfirmed?: boolean;
+  mediaVerified?: boolean;
+  categoryOverrideJustification?: string;
   currency?: string;
   priceUsd?: number;
   bedrooms?: number;
   bathrooms?: number;
   areaSqm?: number;
   featured?: boolean;
+  readinessScore?: number;
   seoTitle?: string | null;
   seoDescription?: string | null;
   ownerName: string;
@@ -40,6 +48,7 @@ type EditorState = {
   city: string;
   district: string;
   listingType: "SALE" | "RENT" | "COMMERCIAL" | "LAND" | "LUXURY" | "INVESTMENT";
+  listingIntent: "SALE" | "RENT" | "INVESTMENT" | "LEASE";
   category: "VILLA" | "CONDO" | "APARTMENT" | "TOWNHOUSE" | "PENTHOUSE" | "OFFICE" | "SHOPHOUSE" | "LAND" | "WAREHOUSE";
   priceUsd: number;
   currency: string;
@@ -47,6 +56,12 @@ type EditorState = {
   bathrooms: number;
   areaSqm: number;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  priceFrequency?: "TOTAL" | "MONTHLY" | "WEEKLY" | "DAILY" | "YEARLY";
+  verificationState?: "UNVERIFIED" | "IN_REVIEW" | "VERIFIED";
+  docsReviewed?: boolean;
+  locationConfirmed?: boolean;
+  mediaVerified?: boolean;
+  categoryOverrideJustification?: string;
   featured: boolean;
   seoTitle: string;
   seoDescription: string;
@@ -66,6 +81,7 @@ const defaultEditor = (): EditorState => ({
   city: "Phnom Penh",
   district: "Chamkarmon",
   listingType: "SALE",
+  listingIntent: "SALE",
   category: "CONDO",
   priceUsd: 100000,
   currency: "USD",
@@ -73,6 +89,12 @@ const defaultEditor = (): EditorState => ({
   bathrooms: 1,
   areaSqm: 50,
   status: "DRAFT",
+  priceFrequency: "TOTAL",
+  verificationState: "UNVERIFIED",
+  docsReviewed: false,
+  locationConfirmed: false,
+  mediaVerified: false,
+  categoryOverrideJustification: "",
   featured: false,
   seoTitle: "",
   seoDescription: "",
@@ -105,7 +127,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
   const [sortBy, setSortBy] = useState<"latest" | "status" | "price">("latest");
   const [query, setQuery] = useState("");
   const [editor, setEditor] = useState<EditorState | null>(null);
-  const [feedback, setFeedback] = useState<{ type: "idle" | "ok" | "error"; message?: string }>({ type: "idle" });
+  const [feedback, setFeedback] = useState<{ type: "idle" | "ok" | "error"; message?: string; fieldErrors?: string[] }>({ type: "idle" });
   const [isSaving, setIsSaving] = useState(false);
 
   const filtered = useMemo(() => {
@@ -170,12 +192,19 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       district: row.district ?? "Chamkarmon",
       listingType: row.listingType ?? "SALE",
       category: row.category ?? "CONDO",
+      listingIntent: row.listingIntent ?? "SALE",
       priceUsd: row.priceUsd ?? 100000,
       currency: row.currency ?? "USD",
       bedrooms: row.bedrooms ?? 1,
       bathrooms: row.bathrooms ?? 1,
       areaSqm: row.areaSqm ?? 50,
       status: row.status,
+      priceFrequency: "TOTAL",
+      verificationState: row.verificationState ?? "UNVERIFIED",
+      docsReviewed: false,
+      locationConfirmed: false,
+      mediaVerified: false,
+      categoryOverrideJustification: "",
       featured: Boolean(row.featured),
       seoTitle: row.seoTitle ?? "",
       seoDescription: row.seoDescription ?? "",
@@ -200,11 +229,18 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       bathrooms: Number(editor.bathrooms),
       areaSqm: Number(editor.areaSqm),
       listingType: editor.listingType,
+      listingIntent: editor.listingIntent,
       category: editor.category,
+      priceFrequency: editor.priceFrequency,
       availability: "AVAILABLE",
       country: "Cambodia",
       currency: editor.currency,
       status: editor.status,
+      verificationState: editor.verificationState,
+      docsReviewed: editor.docsReviewed,
+      locationConfirmed: editor.locationConfirmed,
+      mediaVerified: editor.mediaVerified,
+      categoryOverrideJustification: editor.categoryOverrideJustification || undefined,
       featured: editor.featured,
       seoTitle: editor.seoTitle || editor.title,
       seoDescription: editor.seoDescription || editor.summary,
@@ -229,8 +265,8 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.ok) {
-        const fieldErrors = data?.fieldErrors ? Object.values(data.fieldErrors as Record<string, string[]>).flat().join(" ") : "";
-        setFeedback({ type: "error", message: fieldErrors || data?.error || "Save failed." });
+        const fieldErrors = data?.fieldErrors ? Object.values(data.fieldErrors as Record<string, string[]>).flat() : [];
+        setFeedback({ type: "error", fieldErrors, message: fieldErrors.join(" ") || data?.error || "Save failed." });
         return false;
       }
 
@@ -329,6 +365,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       areaSqm: row.areaSqm ?? 50,
       listingType: row.listingType ?? "SALE",
       category: row.category ?? "CONDO",
+      listingIntent: row.listingIntent ?? "SALE",
       availability: "AVAILABLE",
       country: "Cambodia",
       currency: row.currency ?? "USD",
@@ -383,6 +420,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
       </div>
       {feedback.type === "ok" && <p className="form-ok">{feedback.message}</p>}
       {feedback.type === "error" && <p className="form-error">{feedback.message}</p>}
+      {feedback.fieldErrors?.length ? <ul className="form-error">{feedback.fieldErrors.map((err) => <li key={err}>{err}</li>)}</ul> : null}
 
       {rows.length === 0 ? (
         <article className="empty-state" style={{ marginTop: "1rem" }}>
@@ -394,7 +432,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
         <div className="admin-table-wrap">
           <table className="comparison-table">
             <thead>
-              <tr><th><input type="checkbox" onChange={(e) => setSelected(e.target.checked ? filtered.map((x) => x.id) : [])} /></th><th>Listing</th><th>Status</th><th>Owner</th><th>Plan</th><th>Media</th><th>Price</th><th>Updated</th><th>Actions</th></tr>
+              <tr><th><input type="checkbox" onChange={(e) => setSelected(e.target.checked ? filtered.map((x) => x.id) : [])} /></th><th>Listing</th><th>Status</th><th>Verified</th><th>Owner</th><th>Plan</th><th>Media</th><th>Price</th><th>Updated</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {filtered.map((x) => {
@@ -404,6 +442,7 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
                     <td><input checked={selected.includes(x.id)} type="checkbox" onChange={(e) => toggle(x.id, e.target.checked)} /></td>
                     <td><strong>{x.title}</strong><br /><small>{x.slug}</small></td>
                     <td>{x.status}</td>
+                    <td>{x.verificationState ?? "UNVERIFIED"}{typeof x.readinessScore === "number" ? ` (${x.readinessScore}%)` : ""}</td>
                     <td>{x.ownerName}</td>
                     <td>{x.ownerPlanTier ?? "N/A"}</td>
                     <td>{x.mediaCount}</td>
@@ -439,12 +478,14 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
             <label>City<input value={editor.city} onChange={(e) => setEditor((prev) => prev ? { ...prev, city: e.target.value } : null)} required /></label>
             <label>District<input value={editor.district} onChange={(e) => setEditor((prev) => prev ? { ...prev, district: e.target.value } : null)} required /></label>
             <label>Listing Type<select value={editor.listingType} onChange={(e) => setEditor((prev) => prev ? { ...prev, listingType: e.target.value as EditorState["listingType"] } : null)}><option value="SALE">Sale</option><option value="RENT">Rent</option><option value="COMMERCIAL">Commercial</option><option value="LAND">Land</option><option value="LUXURY">Luxury</option><option value="INVESTMENT">Investment</option></select></label>
+            <label>Listing intent<select value={editor.listingIntent} onChange={(e) => setEditor((prev) => prev ? { ...prev, listingIntent: e.target.value as EditorState["listingIntent"] } : null)}><option value="SALE">Sale</option><option value="RENT">Rent</option><option value="INVESTMENT">Investment</option><option value="LEASE">Lease</option></select></label>
             <label>Category<select value={editor.category} onChange={(e) => setEditor((prev) => prev ? { ...prev, category: e.target.value as EditorState["category"] } : null)}><option value="CONDO">Condo</option><option value="APARTMENT">Apartment</option><option value="VILLA">Villa</option><option value="TOWNHOUSE">Townhouse</option><option value="PENTHOUSE">Penthouse</option><option value="OFFICE">Office</option><option value="SHOPHOUSE">Shophouse</option><option value="LAND">Land</option><option value="WAREHOUSE">Warehouse</option></select></label>
             <label>Price<input type="number" value={editor.priceUsd} onChange={(e) => setEditor((prev) => prev ? { ...prev, priceUsd: Number(e.target.value) } : null)} required /></label>
             <label>Currency<input value={editor.currency} onChange={(e) => setEditor((prev) => prev ? { ...prev, currency: e.target.value } : null)} required /></label>
             <label>Bedrooms<input type="number" value={editor.bedrooms} onChange={(e) => setEditor((prev) => prev ? { ...prev, bedrooms: Number(e.target.value) } : null)} required /></label>
             <label>Bathrooms<input type="number" value={editor.bathrooms} onChange={(e) => setEditor((prev) => prev ? { ...prev, bathrooms: Number(e.target.value) } : null)} required /></label>
             <label>Area sqm<input type="number" value={editor.areaSqm} onChange={(e) => setEditor((prev) => prev ? { ...prev, areaSqm: Number(e.target.value) } : null)} required /></label>
+            <label>Price frequency<select value={editor.priceFrequency} onChange={(e) => setEditor((prev) => prev ? { ...prev, priceFrequency: e.target.value as EditorState["priceFrequency"] } : null)}><option value="TOTAL">Total</option><option value="MONTHLY">Monthly</option><option value="WEEKLY">Weekly</option><option value="DAILY">Daily</option><option value="YEARLY">Yearly</option></select></label>
             <label>Status<select value={editor.status} onChange={(e) => setEditor((prev) => prev ? { ...prev, status: e.target.value as EditorState["status"] } : null)}><option value="DRAFT">Draft</option><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option></select></label>
             <label>SEO title<input value={editor.seoTitle} onChange={(e) => setEditor((prev) => prev ? { ...prev, seoTitle: e.target.value } : null)} /></label>
             <label>SEO description<textarea value={editor.seoDescription} onChange={(e) => setEditor((prev) => prev ? { ...prev, seoDescription: e.target.value } : null)} /></label>
@@ -452,6 +493,11 @@ export function ListingsControlTable({ rows }: { rows: AdminListingRow[] }) {
             <label>Video URLs (one per line)<textarea value={editor.videoUrls} onChange={(e) => setEditor((prev) => prev ? { ...prev, videoUrls: e.target.value } : null)} /></label>
             <label>Contact phone<input value={editor.contactPhone} onChange={(e) => setEditor((prev) => prev ? { ...prev, contactPhone: e.target.value } : null)} /></label>
             <label>Contact email<input value={editor.contactEmail} onChange={(e) => setEditor((prev) => prev ? { ...prev, contactEmail: e.target.value } : null)} /></label>
+            <label>Verification state<select value={editor.verificationState} onChange={(e) => setEditor((prev) => prev ? { ...prev, verificationState: e.target.value as EditorState["verificationState"] } : null)}><option value="UNVERIFIED">Unverified</option><option value="IN_REVIEW">In review</option><option value="VERIFIED">Verified</option></select></label>
+            <label>Category override justification<textarea value={editor.categoryOverrideJustification} onChange={(e) => setEditor((prev) => prev ? { ...prev, categoryOverrideJustification: e.target.value } : null)} /></label>
+            <label className="remember"><input type="checkbox" checked={editor.docsReviewed} onChange={(e) => setEditor((prev) => prev ? { ...prev, docsReviewed: e.target.checked } : null)} /> Docs reviewed</label>
+            <label className="remember"><input type="checkbox" checked={editor.locationConfirmed} onChange={(e) => setEditor((prev) => prev ? { ...prev, locationConfirmed: e.target.checked } : null)} /> Location confirmed</label>
+            <label className="remember"><input type="checkbox" checked={editor.mediaVerified} onChange={(e) => setEditor((prev) => prev ? { ...prev, mediaVerified: e.target.checked } : null)} /> Media verified</label>
             <label>Internal notes<textarea value={editor.internalNotes} onChange={(e) => setEditor((prev) => prev ? { ...prev, internalNotes: e.target.value } : null)} /></label>
             <label className="remember"><input type="checkbox" checked={editor.featured} onChange={(e) => setEditor((prev) => prev ? { ...prev, featured: e.target.checked } : null)} /> Featured</label>
           </div>

@@ -4,6 +4,7 @@ import { PLAN_CONFIG } from "@/lib/plans";
 import { ListingsControlTable, type AdminListingRow } from "@/components/admin/listings-control-table";
 import { logServerError } from "@/lib/observability";
 import type { Prisma } from "@prisma/client";
+import { getVerificationReadiness } from "@/lib/listing-validation";
 
 type ListingStatusCount = {
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
@@ -27,6 +28,7 @@ function normalizeAdminListingRows(rows: AdminListingRecord[]): AdminListingRow[
     city: row.city,
     district: row.district,
     listingType: row.listingType,
+    listingIntent: row.listingIntent,
     category: row.category,
     status: row.status,
     currency: row.currency,
@@ -35,6 +37,8 @@ function normalizeAdminListingRows(rows: AdminListingRecord[]): AdminListingRow[
     bathrooms: row.bathrooms,
     areaSqm: row.areaSqm,
     featured: row.featured,
+    verificationState: row.verificationState,
+    readinessScore: getVerificationReadiness({ ...row, mediaCount: Array.isArray(row.media) ? row.media.length : 0 }).score,
     seoTitle: row.seoTitle,
     seoDescription: row.seoDescription,
     ownerName: row.owner?.fullName ?? "Unassigned",

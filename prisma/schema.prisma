@@ -27,6 +27,27 @@ enum ListingType {
   INVESTMENT
 }
 
+enum ListingIntent {
+  SALE
+  RENT
+  INVESTMENT
+  LEASE
+}
+
+enum PriceFrequency {
+  TOTAL
+  MONTHLY
+  WEEKLY
+  DAILY
+  YEARLY
+}
+
+enum VerificationState {
+  UNVERIFIED
+  IN_REVIEW
+  VERIFIED
+}
+
 enum PropertyCategory {
   VILLA
   CONDO
@@ -112,8 +133,10 @@ model Listing {
   slug         String         @unique
   title        String
   listingType  ListingType    @default(RENT)
+  listingIntent ListingIntent @default(RENT)
   category     PropertyCategory @default(CONDO)
   availability PropertyAvailability @default(AVAILABLE)
+  verificationState VerificationState @default(UNVERIFIED)
   summary      String
   heroDescription String?
   description  String
@@ -129,7 +152,9 @@ model Listing {
   neighborhoodSummary String?
   currency     String         @default("USD")
   priceUsd     Int
+  priceFrequency PriceFrequency @default(TOTAL)
   priceSuffix  String?
+  pricingUpdatedAt DateTime?
   originalPriceUsd Int?
   negotiable   Boolean        @default(false)
   serviceFees  String?
@@ -168,6 +193,11 @@ model Listing {
   whatsappAvailable Boolean @default(true)
   telegramAvailable Boolean @default(true)
   enquirySubjectTemplate String?
+  categoryOverrideJustification String?
+  docsReviewed Boolean @default(false)
+  locationConfirmed Boolean @default(false)
+  mediaVerified Boolean @default(false)
+  lastReviewedAt DateTime?
   seoTitle     String?
   seoDescription String?
   openGraphImage String?
@@ -183,6 +213,7 @@ model Listing {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   media        ListingMedia[]
+  slugHistory  ListingSlugHistory[]
   favorites    Favorite[]
   inquiries    Inquiry[]
   owner        User?          @relation(fields: [ownerId], references: [id], onDelete: SetNull)
@@ -190,6 +221,16 @@ model Listing {
   @@index([status, featured])
   @@index([city])
   @@index([ownerId])
+}
+
+model ListingSlugHistory {
+  id          String   @id @default(cuid())
+  listingId   String
+  slug        String   @unique
+  createdAt   DateTime @default(now())
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, createdAt])
 }
 
 model ListingMedia {

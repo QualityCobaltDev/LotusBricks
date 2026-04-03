@@ -25,10 +25,14 @@ export async function ensureUniqueListingSlug(baseInput: string, excludeId?: str
   const used = new Set(collisions.map((item) => item.slug));
   if (!used.has(base)) return base;
 
-  let suffix = 2;
-  while (used.has(`${base}-${suffix}`)) {
-    suffix += 1;
-  }
+  const suffixes = collisions
+    .map((item) => item.slug)
+    .map((slug) => {
+      if (slug === base) return 1;
+      const match = slug.match(new RegExp(`^${base}-(\\d+)$`));
+      return match ? Number(match[1]) : 1;
+    });
 
-  return `${base}-${suffix}`;
+  const next = Math.max(...suffixes, 1) + 1;
+  return `${base}-${next}`;
 }

@@ -18,7 +18,9 @@
     "prisma:validate": "prisma validate --config ./prisma.config.ts",
     "prisma:migrate:deploy": "prisma migrate deploy --config ./prisma.config.ts",
     "test:routing": "tsx --test src/lib/__tests__/routing.test.ts",
-    "qa:routes": "node scripts/route-integrity-check.mjs"
+    "qa:routes": "node scripts/route-integrity-check.mjs",
+    "seed:backfill-listing-integrity": "tsx prisma/backfill-listing-integrity.ts",
+    "test:listing-validation": "tsx --test src/lib/__tests__/listing-validation.test.ts"
   },
   "dependencies": {
     "@prisma/client": "6.19.2",
