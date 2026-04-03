@@ -5,7 +5,7 @@ import { formatUsd } from "@/lib/plans";
 import { getPricingPlans } from "@/lib/pricing-settings";
 import { Reveal } from "@/components/ui/reveal";
 import { getStaggerDelay } from "@/lib/motion";
-import { normalizePublicHref } from "@/lib/routing";
+import { buildContactHref } from "@/lib/routing";
 
 export const metadata: Metadata = buildMetadata({
   title: "Pricing Plans",
@@ -68,7 +68,14 @@ export default async function PricingPage() {
                 <li><strong>Support:</strong> {supportByTier[plan.key]}</li>
               </ul>
 
-              <a href={normalizePublicHref(plan.ctaHref)} className={`btn ${plan.contactOnly ? "btn-ghost" : "btn-primary"}`} data-track-event="choose_tier" data-track-label={plan.key}>{plan.contactOnly ? "Request Custom Proposal" : "Get Started"}</a>
+              <a
+                href={buildContactHref({ plan: plan.key, source: "pricing" })}
+                className={`btn ${plan.contactOnly ? "btn-ghost" : "btn-primary"}`}
+                data-track-event="pricing_tier_click"
+                data-track-label={plan.key}
+              >
+                {plan.contactOnly ? "Request Custom Proposal" : "Get Started"}
+              </a>
               <small className="muted">No hidden charges. You always know what you pay and what you get.</small>
             </article>
           </Reveal>
@@ -86,7 +93,7 @@ export default async function PricingPage() {
           <article className="card-pad">
             <h2>Need help choosing the right tier?</h2>
             <p>Tell us your listing goals and we&apos;ll recommend the best starting plan in one short consultation.</p>
-            <a className="btn btn-primary" href="/contact" data-track-event="contact_form_start" data-track-label="pricing-help">Contact Us</a>
+            <a className="btn btn-primary" href={buildContactHref({ source: "pricing" })} data-track-event="contact_form_start" data-track-label="pricing-help">Contact Us</a>
           </article>
         </Reveal>
       </div>

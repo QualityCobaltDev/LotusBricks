@@ -12,7 +12,7 @@ import { formatUsd } from "@/lib/plans";
 import { Reveal } from "@/components/ui/reveal";
 import { ParallaxLayer } from "@/components/ui/parallax-layer";
 import { getStaggerDelay } from "@/lib/motion";
-import { normalizePublicHref } from "@/lib/routing";
+import { buildContactHref } from "@/lib/routing";
 
 export const metadata: Metadata = buildMetadata({
   title: "List Property & Get Qualified Leads in Cambodia",
@@ -68,9 +68,9 @@ export default async function HomePage() {
               "RightBricks helps property owners, agencies, and developers showcase verified listings with high-trust presentation, direct enquiries, and sales-focused support."}
           </p>
           <div className="hero-actions">
-            <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="home-list-property">List Your Property</Link>
+            <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="home-list-property">List Your Property</Link>
             <Link href="/listings" className="btn btn-outline" data-track-event="click_browse_listings" data-track-label="home-browse">Browse Listings</Link>
-            <Link href="/contact" className="btn btn-ghost" data-track-event="contact_form_start" data-track-label="home-contact">Contact Us</Link>
+            <a href={buildContactHref({ source: "homepage" })} className="btn btn-ghost" data-track-event="homepage_cta_click" data-track-label="home-contact">Contact Us</a>
           </div>
           <ul className="trust-inline">
             <li>Direct owner/agent enquiries</li>
@@ -109,7 +109,7 @@ export default async function HomePage() {
             <ul className="check-list">
               {outcomes.map((item) => <li key={item}>{item}</li>)}
             </ul>
-            <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="why-list-cta">Get Started</Link>
+            <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="why-list-cta">Get Started</Link>
           </div>
         </Reveal>
         <Reveal delay={100}>
@@ -120,7 +120,7 @@ export default async function HomePage() {
               <li>RightBricks verifies your listing and publishes with premium structure.</li>
               <li>Receive enquiries and schedule viewings through a clear contact path.</li>
             </ol>
-            <Link href="/contact" className="btn btn-outline" data-track-event="contact_form_start" data-track-label="how-it-works-cta">Talk to Sales</Link>
+            <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="how-it-works-cta">Talk to Sales</a>
           </div>
         </Reveal>
       </section>
@@ -145,7 +145,7 @@ export default async function HomePage() {
                 <h3>{plan.name}</h3>
                 {plan.contactOnly ? <p className="muted">Custom pricing for multi-project portfolios</p> : <p className="muted">{`${formatUsd(plan.recurringMonthlyUsd ?? 0)} + ${formatUsd(plan.oneTimeSignupFeeUsd)} sign-up`}</p>}
                 <p className="muted">{plan.contactOnly ? "Best for enterprise portfolios and high-volume inventory." : `Includes ${plan.listingLimit} active listing${plan.listingLimit === 1 ? "" : "s"}, ${plan.photosPerListing} photos, and ${plan.videosPerListing} videos per listing.`}</p>
-                <a href={normalizePublicHref(plan.ctaHref)} className="btn btn-outline" data-track-event="choose_tier" data-track-label={`home-${plan.key.toLowerCase()}`}>{plan.contactOnly ? "Contact Us" : "Choose Plan"}</a>
+                <a href={buildContactHref({ plan: plan.key, source: "homepage" })} className="btn btn-outline" data-track-event="pricing_tier_click" data-track-label={`home-${plan.key.toLowerCase()}`}>{plan.contactOnly ? "Contact Us" : "Choose Plan"}</a>
               </article>
             </Reveal>
           ))}
@@ -170,8 +170,8 @@ export default async function HomePage() {
         <h2>Start converting more leads with RightBricks</h2>
         <p>Choose a plan, launch your listing, and let verified visibility drive serious enquiries.</p>
         <div className="hero-actions">
-          <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="home-footer-list">List Your Property</Link>
-          <Link href="/contact" className="btn btn-outline" data-track-event="contact_form_start" data-track-label="home-footer-contact">Contact Us</Link>
+          <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="home-footer-list">List Your Property</Link>
+          <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="home-footer-contact">Contact Us</a>
         </div>
       </Reveal>
     </>

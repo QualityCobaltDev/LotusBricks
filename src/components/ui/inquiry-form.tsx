@@ -1,14 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { CONTACT } from "@/lib/contact";
+import { trackEvent } from "@/lib/analytics/events";
 
 type InquiryFormState = "idle" | "ok" | "error";
 
 export function InquiryForm({ listingId, compact = false, initialMessage }: { listingId: string; compact?: boolean; initialMessage?: string }) {
   const [state, setState] = useState<InquiryFormState>("idle");
+  const [started, setStarted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   async function submit(formData: FormData) {
+    if (submitting) return;
+    setSubmitting(true);
     setState("idle");
+    trackEvent("listing_enquiry_submit", { listingId });
     const res = await fetch("/api/inquiries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -27,16 +34,27 @@ export function InquiryForm({ listingId, compact = false, initialMessage }: { li
       })
     });
     setState(res.ok ? "ok" : "error");
+    setSubmitting(false);
+  }
+
+  function onStart() {
+    if (started) return;
+    setStarted(true);
+    trackEvent("listing_enquiry_start", { listingId });
   }
 
   return (
-    <form action={submit} className={compact ? "compact-form" : "stack-form"}>
+    <form action={submit} className={`${compact ? "compact-form" : "stack-form"} conversion-form`} onFocusCapture={onStart}>
+      <div className="form-context-card">
+        <strong>Secure enquiry to the RightBricks property team.</strong>
+        <small className="muted">We normally reply within a few business hours with viewing options and full details.</small>
+      </div>
       <input name="fullName" placeholder="Full name" required />
       <input name="email" type="email" placeholder="Email" required />
-      <input name="phone" placeholder="Phone (optional, e.g. (+855) 011 389 625)" />
+      <input name="phone" placeholder="Phone (recommended for faster follow-up)" minLength={7} />
       <label className="muted">Preferred contact method
         <select name="preferredContact" defaultValue="EMAIL">
-          <option value="EMAIL">Email</option><option value="PHONE">Phone</option><option value="WHATSAPP">WhatsApp</option><option value="TELEGRAM">Telegram</option>
+          <option value="WHATSAPP">WhatsApp (Fastest)</option><option value="PHONE">Phone call</option><option value="EMAIL">Email</option><option value="TELEGRAM">Telegram</option>
         </select>
       </label>
       <label className="muted">Interest type
@@ -49,10 +67,10 @@ export function InquiryForm({ listingId, compact = false, initialMessage }: { li
       </label>
       <input name="website" tabIndex={-1} autoComplete="off" className="hp-field" aria-hidden />
       <textarea name="message" defaultValue={initialMessage ?? "Hello RightBricks, I am interested in this property. Please share more details and viewing availability."} placeholder="Tell us your timeline, budget, and goals." required minLength={10} />
-      <button className="btn btn-primary">Enquire Now</button>
-      <p className="muted">No obligation. We respond quickly and can help schedule a viewing.</p>
-      {state === "ok" && <p className="form-ok">We’ve received your enquiry. Our team will contact you shortly via phone or email.</p>}
-      {state === "error" && <p className="form-error">Unable to submit right now. Please contact contact@rightbricks.online or call (+855) 011 389 625.</p>}
+      <button className="btn btn-primary" disabled={submitting}>{submitting ? "Submitting..." : "Request Property Details"}</button>
+      <p className="muted">No obligation. Trusted RightBricks advisor follow-up and clear next steps.</p>
+      {state === "ok" && <div className="form-success-card"><p className="form-ok">Thank you — your property enquiry is confirmed.</p><p className="muted">Next step: our team will share details and viewing availability shortly. Need faster help? <a href={CONTACT.whatsappHref} data-track-event="whatsapp_click" data-track-label="listing-enquiry-success">Chat on WhatsApp</a>.</p></div>}
+      {state === "error" && <p className="form-error">Unable to submit right now. Please contact {CONTACT.email} or call {CONTACT.phoneDisplay}.</p>}
     </form>
   );
 }
