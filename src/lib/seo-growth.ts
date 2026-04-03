@@ -21,7 +21,7 @@ export function getCategoryBySlug(slug: string) {
   return SEO_CATEGORIES.find((category) => category.slug === slug);
 }
 
-export function getDiscoverPath(regionSlug: string, categorySlug: string) {
+export function getDiscoverPath(regionSlug: string, categorySlug: string): `/discover/${string}/${string}` {
   return `/discover/${regionSlug}/${categorySlug}`;
 }
 

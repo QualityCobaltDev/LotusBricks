@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildBreadcrumbJsonLd, buildMetadata } from "@/lib/metadata";
-import { buildListingsFilterHref, getCategoryBySlug, getDiscoverPath, getRegionBySlug, SEO_CATEGORIES, SEO_REGIONS } from "@/lib/seo-growth";
+import { getCategoryBySlug, getDiscoverPath, getRegionBySlug, SEO_CATEGORIES, SEO_REGIONS } from "@/lib/seo-growth";
 
 type Props = {
   params: Promise<{ region: string; category: string }>;
@@ -61,7 +61,7 @@ export default async function DiscoverLandingPage({ params }: Props) {
       <article className="card-pad">
         <h2>Browse live inventory</h2>
         <p>Open filtered listings for {category.name.toLowerCase()} in {region.name}.</p>
-        <Link className="btn btn-primary" href={buildListingsFilterHref({ regionName: region.name, categoryKey: category.listingCategory })}>View filtered listings</Link>
+        <Link className="btn btn-primary" href={{ pathname: "/listings", query: { city: region.name, category: category.listingCategory } }}>View filtered listings</Link>
       </article>
       <article className="card-pad section-card-gap">
         <h2>Explore more discovery paths</h2>
