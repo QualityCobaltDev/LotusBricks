@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ThemeToggle } from "@/components/site/theme-toggle";
 
 const navItems = [
   { href: "/listings", label: "Browse Listings" },
@@ -66,10 +65,10 @@ export function SiteHeader({ brandName = "RightBricks", tagline = "Cambodia's ve
 
         <div className="nav-right">
           <div className="nav-ctas">
-            <ThemeToggle />
             <div className="nav-buttons">
               <Link href="/listings" className="btn btn-outline" data-track-event="click_browse_listings" data-track-label="header-browse">View Listings</Link>
               <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="header-list-property">List Your Property</Link>
+              <Link href="/login/admin" className="btn btn-ghost admin-access-btn" data-track-event="admin_login_start" data-track-label="header-admin-access">Admin Access</Link>
             </div>
           </div>
           <button aria-label={open ? "Close menu" : "Open menu"} className="mobile-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>☰</button>
@@ -88,10 +87,8 @@ export function SiteHeader({ brandName = "RightBricks", tagline = "Cambodia's ve
             {item.label}
           </Link>
         ))}
-        <div style={{ transitionDelay: "320ms" }}>
-          <ThemeToggle />
-        </div>
-        <Link className="btn btn-primary" href="/pricing" onClick={() => setOpen(false)} style={{ transitionDelay: "360ms" }} data-track-event="choose_tier" data-track-label="mobile-list-property">List Your Property</Link>
+        <Link href="/login/admin" onClick={() => setOpen(false)} style={{ transitionDelay: "320ms" }} data-track-event="admin_login_start" data-track-label="mobile-admin-access">Admin Access</Link>
+        <Link className="btn btn-primary" href="/pricing" onClick={() => setOpen(false)} style={{ transitionDelay: "380ms" }} data-track-event="choose_tier" data-track-label="mobile-list-property">List Your Property</Link>
       </div>
     </header>
   );

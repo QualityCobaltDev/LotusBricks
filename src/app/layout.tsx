@@ -7,7 +7,6 @@ import { getCanonicalSiteUrl } from "@/lib/env";
 import { ConsentBanner } from "@/components/site/consent-banner";
 import { AnalyticsProvider } from "@/components/site/analytics-provider";
 import { EventTracker } from "@/components/site/event-tracker";
-import { FloatingContactCta } from "@/components/site/floating-contact";
 import { buildOrganizationJsonLd, buildWebSiteJsonLd } from "@/lib/metadata";
 import { getPublicAppVersion } from "@/lib/routing";
 
@@ -60,21 +59,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const webSiteLd = buildWebSiteJsonLd();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body>
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              '(function(){try{var key="rightbricks-theme";var stored=localStorage.getItem(key);var theme=stored||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=theme;}catch(e){}})();'
-          }}
-        />
         <a href="#main-content" className="skip-link">Skip to main content</a>
         <SiteHeader brandName={brand.siteName} tagline={brand.tagline} logoUrl={brand.headerLogoUrl || undefined} />
         <main id="main-content">{children}</main>
         <ConsentBanner />
         <AnalyticsProvider />
         <EventTracker />
-        <FloatingContactCta />
         <SiteFooter
           email={contact.email}
           emailHref={contact.emailHref}
