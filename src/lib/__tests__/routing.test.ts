@@ -4,7 +4,9 @@ import {
   getCanonicalRedirectUrl,
   normalizePublicHref,
   normalizeContactPlan,
-  getPublicAppVersion
+  getPublicAppVersion,
+  buildContactHref,
+  normalizeContactSource
 } from "@/lib/routing";
 import { PLAN_CONFIG } from "@/lib/plans";
 import { isKnownResourceSlug } from "@/lib/resources";
@@ -35,6 +37,10 @@ test("pricing CTA targets stay routable for all plan variants", () => {
   assert.equal(normalizeContactPlan("TIER_2"), "TIER_2");
   assert.equal(normalizeContactPlan("custom"), "CUSTOM");
   assert.equal(normalizeContactPlan("unexpected"), "");
+  assert.equal(normalizeContactSource("pricing"), "pricing");
+  assert.equal(normalizeContactSource("unknown"), "direct");
+  assert.equal(buildContactHref({ plan: "tier-2", source: "pricing" }), "/contact?plan=tier-2&source=pricing");
+  assert.equal(buildContactHref({ plan: "unexpected", source: "broken" }), "/contact");
 });
 
 test("forgot-password route path remains stable", () => {

@@ -1,11 +1,19 @@
 export type AnalyticsEventName =
   | "view_home"
+  | "homepage_cta_click"
   | "click_browse_listings"
   | "view_listings"
   | "apply_filter"
   | "choose_tier"
+  | "pricing_tier_click"
   | "contact_form_start"
   | "contact_form_submit"
+  | "listing_enquiry_start"
+  | "listing_enquiry_submit"
+  | "whatsapp_click"
+  | "telegram_click"
+  | "call_click"
+  | "email_click"
   | "login_view"
   | "password_reset_request";
 

@@ -28,7 +28,7 @@ export function SiteFooter({
           <p>Launch your listing with RightBricks and get direct enquiries from serious buyers, renters, and investors in Cambodia.</p>
         </div>
         <div className="hero-actions">
-          <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="footer-list-property">List Your Property</Link>
+          <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="footer-list-property">List Your Property</Link>
           <Link href="/contact" className="btn btn-outline" data-track-event="contact_form_start" data-track-label="footer-contact">Contact Us</Link>
         </div>
       </Reveal>
@@ -40,8 +40,8 @@ export function SiteFooter({
             <p>
               Trusted platform serving Cambodia&apos;s real estate market with verified listings, transparent communication, and responsive support.
             </p>
-            <p className="muted">✉️ <a href={emailHref}>{email}</a> · ☎️ <a href={phoneHref}>{phoneDisplay}</a></p>
-            <p className="muted">💬 <a href={whatsappHref}>WhatsApp</a> · 📲 <a href={telegramHref}>Telegram</a></p>
+            <p className="muted">✉️ <a href={emailHref} data-track-event="email_click" data-track-label="footer-email">{email}</a> · ☎️ <a href={phoneHref} data-track-event="call_click" data-track-label="footer-phone">{phoneDisplay}</a></p>
+            <p className="muted">💬 <a href={whatsappHref} data-track-event="whatsapp_click" data-track-label="footer-whatsapp">WhatsApp</a> · 📲 <a href={telegramHref} data-track-event="telegram_click" data-track-label="footer-telegram">Telegram</a></p>
           </div>
         </Reveal>
         <Reveal delay={80}>
