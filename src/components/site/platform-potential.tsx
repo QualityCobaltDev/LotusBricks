@@ -7,9 +7,9 @@ export function PlatformPotential() {
     <section className="shell section platform-potential">
       <Reveal>
         <div className="section-head platform-potential-head">
-          <h2>Platform Potential</h2>
+          <h2>Operational standards</h2>
           <p className="muted">
-            Designed to maximize visibility, enquiries, and response efficiency across Cambodia&apos;s property market.
+            Trust signals that make RightBricks feel clear, accountable, and professionally operated.
           </p>
         </div>
       </Reveal>

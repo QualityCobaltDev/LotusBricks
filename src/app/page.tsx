@@ -14,6 +14,8 @@ import { ParallaxLayer } from "@/components/ui/parallax-layer";
 import { getStaggerDelay } from "@/lib/motion";
 import { buildContactHref } from "@/lib/routing";
 import { PlatformPotential } from "@/components/site/platform-potential";
+import { CONTACT } from "@/lib/contact";
+import { CONTACT_CONFIDENCE_POINTS, TRUST_BADGES } from "@/lib/trust";
 
 export const metadata: Metadata = buildMetadata({
   title: "List Property & Get Qualified Leads in Cambodia",
@@ -27,13 +29,7 @@ const guides = [
   { title: "Developer listing playbook", href: "/resources/developer-listing-playbook", text: "How to present verified media and convert qualified inquiries faster." }
 ];
 
-const trustStrip = [
-  "Verified listings",
-  "Direct enquiries",
-  "Professional presentation",
-  "Fast response handling",
-  "Built for owners, agents, and developers"
-];
+const trustStrip = TRUST_BADGES;
 
 const howItWorksSteps = [
   {
@@ -128,9 +124,7 @@ export default async function HomePage() {
             <a href={buildContactHref({ source: "homepage" })} className="btn btn-ghost" data-track-event="homepage_cta_click" data-track-label="home-contact">Contact Us</a>
           </div>
           <ul className="trust-inline">
-            <li>No obligation consultation</li>
-            <li>Fast onboarding support</li>
-            <li>Built for serious property exposure</li>
+            {CONTACT_CONFIDENCE_POINTS.map((point) => <li key={point}>{point}</li>)}
           </ul>
         </Reveal>
         <Reveal delay={140} className="hero-visual-wrap" y={24}>
@@ -284,7 +278,7 @@ export default async function HomePage() {
           <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="home-footer-list">List Your Property</Link>
           <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="home-footer-contact">Contact the Team</a>
         </div>
-        <p className="cta-note">No obligation consultation. Fast response from the RightBricks team.</p>
+        <p className="cta-note">No obligation consultation. Fast response from the RightBricks team via <a href={CONTACT.whatsappHref}>WhatsApp</a>, <a href={CONTACT.telegramHref}>Telegram</a>, phone, or email.</p>
       </Reveal>
     </>
   );
