@@ -307,6 +307,21 @@ input:hover, textarea:hover, select:hover { border-color: var(--primary); }
 input:focus, textarea:focus, select:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent); }
 input:disabled, textarea:disabled, select:disabled, button:disabled { opacity: .6; cursor: not-allowed; }
 .stack-form { display: grid; gap: .8rem; }
+.conversion-form { gap: .95rem; }
+.form-context-card {
+  display: grid;
+  gap: .3rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+  border-radius: 12px;
+  padding: .8rem;
+  background: color-mix(in srgb, var(--muted) 70%, var(--card));
+}
+.form-success-card {
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, var(--border));
+  border-radius: 12px;
+  padding: .75rem;
+  background: color-mix(in srgb, var(--color-success) 8%, var(--card));
+}
 .empty-state { background: var(--card); border: 1px dashed color-mix(in srgb, var(--border) 80%, transparent); border-radius: var(--radius); padding: 1.5rem; text-align: center; }
 
 .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
@@ -432,6 +447,9 @@ details[open] summary + p { animation: details-in var(--motion-page) var(--ease-
   .price { font-size: 1.25rem; }
   .listing-grid { gap: .85rem; }
   .listing-content { padding: .85rem; }
+  .conversion-form { gap: .75rem; }
+  .conversion-form input, .conversion-form select, .conversion-form textarea { font-size: 16px; }
+  .sticky-card { position: static; }
   .comparison-table { min-width: 560px; }
   .inline-admin-form { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: .4rem; }

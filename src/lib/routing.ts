@@ -46,6 +46,34 @@ export function normalizeContactPlan(value: string) {
   return allowedContactPlans.has(plan) ? plan : "";
 }
 
+const allowedContactSources = new Set(["pricing", "homepage", "listing", "support", "direct"]);
+
+export function normalizeContactSource(value: string) {
+  const source = value.trim().toLowerCase();
+  return allowedContactSources.has(source) ? source : "direct";
+}
+
+export function buildContactHref(input: {
+  plan?: string;
+  source?: string;
+  listingId?: string;
+}) {
+  const params = new URLSearchParams();
+  const normalizedPlan = normalizeContactPlan(input.plan ?? "");
+  const normalizedSource = normalizeContactSource(input.source ?? "direct");
+  if (normalizedPlan) {
+    params.set("plan", normalizedPlan.toLowerCase().replaceAll("_", "-"));
+  }
+  if (normalizedSource && normalizedSource !== "direct") {
+    params.set("source", normalizedSource);
+  }
+  if (input.listingId) {
+    params.set("listing", input.listingId);
+  }
+  const query = params.toString();
+  return query ? `/contact?${query}` : "/contact";
+}
+
 export function getPublicAppVersion(value: string | undefined) {
   if (!value) return "";
   const normalized = value.trim();

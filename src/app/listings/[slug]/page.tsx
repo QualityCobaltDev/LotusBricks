@@ -152,10 +152,10 @@ export default async function ListingDetail({
         <div>
           <Image src={primary?.posterUrl ?? primary?.url ?? MEDIA_FALLBACK_IMAGE} alt={primary?.altText ?? listing.title} className="detail-hero" width={1200} height={720} priority />
           <div className="hero-actions">
-            <a className="btn btn-primary" href="#listing-enquiry" data-track-event="contact_form_start" data-track-label="detail-enquire-now">Enquire Now</a>
-            <a className="btn btn-ghost" href="#listing-enquiry" data-track-event="contact_form_start" data-track-label="detail-get-details">Get Details</a>
-            <a className="btn btn-ghost" href="tel:+85511389625" data-track-event="contact_form_start" data-track-label="detail-schedule-viewing">Schedule Viewing</a>
-            <a className="btn btn-ghost" href="https://wa.me/85511389625">WhatsApp</a>
+            <a className="btn btn-primary" href="#listing-enquiry" data-track-event="listing_enquiry_start" data-track-label="detail-enquire-now">Enquire Now</a>
+            <a className="btn btn-ghost" href="#listing-enquiry" data-track-event="listing_enquiry_start" data-track-label="detail-get-details">Get Details</a>
+            <a className="btn btn-ghost" href="tel:+85511389625" data-track-event="call_click" data-track-label="detail-schedule-viewing">Schedule Viewing</a>
+            <a className="btn btn-ghost" href="https://wa.me/85511389625" data-track-event="whatsapp_click" data-track-label="detail-whatsapp">WhatsApp</a>
           </div>
           <div className="thumb-row">
             {normalizedMedia.slice(1, 5).map((m) => m.type === "image" ? (<Image key={m.id ?? m.url} src={m.url} alt={m.altText} className="thumb" loading="lazy" width={240} height={140} />) : (<div key={m.id ?? m.url} className="thumb video-thumb">▶ Video</div>))}
@@ -283,8 +283,8 @@ export default async function ListingDetail({
           <p className="muted">Phone: <a href="tel:+85511389625">(+855) 011 389 625</a></p>
           <p className="muted">Email: <a href="mailto:contact@rightbricks.online">contact@rightbricks.online</a></p>
           <p className="muted">Direct contact. No obligation. Fast response during business hours.</p>
-          <a className="btn btn-accent" href="tel:+85511389625" style={{ width: "100%", marginBottom: ".75rem" }}>Schedule a viewing</a>
-          <a className="btn btn-outline" href="mailto:contact@rightbricks.online" style={{ width: "100%", marginBottom: ".75rem" }} data-track-event="contact_form_start" data-track-label="detail-email">Get details by email</a>
+          <a className="btn btn-accent" href="tel:+85511389625" style={{ width: "100%", marginBottom: ".75rem" }} data-track-event="call_click" data-track-label="aside-call">Schedule a viewing</a>
+          <a className="btn btn-outline" href="mailto:contact@rightbricks.online" style={{ width: "100%", marginBottom: ".75rem" }} data-track-event="email_click" data-track-label="detail-email">Get details by email</a>
           <h3>Contact / enquiry form</h3>
           <InquiryForm listingId={listing.id} compact initialMessage={`Hello RightBricks, I am interested in ${listing.title}. Please share more details and viewing availability.`} />
         </aside>

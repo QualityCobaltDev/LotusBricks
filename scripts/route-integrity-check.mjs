@@ -24,6 +24,6 @@ const footer = fs.readFileSync("src/app/layout.tsx", "utf8");
 assert(footer.includes("getPublicAppVersion"), "layout must sanitize public app version");
 
 const pricingPage = fs.readFileSync("src/app/pricing/page.tsx", "utf8");
-assert(pricingPage.includes("normalizePublicHref"), "pricing CTA links should normalize canonical host links");
+assert(pricingPage.includes("buildContactHref"), "pricing CTA links should build reliable attributed contact links");
 
 console.log("Route integrity checks passed.");

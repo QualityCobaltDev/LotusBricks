@@ -16,6 +16,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true }, { status: 202 });
   }
 
+  const duplicateWindowStart = new Date(Date.now() - 1000 * 60 * 5);
+  const possibleDuplicate = await db.inquiry.findFirst({
+    where: {
+      email: payload.email,
+      listingId: payload.listingId || null,
+      inquiryType: payload.inquiryType,
+      message: payload.message,
+      createdAt: { gte: duplicateWindowStart }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+  if (possibleDuplicate) {
+    return NextResponse.json({ id: possibleDuplicate.id, status: possibleDuplicate.status, duplicate: true }, { status: 200 });
+  }
+
   const inquiry = await db.inquiry.create({
     data: {
       listingId: payload.listingId || null,
