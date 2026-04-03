@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { InquiryForm } from "@/components/ui/inquiry-form";
 import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
@@ -10,6 +10,8 @@ import { Prisma } from "@prisma/client";
 import { getPrimaryMedia, normalizeListingMedia, hasVideoMedia, MEDIA_FALLBACK_IMAGE, getYouTubeEmbedUrl } from "@/lib/listing-media";
 import { getSession } from "@/lib/auth";
 import { normalizeListingSlug } from "@/lib/listing-slug";
+import { resolveListingSlug } from "@/lib/listing-routing";
+import { getVerificationReadiness } from "@/lib/listing-validation";
 
 const asStringArray = (value: Prisma.JsonValue | null | undefined) =>
   Array.isArray(value) ? value.map((item) => String(item)) : [];
@@ -27,10 +29,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug: rawSlug } = await params;
   const slug = normalizeListingSlug(rawSlug);
   if (!slug) return { title: "Listing not found" };
-  let listing: { title: string; city: string; seoTitle: string | null; seoDescription: string | null; summary: string; openGraphImage: string | null } | null = null;
+  let listing: { title: string; city: string; seoTitle: string | null; seoDescription: string | null; summary: string; openGraphImage: string | null; slug: string } | null = null;
 
   try {
-    listing = await db.listing.findUnique({ where: { slug } });
+    const resolved = await resolveListingSlug(slug);
+    if (!resolved) return { title: "Listing not found" };
+    listing = await db.listing.findUnique({ where: { slug: resolved.slug } });
   } catch (error) {
     logServerError("listing-metadata", error, { slug });
   }
@@ -56,13 +60,16 @@ export default async function ListingDetail({
   const { slug } = await params;
   const normalizedSlug = normalizeListingSlug(slug);
   if (!normalizedSlug) return notFound();
+  const resolved = await resolveListingSlug(normalizedSlug);
+  if (!resolved) return notFound();
+  if (resolved.redirectFromLegacy) redirect(`/listings/${resolved.slug}`);
   const previewParams = searchParams ? await searchParams : undefined;
 
   let listing: Prisma.ListingGetPayload<{ include: { media: true } }> | null = null;
   let similar: Prisma.ListingGetPayload<{ include: { media: true } }>[] = [];
 
   try {
-    listing = await db.listing.findUnique({ where: { slug: normalizedSlug }, include: { media: { orderBy: { sortOrder: "asc" } } } });
+    listing = await db.listing.findUnique({ where: { slug: resolved.slug }, include: { media: { orderBy: { sortOrder: "asc" } } } });
 
     if (listing) {
       const seededSimilar = asStringArray(listing.similarListings);
@@ -134,10 +141,10 @@ export default async function ListingDetail({
             {badges.map((badge) => <span className="pill" key={badge} style={{ position: "static" }}>{badge}</span>)}
           </div>
           <h1>{listing.title}</h1>
-          <p className="muted">{listing.streetAddress ?? listing.district}, {listing.district}, {listing.city}, {listing.country}</p>
+          <p className="muted">{[listing.streetAddress, listing.district, listing.city, listing.country].filter(Boolean).join(", ")}</p>
           <p>{listing.heroDescription ?? listing.summary}</p>
         </div>
-        <p className="price">${listing.priceUsd.toLocaleString()}{listing.priceSuffix ?? ""}</p>
+        <p className="price">${listing.priceUsd.toLocaleString()} {listing.priceFrequency !== "TOTAL" ? `/${listing.priceFrequency.toLowerCase()}` : ""}</p>
         {hasVideoMedia(normalizedMedia) && <p className="muted">Includes video tour</p>}
       </div>
 
@@ -154,8 +161,8 @@ export default async function ListingDetail({
             {normalizedMedia.slice(1, 5).map((m) => m.type === "image" ? (<Image key={m.id ?? m.url} src={m.url} alt={m.altText} className="thumb" loading="lazy" width={240} height={140} />) : (<div key={m.id ?? m.url} className="thumb video-thumb">▶ Video</div>))}
           </div>
           <div className="spec-grid">
-            <article><strong>{listing.bedrooms || "N/A"}</strong><span>Bedrooms</span></article>
-            <article><strong>{listing.bathrooms || "N/A"}</strong><span>Bathrooms</span></article>
+            <article><strong>{listing.bedrooms}</strong><span>Bedrooms</span></article>
+            <article><strong>{listing.bathrooms}</strong><span>Bathrooms</span></article>
             <article><strong>{listing.areaSqm}</strong><span>Floor sqm</span></article>
             <article><strong>{listing.landAreaSqm ?? "N/A"}</strong><span>Land sqm</span></article>
           </div>
@@ -172,11 +179,11 @@ export default async function ListingDetail({
               <li>Listing type: {listing.listingType.toLowerCase()}</li>
               <li>Category: {listing.category.toLowerCase()}</li>
               <li>Furnishing: {listing.furnishing.replaceAll("_", " ").toLowerCase()}</li>
-              <li>Title type: {listing.titleType ?? "On request"}</li>
-              <li>Orientation: {listing.orientation ?? "On request"}</li>
-              <li>Condition: {listing.propertyCondition ?? "On request"}</li>
-              <li>Parking: {listing.parkingSpaces ?? 0}</li>
-              <li>Viewing: {listing.viewingAvailability ?? "By appointment"}</li>
+              {listing.titleType && <li>Title type: {listing.titleType}</li>}
+              {listing.orientation && <li>Orientation: {listing.orientation}</li>}
+              {listing.propertyCondition && <li>Condition: {listing.propertyCondition}</li>}
+              {typeof listing.parkingSpaces === "number" && <li>Parking: {listing.parkingSpaces}</li>}
+              {listing.viewingAvailability && <li>Viewing: {listing.viewingAvailability}</li>}
             </ul>
           </article>
 
@@ -222,11 +229,11 @@ export default async function ListingDetail({
             </div>
           </article>
 
-          <article className="card-pad section">
+          {(listing.neighborhoodSummary || neighborhoodBenefits.length > 0) && <article className="card-pad section">
             <h2>Neighborhood / location highlights</h2>
-            <p>{listing.neighborhoodSummary}</p>
-            <ul className="check-list">{neighborhoodBenefits.map((x) => <li key={x}>{x}</li>)}</ul>
-          </article>
+            {listing.neighborhoodSummary && <p>{listing.neighborhoodSummary}</p>}
+            {neighborhoodBenefits.length > 0 && <ul className="check-list">{neighborhoodBenefits.map((x) => <li key={x}>{x}</li>)}</ul>}
+          </article>}
 
           <article className="card-pad section">
             <h2>Investment or lifestyle suitability</h2>
@@ -238,13 +245,33 @@ export default async function ListingDetail({
             <ul className="check-list">{investmentHighlights.map((x) => <li key={x}>{x}</li>)}</ul>
           </article>
 
+
+          <article className="card-pad section">
+            <h2>Verification summary</h2>
+            {(() => {
+              const readiness = getVerificationReadiness({ ...listing, mediaCount: normalizedMedia.length });
+              return (
+                <>
+                  <p className="muted">Verification state: <strong>{listing.verificationState.replaceAll("_", " ").toLowerCase()}</strong> · Readiness score: <strong>{readiness.score}%</strong></p>
+                  <ul className="check-list">
+                    <li>Media verified: {listing.mediaVerified ? "Yes" : "No"}</li>
+                    <li>Ownership/documentation reviewed: {listing.docsReviewed ? "Yes" : "No"}</li>
+                    <li>Location confirmed: {listing.locationConfirmed ? "Yes" : "No"}</li>
+                    <li>Pricing last updated: {listing.pricingUpdatedAt ? listing.pricingUpdatedAt.toISOString().slice(0, 10) : "Not provided"}</li>
+                    <li>Last reviewed date: {listing.lastReviewedAt ? listing.lastReviewedAt.toISOString().slice(0, 10) : "Not provided"}</li>
+                  </ul>
+                </>
+              );
+            })()}
+          </article>
+
           <article className="card-pad section">
             <h2>Payment / rental terms</h2>
             <ul className="check-list">
-              <li>Deposit terms: {listing.depositTerms ?? "On request"}</li>
-              <li>Payment terms: {listing.paymentTerms ?? "On request"}</li>
-              <li>Service fees: {listing.serviceFees ?? "On request"}</li>
-              <li>Annual management fee: {listing.annualManagementFee ?? "On request"}</li>
+              {listing.depositTerms && <li>Deposit terms: {listing.depositTerms}</li>}
+              {listing.paymentTerms && <li>Payment terms: {listing.paymentTerms}</li>}
+              {listing.serviceFees && <li>Service fees: {listing.serviceFees}</li>}
+              {listing.annualManagementFee && <li>Annual management fee: {listing.annualManagementFee}</li>}
               <li>Negotiable: {listing.negotiable ? "Yes" : "No"}</li>
             </ul>
           </article>

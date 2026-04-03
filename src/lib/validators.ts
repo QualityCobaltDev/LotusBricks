@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getPlanByKey } from "@/lib/plans";
+import { getIntentFromListingType, getVerificationReadiness, validateListingConsistency } from "@/lib/listing-validation";
 
 const maxPhotos = getPlanByKey("TIER_1").photosPerListing;
 const maxVideos = getPlanByKey("TIER_1").videosPerListing;
@@ -20,8 +21,9 @@ export const listingSchema = z.object({
   bedrooms: z.coerce.number().int().nonnegative(),
   bathrooms: z.coerce.number().int().nonnegative(),
   areaSqm: z.coerce.number().int().positive(),
-  listingType: z.enum(["SALE", "RENT", "COMMERCIAL", "LAND", "LUXURY", "INVESTMENT"]).optional(),
-  category: z.enum(["VILLA", "CONDO", "APARTMENT", "TOWNHOUSE", "PENTHOUSE", "OFFICE", "SHOPHOUSE", "LAND", "WAREHOUSE"]).optional(),
+  listingType: z.enum(["SALE", "RENT", "COMMERCIAL", "LAND", "LUXURY", "INVESTMENT"]).optional().default("SALE"),
+  listingIntent: z.enum(["SALE", "RENT", "INVESTMENT", "LEASE"]).optional(),
+  category: z.enum(["VILLA", "CONDO", "APARTMENT", "TOWNHOUSE", "PENTHOUSE", "OFFICE", "SHOPHOUSE", "LAND", "WAREHOUSE"]).optional().default("CONDO"),
   availability: z.enum(["AVAILABLE", "RESERVED", "SOLD", "RENTED", "UNDER_OFFER"]).optional(),
   country: z.string().optional(),
   commune: z.string().optional(),
@@ -31,6 +33,7 @@ export const listingSchema = z.object({
   longitude: z.coerce.number().optional(),
   neighborhoodSummary: z.string().optional(),
   currency: z.string().optional(),
+  priceFrequency: z.enum(["TOTAL", "MONTHLY", "WEEKLY", "DAILY", "YEARLY"]).optional(),
   priceSuffix: z.string().optional(),
   originalPriceUsd: z.coerce.number().int().positive().optional(),
   negotiable: z.coerce.boolean().optional(),
@@ -69,6 +72,13 @@ export const listingSchema = z.object({
   whatsappAvailable: z.coerce.boolean().optional(),
   telegramAvailable: z.coerce.boolean().optional(),
   enquirySubjectTemplate: z.string().optional(),
+  categoryOverrideJustification: z.string().optional(),
+  verificationState: z.enum(["UNVERIFIED", "IN_REVIEW", "VERIFIED"]).optional().default("UNVERIFIED"),
+  docsReviewed: z.coerce.boolean().optional().default(false),
+  locationConfirmed: z.coerce.boolean().optional().default(false),
+  mediaVerified: z.coerce.boolean().optional().default(false),
+  pricingUpdatedAt: z.string().datetime().optional(),
+  lastReviewedAt: z.string().datetime().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   openGraphImage: z.string().optional(),
@@ -96,6 +106,8 @@ export const listingSchema = z.object({
     sourceType: z.enum(["seed", "upload"]).optional()
   })).optional().default([])
 }).superRefine((payload, ctx) => {
+  const listingIntent = payload.listingIntent ?? getIntentFromListingType(payload.listingType);
+  const priceFrequency = payload.priceFrequency ?? (listingIntent === "RENT" || listingIntent === "LEASE" ? "MONTHLY" : "TOTAL");
   const legacyImages = payload.imageUrl ? [payload.imageUrl] : [];
   const legacyVideos = payload.videoUrl ? [payload.videoUrl] : [];
   const mediaImages = payload.mediaItems.filter((item) => item.kind === "image").map((item) => item.url);
@@ -109,6 +121,31 @@ export const listingSchema = z.object({
 
   if (videos.length > maxVideos) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["videoUrls"], message: `Maximum ${maxVideos} videos per listing.` });
+  }
+
+  for (const issue of validateListingConsistency({
+    ...payload,
+    listingIntent,
+    priceFrequency,
+    mediaCount: images.length + videos.length
+  } as never)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: [issue.path], message: issue.message });
+  }
+
+  if (payload.status === "PUBLISHED" && payload.verificationState === "VERIFIED") {
+    const readiness = getVerificationReadiness({
+      ...payload,
+      listingIntent,
+      priceFrequency,
+      mediaCount: images.length + videos.length
+    } as never);
+    if (!readiness.readyForVerified) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["verificationState"],
+        message: `Verified listings must be complete before publishing. Readiness ${readiness.score}%.`
+      });
+    }
   }
 });
 

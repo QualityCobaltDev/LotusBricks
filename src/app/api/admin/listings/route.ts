@@ -6,7 +6,7 @@ import { failResult, okResult, toUserFacingError } from "@/lib/mutation-result";
 import { logServerError } from "@/lib/observability";
 import { revalidatePath } from "next/cache";
 import { ensureUniqueListingSlug } from "@/lib/listing-slug";
-
+import { getIntentFromListingType, getVerificationReadiness } from "@/lib/listing-validation";
 
 function revalidateListingSurfaces(slug?: string | null) {
   revalidatePath("/");
@@ -42,19 +42,18 @@ export async function POST(req: Request) {
     return NextResponse.json(failResult("Invalid JSON payload."), { status: 400 });
   }
 
-  console.info("[admin-listings-create] request_start", { actor: session.userId });
   const parsed = listingSchema.safeParse(body);
-  if (!parsed.success) {
-    console.info("[admin-listings-create] validation_failed", { actor: session.userId, issues: parsed.error.flatten().fieldErrors });
-    return NextResponse.json(failResult("Validation failed.", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
-  }
+  if (!parsed.success) return NextResponse.json(failResult("Validation failed.", { fieldErrors: parsed.error.flatten().fieldErrors }), { status: 400 });
 
   const payload = parsed.data;
   const candidateSlug = payload.slug || payload.title;
   const slug = await ensureUniqueListingSlug(candidateSlug);
   if (!slug) return NextResponse.json(failResult("Slug is required."), { status: 400 });
 
-  const { imageUrl, videoUrl, imageUrls, videoUrls, mediaItems, availabilityDate, ...rest } = payload;
+  const listingIntent = payload.listingIntent ?? getIntentFromListingType(payload.listingType);
+  const priceFrequency = payload.priceFrequency ?? (listingIntent === "RENT" || listingIntent === "LEASE" ? "MONTHLY" : "TOTAL");
+  const { imageUrl, videoUrl, imageUrls, videoUrls, mediaItems, availabilityDate, pricingUpdatedAt, lastReviewedAt, ...rest } = payload;
+
   const normalizedItems = mediaItems.length
     ? mediaItems
     : [
@@ -62,16 +61,24 @@ export async function POST(req: Request) {
       ...((videoUrls.length ? videoUrls : videoUrl ? [videoUrl] : []).map((url) => ({ url, kind: "video" as const })))
     ];
 
+  const readiness = getVerificationReadiness({ ...payload, listingIntent, priceFrequency, mediaCount: normalizedItems.length } as never);
+
   try {
     const listing = await db.listing.create({
       data: {
         ...rest,
         slug,
+        listingIntent,
+        priceFrequency,
         ownerId: session.userId,
         availabilityDate: availabilityDate ? new Date(availabilityDate) : undefined,
+        pricingUpdatedAt: pricingUpdatedAt ? new Date(pricingUpdatedAt) : new Date(),
+        lastReviewedAt: lastReviewedAt ? new Date(lastReviewedAt) : null,
         publishedAt: rest.status === "PUBLISHED" ? new Date() : null
       }
     });
+
+    await db.listingSlugHistory.upsert({ where: { slug: listing.slug }, update: {}, create: { slug: listing.slug, listingId: listing.id } });
 
     if (normalizedItems.length) {
       await db.listingMedia.createMany({
@@ -86,11 +93,8 @@ export async function POST(req: Request) {
       });
     }
 
-    console.info("[admin-listings-create] db_success", { listingId: listing.id, slug: listing.slug });
     revalidateListingSurfaces(listing.slug);
-    console.info("[admin-listings-create] cache_revalidated", { slug: listing.slug });
-
-    return NextResponse.json(okResult(listing, "Listing created successfully."));
+    return NextResponse.json(okResult({ ...listing, readiness }, "Listing created successfully."));
   } catch (error) {
     logServerError("admin-listings-create", error, { slug });
     return NextResponse.json(toUserFacingError(error, "Unable to create listing."), { status: 500 });
