@@ -168,7 +168,7 @@ export default async function ListingsPage({
               <Reveal key={listing.id} delay={getStaggerDelay(index)}><ListingCard listing={listing} /></Reveal>
             ))}
           </div>
-          <div className="hero-actions" style={{ marginTop: "1rem" }}>
+          <div className="hero-actions section-actions-row">
             <button className="btn btn-ghost" type="button" data-cta="listings-load-more">Load more</button>
             <Link className="btn btn-ghost" href="/contact" data-cta="listings-request-help" data-track-event="contact_form_start" data-track-label="listings-help">Need help shortlisting?</Link>
             <Link className="btn btn-primary" href="/pricing" data-track-event="choose_tier" data-track-label="listings-list-property">List Your Property</Link>
@@ -184,7 +184,7 @@ export default async function ListingsPage({
         <article className="empty-state">
           <h3>No listings matched this filter set</h3>
           <p>Try removing one or two constraints, then enquire on matching listings in seconds.</p>
-          <div className="hero-actions" style={{ justifyContent: "center" }}>
+          <div className="hero-actions hero-actions-centered">
             <Link href="/listings" className="btn btn-ghost">Back to full inventory</Link>
             <Link href="/contact" className="btn btn-primary" data-track-event="contact_form_start" data-track-label="empty-state-contact">Get help from an advisor</Link>
           </div>

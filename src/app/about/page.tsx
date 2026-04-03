@@ -40,7 +40,7 @@ export default async function AboutPage() {
         </article>
       </div>
 
-      <article className="card-pad" style={{ marginBottom: "1rem" }}>
+      <article className="card-pad section-card-gap">
         <h2>How the process works</h2>
         <div className="grid">
           {CONTACT_PROCESS.map((step) => (

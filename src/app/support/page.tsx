@@ -34,7 +34,7 @@ export default async function SupportPage() {
         </article>
       </div>
 
-      <article className="card-pad" style={{ marginTop: "1rem" }}>
+      <article className="card-pad section-card-gap">
         <h2>Support standards</h2>
         <ul className="check-list">
           {TRUST_BADGES.map((item) => <li key={item}>{item}</li>)}

@@ -57,6 +57,7 @@ export function SignInForm({ role }: { role: "ADMIN" | "CUSTOMER" }) {
         </div>
       </label>
       <label className="remember"><input type="checkbox" name="remember" />Remember me for 30 days</label>
+      <p className="muted form-helper">Secure sign-in with encrypted session controls.</p>
       <button className="btn btn-primary" disabled={isSubmitting} aria-busy={isSubmitting}>
         {isSubmitting ? "Signing in..." : `Sign in as ${role === "ADMIN" ? "Admin" : "Customer"}`}
       </button>

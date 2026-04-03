@@ -7,7 +7,7 @@ export default async function AdminLoginPage() {
   if (session) redirect(roleToRedirect(session.role));
 
   return (
-    <section className="shell signin-wrap">
+    <section className="shell section signin-wrap">
       <article className="signin-aside">
         <h1>Admin Login</h1>
         <p>Restricted access for platform administration, operations, and content governance.</p>
