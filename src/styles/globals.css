@@ -21,6 +21,7 @@
   --gradient-brand: linear-gradient(130deg, #173f99 0%, #1e57ca 52%, #c92857 100%);
   --gradient-surface: radial-gradient(circle at 0 0, rgba(63, 117, 225, 0.18), transparent 54%), radial-gradient(circle at 95% 0, rgba(201, 55, 99, 0.14), transparent 46%);
   --overlay: rgba(7, 15, 35, 0.64);
+  --hero-image-blend: var(--background);
   --radius: 18px;
   --color-primary: var(--primary);
   --color-primary-hover: #113a8f;
@@ -79,6 +80,7 @@
   --gradient-brand: linear-gradient(130deg, #6f96ff 0%, #3f71ec 48%, #ea5d87 100%);
   --gradient-surface: radial-gradient(circle at 0 0, rgba(101, 148, 255, 0.18), transparent 55%), radial-gradient(circle at 100% 0, rgba(255, 86, 135, 0.14), transparent 48%);
   --overlay: rgba(3, 7, 19, 0.72);
+  --hero-image-blend: var(--background);
 }
 
 * { box-sizing: border-box; }
@@ -226,7 +228,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .hero::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
-  background: var(--gradient-surface); filter: blur(0); pointer-events: none; opacity: 0; animation: hero-surface-in .7s var(--ease-standard) forwards;
+  background: var(--background); filter: none; pointer-events: none; opacity: 1; animation: none;
 }
 .hero-backdrop { position: absolute; inset: 0; z-index: -2; pointer-events: none; will-change: transform; }
 .hero-backdrop-orb {
@@ -237,8 +239,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   right: 8%;
   top: -6%;
   border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%);
-  animation: float-orb 7s ease-in-out infinite alternate;
+  display: none;
 }
 @keyframes hero-surface-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes float-orb { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 16px, 0); } }
@@ -246,10 +247,38 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .hero h1 { margin: 0; font-size: clamp(2.2rem, 5.4vw, 4rem); line-height: 1.04; letter-spacing: -0.03em; }
 .hero p { color: var(--muted-foreground); font-size: 1.08rem; max-width: 60ch; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin: 1.2rem 0; }
-.hero-card { position: relative; border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-lg); min-height: 440px; border: 1px solid color-mix(in srgb, var(--border) 65%, transparent); }
-.hero-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.hero-card {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  min-height: 440px;
+  background: var(--hero-image-blend);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--foreground) 3%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hero-image-blend) 95%, transparent);
+}
+.hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--hero-image-blend) 0%, color-mix(in srgb, var(--hero-image-blend) 88%, transparent) 14%, transparent 38%),
+    linear-gradient(0deg, var(--hero-image-blend) 0%, color-mix(in srgb, var(--hero-image-blend) 90%, transparent) 18%, transparent 46%);
+  z-index: 1;
+}
+.hero-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .6s ease, filter .35s ease;
+  filter: brightness(1.07) contrast(.97);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 86%, transparent 100%), linear-gradient(180deg, #000 0%, #000 84%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 86%, transparent 100%), linear-gradient(180deg, #000 0%, #000 84%, transparent 100%);
+  mask-composite: intersect;
+}
 .hero-card:hover img { transform: scale(1.04); }
-.hero-overlay { position: absolute; left: 1rem; right: 1rem; bottom: 1rem; background: var(--overlay); color: #fff; border-radius: 14px; padding: 1rem; display: grid; gap: .2rem; backdrop-filter: blur(8px); }
+.hero-overlay { position: absolute; left: 1rem; right: 1rem; bottom: 1rem; background: var(--overlay); color: #fff; border-radius: 14px; padding: 1rem; display: grid; gap: .2rem; backdrop-filter: blur(8px); z-index: 2; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1rem; }
 .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; box-shadow: var(--shadow-sm); }
