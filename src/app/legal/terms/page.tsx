@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { getContactSettings } from "@/lib/site-settings";
+import { buildMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Terms of Service",
+  description: "Usage terms for RightBricks marketplace tools, listing standards, and platform conduct.",
+  path: "/legal/terms"
+});
 
 const sections = [
   {
@@ -38,6 +47,7 @@ export default async function TermsPage() {
       <article className="card-pad">
         <h2>Contact</h2>
         <p>Terms questions: <a href={contact.emailHref}>{contact.email}</a> · <a href={contact.phoneHref}>{contact.phoneDisplay}</a>.</p>
+        <p className="muted">Need operational help? Visit <Link href="/support">Support Center</Link> or <Link href="/contact">Contact sales</Link>.</p>
       </article>
     </section>
   );

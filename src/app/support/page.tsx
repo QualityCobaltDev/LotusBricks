@@ -1,6 +1,14 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getContactSettings } from "@/lib/site-settings";
+import { buildMetadata } from "@/lib/metadata";
 import { CONTACT_CONFIDENCE_POINTS, CONTACT_PROCESS, TRUST_BADGES } from "@/lib/trust";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Support Center for Property Owners, Buyers, and Agencies",
+  description: "Get RightBricks support for listings, enquiries, account access, and marketplace workflows.",
+  path: "/support"
+});
 
 export default async function SupportPage() {
   const contact = await getContactSettings();
@@ -21,6 +29,7 @@ export default async function SupportPage() {
           {contact.supportHours && <p>Support hours: {contact.supportHours}</p>}
           {contact.supportAddress && <p>Location: {contact.supportAddress}</p>}
           <p className="muted">{CONTACT_CONFIDENCE_POINTS.join(" · ")}.</p>
+          <p className="muted">For tier comparisons and onboarding questions, review <Link href="/pricing">pricing plans</Link> then continue in <Link href="/contact">contact</Link>.</p>
         </article>
 
         <article className="card-pad">

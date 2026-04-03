@@ -16,6 +16,7 @@ import { buildContactHref } from "@/lib/routing";
 import { PlatformPotential } from "@/components/site/platform-potential";
 import { CONTACT } from "@/lib/contact";
 import { CONTACT_CONFIDENCE_POINTS, TRUST_BADGES } from "@/lib/trust";
+import { getDiscoverPath, SEO_CATEGORIES, SEO_REGIONS } from "@/lib/seo-growth";
 
 export const metadata: Metadata = buildMetadata({
   title: "List Property & Get Qualified Leads in Cambodia",
@@ -30,6 +31,13 @@ const guides = [
 ];
 
 const trustStrip = TRUST_BADGES;
+
+const discoveryLinks = SEO_REGIONS.slice(0, 3).flatMap((region) =>
+  SEO_CATEGORIES.slice(0, 2).map((category) => ({
+    label: `${category.name} in ${region.name}`,
+    href: getDiscoverPath(region.slug, category.slug)
+  }))
+);
 
 const howItWorksSteps = [
   {
@@ -212,6 +220,25 @@ export default async function HomePage() {
         </div>
         <div className="listing-grid">{featured.map((listing, index) => <Reveal key={listing.id} delay={getStaggerDelay(index)}><ListingCard listing={listing} /></Reveal>)}</div>
       </section>
+
+      <section className="shell section">
+        <div className="section-head">
+          <h2>Discovery hubs for location and property type</h2>
+          <Link href="/discover">View all hubs</Link>
+        </div>
+        <div className="grid">
+          {discoveryLinks.map((item, index) => (
+            <Reveal key={item.href} delay={getStaggerDelay(index)}>
+              <article className="card-pad">
+                <h3>{item.label}</h3>
+                <p className="muted">Structured navigation path into filtered inventory pages.</p>
+                <Link href={item.href}>Explore hub</Link>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
 
       <section className="shell section">
         <div className="section-head">
