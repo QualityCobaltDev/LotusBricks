@@ -246,10 +246,38 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .hero h1 { margin: 0; font-size: clamp(2.2rem, 5.4vw, 4rem); line-height: 1.04; letter-spacing: -0.03em; }
 .hero p { color: var(--muted-foreground); font-size: 1.08rem; max-width: 60ch; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin: 1.2rem 0; }
-.hero-card { position: relative; border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-lg); min-height: 440px; border: 1px solid color-mix(in srgb, var(--border) 65%, transparent); }
-.hero-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.hero-card {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  min-height: 440px;
+  background: var(--background);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--foreground) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--background) 92%, var(--border));
+}
+.hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--background) 0%, color-mix(in srgb, var(--background) 85%, transparent) 12%, transparent 36%),
+    linear-gradient(0deg, var(--background) 0%, color-mix(in srgb, var(--background) 88%, transparent) 16%, transparent 42%);
+  z-index: 1;
+}
+.hero-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .6s ease, filter .35s ease;
+  filter: brightness(1.07) contrast(.97);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 86%, transparent 100%), linear-gradient(180deg, #000 0%, #000 84%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 86%, transparent 100%), linear-gradient(180deg, #000 0%, #000 84%, transparent 100%);
+  mask-composite: intersect;
+}
 .hero-card:hover img { transform: scale(1.04); }
-.hero-overlay { position: absolute; left: 1rem; right: 1rem; bottom: 1rem; background: var(--overlay); color: #fff; border-radius: 14px; padding: 1rem; display: grid; gap: .2rem; backdrop-filter: blur(8px); }
+.hero-overlay { position: absolute; left: 1rem; right: 1rem; bottom: 1rem; background: var(--overlay); color: #fff; border-radius: 14px; padding: 1rem; display: grid; gap: .2rem; backdrop-filter: blur(8px); z-index: 2; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1rem; }
 .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; box-shadow: var(--shadow-sm); }
