@@ -6,20 +6,43 @@ import { ListingCard } from "@/components/ui/listing-card";
 import { logServerError } from "@/lib/observability";
 import { Reveal } from "@/components/ui/reveal";
 import { getStaggerDelay } from "@/lib/motion";
+import { getDiscoverPath, SEO_CATEGORIES, SEO_REGIONS } from "@/lib/seo-growth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = buildMetadata({
-  title: "Verified Property Listings Cambodia",
-  description: "Explore verified apartments, villas, and investment property listings across Cambodia.",
-  path: "/listings"
-});
+type ListingsSearchParams = { q?: string; min?: string; max?: string; beds?: string; baths?: string; city?: string; sort?: string; listingType?: string; category?: string; furnished?: string; featured?: string; areaMin?: string; areaMax?: string; landMin?: string; landMax?: string };
+
+export async function generateMetadata({
+  searchParams
+}: {
+  searchParams: Promise<ListingsSearchParams>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const city = params.city?.trim();
+  const category = params.category?.trim();
+  const q = params.q?.trim();
+  const hasFilters = Boolean(city || category || q || params.beds || params.baths || params.min || params.max || params.listingType || params.furnished || params.featured || params.areaMin || params.areaMax || params.landMin || params.landMax);
+
+  const titleParts = ["Verified Property Listings"];
+  if (category) titleParts.push(category.replaceAll("_", " ").toLowerCase());
+  if (city) titleParts.push(`in ${city}`);
+  if (!city && q) titleParts.push(`for \"${q}\"`);
+
+  return buildMetadata({
+    title: titleParts.join(" "),
+    description: city
+      ? `Explore verified property listings in ${city} with trust signals, media quality indicators, and direct enquiry options.`
+      : "Explore verified apartments, villas, and investment property listings across Cambodia.",
+    path: "/listings",
+    noIndex: hasFilters
+  });
+}
 
 export default async function ListingsPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; min?: string; max?: string; beds?: string; baths?: string; city?: string; sort?: string; listingType?: string; category?: string; furnished?: string; featured?: string; areaMin?: string; areaMax?: string; landMin?: string; landMax?: string }>;
+  searchParams: Promise<ListingsSearchParams>;
 }) {
   const params = await searchParams;
   const q = params.q?.trim() ?? "";
@@ -44,33 +67,33 @@ export default async function ListingsPage({
   if (isDatabaseConfigured()) {
     try {
       listings = await db.listing.findMany({
-      where: {
-        status: "PUBLISHED",
-        priceUsd: { gte: min, lte: max },
-        bedrooms: beds ? { gte: beds } : undefined,
-        bathrooms: baths ? { gte: baths } : undefined,
-        city: city ? { contains: city, mode: "insensitive" } : undefined,
-        listingType: listingType ? listingType as any : undefined,
-        category: category ? category as any : undefined,
-        featured: params.featured ? featured : undefined,
-        furnishing: furnished ? furnished as any : undefined,
-        areaSqm: areaMin || areaMax ? { gte: areaMin || undefined, lte: areaMax } : undefined,
-        landAreaSqm: landMin || landMax ? { gte: landMin || undefined, lte: landMax } : undefined,
-        OR: q
-          ? [{ city: { contains: q, mode: "insensitive" } }, { district: { contains: q, mode: "insensitive" } }, { title: { contains: q, mode: "insensitive" } }]
-          : undefined
-      },
-      orderBy:
-        sort === "price_asc"
-          ? [{ priceUsd: "asc" }]
-          : sort === "price_desc"
-            ? [{ priceUsd: "desc" }]
-            : sort === "newest"
-              ? [{ createdAt: "desc" }]
-              : [{ featured: "desc" }, { createdAt: "desc" }],
-      include: { media: { orderBy: { sortOrder: "asc" }, take: 8 } },
-      take: 18
-    });
+        where: {
+          status: "PUBLISHED",
+          priceUsd: { gte: min, lte: max },
+          bedrooms: beds ? { gte: beds } : undefined,
+          bathrooms: baths ? { gte: baths } : undefined,
+          city: city ? { contains: city, mode: "insensitive" } : undefined,
+          listingType: listingType ? listingType as any : undefined,
+          category: category ? category as any : undefined,
+          featured: params.featured ? featured : undefined,
+          furnishing: furnished ? furnished as any : undefined,
+          areaSqm: areaMin || areaMax ? { gte: areaMin || undefined, lte: areaMax } : undefined,
+          landAreaSqm: landMin || landMax ? { gte: landMin || undefined, lte: landMax } : undefined,
+          OR: q
+            ? [{ city: { contains: q, mode: "insensitive" } }, { district: { contains: q, mode: "insensitive" } }, { title: { contains: q, mode: "insensitive" } }]
+            : undefined
+        },
+        orderBy:
+          sort === "price_asc"
+            ? [{ priceUsd: "asc" }]
+            : sort === "price_desc"
+              ? [{ priceUsd: "desc" }]
+              : sort === "newest"
+                ? [{ createdAt: "desc" }]
+                : [{ featured: "desc" }, { createdAt: "desc" }],
+        include: { media: { orderBy: { sortOrder: "asc" }, take: 8 } },
+        take: 18
+      });
     } catch (error) {
       inventoryState = "unavailable";
       logServerError("listings-page", error, { q, min, max, beds, baths });
@@ -160,6 +183,22 @@ export default async function ListingsPage({
       </Reveal>
 
       {hasFilters && <p className="muted">Active filters applied. Use reset to return to full inventory.</p>}
+
+      {!hasFilters && (
+        <article className="card-pad section-card-gap">
+          <h2>Popular discovery paths</h2>
+          <p className="muted">Jump into high-intent region and property-type hubs.</p>
+          <ul className="check-list">
+            {SEO_REGIONS.slice(0, 3).flatMap((region) =>
+              SEO_CATEGORIES.slice(0, 2).map((categoryItem) => (
+                <li key={`${region.slug}-${categoryItem.slug}`}>
+                  <Link href={getDiscoverPath(region.slug, categoryItem.slug)}>{categoryItem.name} in {region.name}</Link>
+                </li>
+              ))
+            )}
+          </ul>
+        </article>
+      )}
 
       {listings.length ? (
         <>

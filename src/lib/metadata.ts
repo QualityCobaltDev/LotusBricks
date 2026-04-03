@@ -18,26 +18,33 @@ export function buildPageTitle(raw: string) {
   return cleaned;
 }
 
+export function buildAbsoluteUrl(path: string) {
+  return `${siteUrl}${path}`;
+}
+
 export function buildMetadata({
   title,
   description,
   path,
   image = "/og-default.png",
-  type = "website"
+  type = "website",
+  noIndex = false
 }: {
   title: string;
   description: string;
   path: string;
   image?: string;
   type?: "website" | "article";
+  noIndex?: boolean;
 }): Metadata {
   const cleanTitle = buildPageTitle(title);
-  const url = `${siteUrl}${path}`;
+  const url = buildAbsoluteUrl(path);
 
   return {
     title: cleanTitle,
     description,
     alternates: { canonical: path },
+    robots: noIndex ? { index: false, follow: true } : undefined,
     openGraph: {
       title: cleanTitle,
       description,
@@ -63,7 +70,7 @@ export function buildBreadcrumbJsonLd(items: Array<{ name: string; path: string 
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: `${siteUrl}${item.path}`
+      item: buildAbsoluteUrl(item.path)
     }))
   };
 }
@@ -95,5 +102,51 @@ export function buildOrganizationJsonLd(input: {
     email: input.email,
     telephone: input.telephone,
     sameAs: input.sameAs
+  };
+}
+
+export function buildListingJsonLd(input: {
+  name: string;
+  description: string;
+  path: string;
+  priceUsd: number;
+  currency?: string;
+  image?: string;
+  city?: string;
+  country?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  areaSqm?: number;
+  listingType?: string;
+  category?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: input.name,
+    description: input.description,
+    url: buildAbsoluteUrl(input.path),
+    image: input.image,
+    category: [input.listingType, input.category].filter(Boolean).join(" · "),
+    offers: {
+      "@type": "Offer",
+      price: input.priceUsd,
+      priceCurrency: input.currency ?? "USD",
+      availability: "https://schema.org/InStock"
+    },
+    itemOffered: {
+      "@type": "Residence",
+      name: input.name,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: input.city,
+        addressCountry: input.country
+      },
+      numberOfRooms: input.bedrooms,
+      numberOfBathroomsTotal: input.bathrooms,
+      floorSize: input.areaSqm
+        ? { "@type": "QuantitativeValue", value: input.areaSqm, unitCode: "MTK" }
+        : undefined
+    }
   };
 }
