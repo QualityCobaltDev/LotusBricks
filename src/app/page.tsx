@@ -70,7 +70,7 @@ export default async function HomePage() {
           <div className="hero-actions">
             <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="home-list-property">List Your Property</Link>
             <Link href="/listings" className="btn btn-outline" data-track-event="click_browse_listings" data-track-label="home-browse">Browse Listings</Link>
-            <Link href={buildContactHref({ source: "homepage" })} className="btn btn-ghost" data-track-event="homepage_cta_click" data-track-label="home-contact">Contact Us</Link>
+            <a href={buildContactHref({ source: "homepage" })} className="btn btn-ghost" data-track-event="homepage_cta_click" data-track-label="home-contact">Contact Us</a>
           </div>
           <ul className="trust-inline">
             <li>Direct owner/agent enquiries</li>
@@ -120,7 +120,7 @@ export default async function HomePage() {
               <li>RightBricks verifies your listing and publishes with premium structure.</li>
               <li>Receive enquiries and schedule viewings through a clear contact path.</li>
             </ol>
-            <Link href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="how-it-works-cta">Talk to Sales</Link>
+            <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="how-it-works-cta">Talk to Sales</a>
           </div>
         </Reveal>
       </section>
@@ -171,7 +171,7 @@ export default async function HomePage() {
         <p>Choose a plan, launch your listing, and let verified visibility drive serious enquiries.</p>
         <div className="hero-actions">
           <Link href="/pricing" className="btn btn-primary" data-track-event="homepage_cta_click" data-track-label="home-footer-list">List Your Property</Link>
-          <Link href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="home-footer-contact">Contact Us</Link>
+          <a href={buildContactHref({ source: "homepage" })} className="btn btn-outline" data-track-event="homepage_cta_click" data-track-label="home-footer-contact">Contact Us</a>
         </div>
       </Reveal>
     </>
