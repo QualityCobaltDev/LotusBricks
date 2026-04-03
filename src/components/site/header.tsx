@@ -18,9 +18,14 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [compact, setCompact] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      setCompact(y > 28);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -34,17 +39,19 @@ export function SiteHeader() {
   }, [open]);
 
   return (
-    <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
+    <header className={`site-header ${scrolled ? "is-scrolled" : ""} ${compact ? "is-compact" : ""}`}>
       <div className="shell nav-shell">
-        <Link href="/" className="brand" aria-label="RightBricks homepage">
-          <span className="brand-mark">RB</span>
-          <span>
-            RightBricks
-            <small>Cambodia&apos;s verified property platform</small>
-          </span>
-        </Link>
+        <div className="nav-left">
+          <Link href="/" className="brand" aria-label="RightBricks homepage">
+            <span className="brand-mark" aria-hidden="true">RB</span>
+            <span className="brand-copy">
+              <strong>RightBricks</strong>
+              <small>Cambodia&apos;s verified property platform</small>
+            </span>
+          </Link>
+        </div>
 
-        <nav className="desktop-nav" aria-label="Primary">
+        <nav className="desktop-nav nav-center" aria-label="Primary">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href as any} className={pathname === item.href ? "active" : ""}>
               {item.label}
@@ -52,10 +59,14 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="nav-ctas">
-          <ThemeToggle />
-          <Link href="/listings" className="btn btn-outline" data-track-event="click_browse_listings" data-track-label="header-browse">View Listings</Link>
-          <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="header-list-property">List Your Property</Link>
+        <div className="nav-right">
+          <div className="nav-ctas">
+            <ThemeToggle />
+            <div className="nav-buttons">
+              <Link href="/listings" className="btn btn-outline" data-track-event="click_browse_listings" data-track-label="header-browse">View Listings</Link>
+              <Link href="/pricing" className="btn btn-primary" data-track-event="choose_tier" data-track-label="header-list-property">List Your Property</Link>
+            </div>
+          </div>
           <button aria-label={open ? "Close menu" : "Open menu"} className="mobile-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>☰</button>
         </div>
       </div>
