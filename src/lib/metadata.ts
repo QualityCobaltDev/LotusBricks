@@ -1,35 +1,54 @@
 import type { Metadata } from "next";
-import { getSafeSiteUrl } from "@/lib/env";
+import { getCanonicalSiteUrl } from "@/lib/env";
 
-const siteUrl = getSafeSiteUrl();
+const BRAND = "RightBricks";
+const siteUrl = getCanonicalSiteUrl();
+
+function normalizeTitle(raw: string) {
+  return raw
+    .replace(new RegExp(`\\|\\s*${BRAND}`, "gi"), "")
+    .replace(new RegExp(`${BRAND}\\s*\\|`, "gi"), "")
+    .replace(new RegExp(BRAND, "gi"), BRAND)
+    .trim();
+}
+
+export function buildPageTitle(raw: string) {
+  const cleaned = normalizeTitle(raw);
+  if (!cleaned) return BRAND;
+  return cleaned;
+}
 
 export function buildMetadata({
   title,
   description,
   path,
-  image = "/og-default.png"
+  image = "/og-default.png",
+  type = "website"
 }: {
   title: string;
   description: string;
   path: string;
   image?: string;
+  type?: "website" | "article";
 }): Metadata {
+  const cleanTitle = buildPageTitle(title);
   const url = `${siteUrl}${path}`;
+
   return {
-    title,
+    title: cleanTitle,
     description,
     alternates: { canonical: path },
     openGraph: {
-      title,
+      title: cleanTitle,
       description,
       url,
-      siteName: "RightBricks",
-      type: "website",
-      images: [{ url: image, width: 1200, height: 630, alt: title }]
+      siteName: BRAND,
+      type,
+      images: [{ url: image, width: 1200, height: 630, alt: cleanTitle }]
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: cleanTitle,
       description,
       images: [image]
     }
@@ -53,12 +72,28 @@ export function buildWebSiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "RightBricks",
+    name: BRAND,
     url: siteUrl,
     potentialAction: {
       "@type": "SearchAction",
       target: `${siteUrl}/listings?q={search_term_string}`,
       "query-input": "required name=search_term_string"
     }
+  };
+}
+
+export function buildOrganizationJsonLd(input: {
+  email: string;
+  telephone: string;
+  sameAs: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: BRAND,
+    url: siteUrl,
+    email: input.email,
+    telephone: input.telephone,
+    sameAs: input.sameAs
   };
 }

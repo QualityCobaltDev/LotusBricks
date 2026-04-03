@@ -12,6 +12,8 @@ import { getSession } from "@/lib/auth";
 import { normalizeListingSlug } from "@/lib/listing-slug";
 import { resolveListingSlug } from "@/lib/listing-routing";
 import { getVerificationReadiness } from "@/lib/listing-validation";
+import { buildBreadcrumbJsonLd, buildPageTitle } from "@/lib/metadata";
+import { getCanonicalSiteUrl } from "@/lib/env";
 
 const asStringArray = (value: Prisma.JsonValue | null | undefined) =>
   Array.isArray(value) ? value.map((item) => String(item)) : [];
@@ -41,13 +43,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!listing) return { title: "Listing not found" };
 
+  const metadataTitle = buildPageTitle(listing.seoTitle ?? `${listing.title} ${listing.city ? `in ${listing.city}` : ""}`.trim());
+  const metadataDescription = listing.seoDescription ?? listing.summary;
+
   return {
-    title: listing.seoTitle ?? `${listing.title} | ${listing.city}`,
-    description: listing.seoDescription ?? listing.summary,
-    alternates: { canonical: `/listings/${slug}` },
+    title: metadataTitle,
+    description: metadataDescription,
+    alternates: { canonical: `/listings/${listing.slug}` },
     openGraph: {
-      title: listing.seoTitle ?? listing.title,
-      description: listing.seoDescription ?? listing.summary,
+      title: metadataTitle,
+      description: metadataDescription,
+      url: `${getCanonicalSiteUrl()}/listings/${listing.slug}`,
+      type: "website",
+      images: listing.openGraphImage ? [listing.openGraphImage] : undefined
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: metadataTitle,
+      description: metadataDescription,
       images: listing.openGraphImage ? [listing.openGraphImage] : undefined
     }
   };
@@ -123,6 +136,14 @@ export default async function ListingDetail({
   const securityFeatures = asStringArray(listing.securityFeatures);
   const lifestyleFeatures = asStringArray(listing.lifestyleFeatures);
   const badges = asStringArray(listing.badges);
+
+  const breadcrumbLd = buildBreadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Listings", path: "/listings" },
+    { name: listing.title, path: `/listings/${listing.slug}` }
+  ]);
+
+  const canonicalUrl = `${getCanonicalSiteUrl()}/listings/${listing.slug}`;
 
   const ld = listing.structuredData ?? {
     "@context": "https://schema.org",
@@ -298,7 +319,8 @@ export default async function ListingDetail({
           </div>
         </div>
       )}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ ...ld, url: canonicalUrl }) }} />
     </section>
   );
 }

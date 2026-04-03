@@ -8,7 +8,7 @@ import { CONTACT } from "@/lib/contact";
 import { normalizeContactPlan, normalizeContactSource } from "@/lib/routing";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Contact RightBricks",
+  title: "Contact Sales & Support",
   description: "Contact RightBricks sales and support team via email, phone, WhatsApp, or Telegram.",
   path: "/contact"
 });
