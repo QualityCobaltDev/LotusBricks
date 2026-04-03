@@ -13,7 +13,7 @@ for (const route of ["/", "/listings", "/pricing", "/resources", "/contact"]) {
 }
 
 const contactPage = fs.readFileSync("src/app/contact/page.tsx", "utf8");
-assert(contactPage.includes("normalizePlan"), "contact plan prefill normalization missing");
+assert(contactPage.includes("normalizeContactPlan"), "contact plan prefill normalization missing");
 
 const resetRoute = fs.readFileSync("src/app/api/auth/forgot-password/route.ts", "utf8");
 assert(resetRoute.includes("If an account exists"), "forgot-password route must avoid account enumeration leaks");

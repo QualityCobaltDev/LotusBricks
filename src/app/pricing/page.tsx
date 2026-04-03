@@ -5,6 +5,7 @@ import { formatUsd } from "@/lib/plans";
 import { getPricingPlans } from "@/lib/pricing-settings";
 import { Reveal } from "@/components/ui/reveal";
 import { getStaggerDelay } from "@/lib/motion";
+import { normalizePublicHref } from "@/lib/routing";
 
 export const metadata: Metadata = buildMetadata({
   title: "Pricing Plans",
@@ -67,7 +68,7 @@ export default async function PricingPage() {
                 <li><strong>Support:</strong> {supportByTier[plan.key]}</li>
               </ul>
 
-              <a href={plan.ctaHref} className={`btn ${plan.contactOnly ? "btn-ghost" : "btn-primary"}`} data-track-event="choose_tier" data-track-label={plan.key}>{plan.contactOnly ? "Request Custom Proposal" : "Get Started"}</a>
+              <a href={normalizePublicHref(plan.ctaHref)} className={`btn ${plan.contactOnly ? "btn-ghost" : "btn-primary"}`} data-track-event="choose_tier" data-track-label={plan.key}>{plan.contactOnly ? "Request Custom Proposal" : "Get Started"}</a>
               <small className="muted">No hidden charges. You always know what you pay and what you get.</small>
             </article>
           </Reveal>
