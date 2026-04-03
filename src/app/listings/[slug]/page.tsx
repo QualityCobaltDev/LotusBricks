@@ -125,6 +125,7 @@ export default async function ListingDetail({
   const normalizedMedia = normalizeListingMedia(listing.media, listing.title);
   const videos = normalizedMedia.filter((m) => m.type === "video");
   const primary = getPrimaryMedia(normalizedMedia);
+  const readiness = getVerificationReadiness({ ...listing, mediaCount: normalizedMedia.length });
 
   const keySellingPoints = asStringArray(listing.keySellingPoints);
   const idealFor = asStringArray(listing.idealFor);
@@ -167,6 +168,11 @@ export default async function ListingDetail({
           <h1>{listing.title}</h1>
           <p className="muted">{[listing.streetAddress, listing.district, listing.city, listing.country].filter(Boolean).join(", ")}</p>
           <p>{listing.heroDescription ?? listing.summary}</p>
+          <div className="trust-row">
+            <span>Verification: {listing.verificationState.replaceAll("_", " ").toLowerCase()}</span>
+            <span>Readiness: {readiness.score}%</span>
+            <span>Last reviewed: {listing.lastReviewedAt ? listing.lastReviewedAt.toISOString().slice(0, 10) : "Pending"}</span>
+          </div>
         </div>
         <p className="price">${listing.priceUsd.toLocaleString()} {listing.priceFrequency !== "TOTAL" ? `/${listing.priceFrequency.toLowerCase()}` : ""}</p>
         {hasVideoMedia(normalizedMedia) && <p className="muted">Includes video tour</p>}
@@ -175,7 +181,7 @@ export default async function ListingDetail({
       <div className="detail-layout">
         <div>
           <Image src={primary?.posterUrl ?? primary?.url ?? MEDIA_FALLBACK_IMAGE} alt={primary?.altText ?? listing.title} className="detail-hero" width={1200} height={720} priority />
-          <div className="hero-actions">
+          <div className="hero-actions detail-cta-row">
             <a className="btn btn-primary" href="#listing-enquiry" data-track-event="listing_enquiry_start" data-track-label="detail-enquire-now">Enquire Now</a>
             <a className="btn btn-ghost" href="#listing-enquiry" data-track-event="listing_enquiry_start" data-track-label="detail-get-details">Get Details</a>
             <a className="btn btn-ghost" href="tel:+85511389625" data-track-event="call_click" data-track-label="detail-schedule-viewing">Schedule Viewing</a>
@@ -270,23 +276,17 @@ export default async function ListingDetail({
           </article>
 
 
-          <article className="card-pad section">
+          <article className="card-pad section verification-module">
             <h2>Verification summary</h2>
-            {(() => {
-              const readiness = getVerificationReadiness({ ...listing, mediaCount: normalizedMedia.length });
-              return (
-                <>
-                  <p className="muted">Verification state: <strong>{listing.verificationState.replaceAll("_", " ").toLowerCase()}</strong> · Readiness score: <strong>{readiness.score}%</strong></p>
-                  <ul className="check-list">
-                    <li>Media verified: {listing.mediaVerified ? "Yes" : "No"}</li>
-                    <li>Ownership/documentation reviewed: {listing.docsReviewed ? "Yes" : "No"}</li>
-                    <li>Location confirmed: {listing.locationConfirmed ? "Yes" : "No"}</li>
-                    <li>Pricing last updated: {listing.pricingUpdatedAt ? listing.pricingUpdatedAt.toISOString().slice(0, 10) : "Not provided"}</li>
-                    <li>Last reviewed date: {listing.lastReviewedAt ? listing.lastReviewedAt.toISOString().slice(0, 10) : "Not provided"}</li>
-                  </ul>
-                </>
-              );
-            })()}
+            <p className="muted">Verification state: <strong>{listing.verificationState.replaceAll("_", " ").toLowerCase()}</strong> · Readiness score: <strong>{readiness.score}%</strong></p>
+            <ul className="check-list">
+              <li>Media verified: {listing.mediaVerified ? "Yes" : "No"}</li>
+              <li>Ownership/documentation reviewed: {listing.docsReviewed ? "Yes" : "No"}</li>
+              <li>Location confirmed: {listing.locationConfirmed ? "Yes" : "No"}</li>
+              <li>Pricing last updated: {listing.pricingUpdatedAt ? listing.pricingUpdatedAt.toISOString().slice(0, 10) : "Not provided"}</li>
+              <li>Last reviewed date: {listing.lastReviewedAt ? listing.lastReviewedAt.toISOString().slice(0, 10) : "Not provided"}</li>
+            </ul>
+            <p className="muted">How to read this: verification checks are completed by RightBricks operations before a listing is prioritized in search and outreach.</p>
           </article>
 
           <article className="card-pad section">
@@ -307,8 +307,10 @@ export default async function ListingDetail({
           <p className="muted">Phone: <a href="tel:+85511389625">(+855) 011 389 625</a></p>
           <p className="muted">Email: <a href="mailto:contact@rightbricks.online">contact@rightbricks.online</a></p>
           <p className="muted">Direct contact. No obligation. Fast response during business hours.</p>
-          <a className="btn btn-accent" href="tel:+85511389625" style={{ width: "100%", marginBottom: ".75rem" }} data-track-event="call_click" data-track-label="aside-call">Schedule a viewing</a>
-          <a className="btn btn-outline" href="mailto:contact@rightbricks.online" style={{ width: "100%", marginBottom: ".75rem" }} data-track-event="email_click" data-track-label="detail-email">Get details by email</a>
+          <div className="sticky-quick-actions">
+            <a className="btn btn-accent" href="tel:+85511389625" style={{ width: "100%", marginBottom: ".75rem" }} data-track-event="call_click" data-track-label="aside-call">Schedule a viewing</a>
+            <a className="btn btn-outline" href="mailto:contact@rightbricks.online" style={{ width: "100%", marginBottom: ".75rem" }} data-track-event="email_click" data-track-label="detail-email">Get details by email</a>
+          </div>
           <h3>Contact / enquiry form</h3>
           <InquiryForm listingId={listing.id} compact initialMessage={`Hello RightBricks, I am interested in ${listing.title}. Please share more details and viewing availability.`} />
         </aside>
