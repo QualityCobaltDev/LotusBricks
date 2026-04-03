@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { trustStats } from "@/lib/site/content";
+import { platformPotentialStats } from "@/lib/site/content";
 import { buildMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = buildMetadata({
@@ -35,7 +35,7 @@ export default function AboutPage() {
         </article>
       </div>
 
-      <div className="stat-grid">{trustStats.map((item) => <article key={item.label} className="stat-card"><p>{item.value}</p><span>{item.label}</span></article>)}</div>
+      <div className="stat-grid">{platformPotentialStats.map((item) => <article key={item.label} className="stat-card"><p>{item.value}</p><span>{item.label}</span></article>)}</div>
 
       <section className="cta-band">
         <h2>Ready to grow your property visibility?</h2>
