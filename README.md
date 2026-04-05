@@ -1,51 +1,63 @@
-# RightBricks Rebuild
+RightBricks
 
-Production-grade rewrite of the RightBricks property platform using Next.js App Router + Prisma + PostgreSQL.
+RightBricks is a modern real estate platform designed to transform how property is listed, discovered, and managed in Cambodia.
 
-## Architecture
-- Public marketing and listing pages.
-- Shared sign-in endpoint with server-side role routing.
-- Admin area (`/admin`) for users, listings, inquiries, pricing, and content visibility.
-- Customer area (`/account`) with saved listings.
-- API routes with Zod validation and role checks.
-- Prisma-backed content and business entities.
-- Docker Compose stack (`web`, `db`, `proxy`) behind Caddy.
+Built with a focus on performance, scalability, and user experience, the platform provides a structured environment for showcasing property listings and managing real estate operations efficiently.
 
-## Environment
-Copy `.env.example` to `.env` and set secure values.
+Overview
 
-## Run locally
-```bash
-npm install
-npm run prisma:generate
-npm run build
-npm run dev
-```
+RightBricks delivers a streamlined digital experience for:
 
-## Docker deployment
-```bash
-./scripts/deploy-production.sh main
-```
+Property discovery and browsing
+Structured listing presentation
+Centralised listing management
+Role-based platform access
+Scalable infrastructure for future growth
 
-This deployment script fails fast, stamps images with the deployed commit SHA, rebuilds the Docker stack deterministically, waits for Postgres health, runs `prisma generate`, runs `prisma db push`, seeds baseline data, then starts web/proxy and prints health + logs.
+The platform is engineered to support agents, developers, and property owners through a clean and conversion-focused interface.
 
-## Seed credentials
-- Admin: `admin@rightbricks.online` / `Admin123!`
-- Customer: `customer@rightbricks.online` / `Customer123!`
+Technology Stack
+Frontend: Next.js (App Router)
+Backend: Node.js
+Database: PostgreSQL
+ORM: Prisma
+Validation: Zod
+Infrastructure: Docker + Reverse Proxy
+Key Features
+Modern property listing system
+High-performance page rendering
+Role-based authentication and access control
+Admin management interface
+Structured API architecture
+Scalable full-stack design
+Architecture (High-Level)
 
+The platform is built with a modular architecture:
 
-## Database lifecycle
-```bash
-npm run prisma:generate
-npm run prisma:push
-npm run seed
-```
+Public-facing pages for listings and marketing
+Secure authentication and role routing
+Administrative management system
+API layer with validation and access control
+Database layer using a structured schema
 
-Use `prisma db push` as the production schema-sync strategy for this repository.
+Security
 
+This repository does not contain any production credentials or sensitive configuration.
+All secrets, keys, and environment-specific values must be managed securely outside of the codebase.
 
-## Demo media curation workflow
+Project Status
+RightBricks is currently under active development, with a focus on building a scalable and high-performance real estate platform.
 
-- Seed fresh curated listing media: `npm run prisma:reset`
-- Backfill curated demo media onto existing seeded listings without removing uploaded media: `npm run seed:backfill-media`
-- Validate media normalization helpers: `npm run test:media`
+License
+This project is proprietary and not open for redistribution or reuse without permission.
+
+Contact
+For business or platform inquiries:
+
+Email: contact@rightbricks.online
+Phone: (+855) 011 389 625
+
+Notes
+
+This public repository provides a high-level overview of the platform architecture and capabilities.
+Certain internal systems, configurations, and operational details have been intentionally omitted.
