@@ -21,7 +21,7 @@
   --gradient-brand: linear-gradient(130deg, #173f99 0%, #1e57ca 52%, #c92857 100%);
   --gradient-surface: radial-gradient(circle at 0 0, rgba(63, 117, 225, 0.18), transparent 54%), radial-gradient(circle at 95% 0, rgba(201, 55, 99, 0.14), transparent 46%);
   --overlay: rgba(7, 15, 35, 0.64);
-  --hero-image-blend: #ffffff;
+  --hero-image-blend: var(--background);
   --radius: 18px;
   --radius-sm: 12px;
   --radius-lg: 22px;
@@ -332,7 +332,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .hero::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
-  background: #ffffff; filter: none; pointer-events: none; opacity: 1; animation: none;
+  background: var(--background); filter: none; pointer-events: none; opacity: 1; animation: none;
 }
 .hero-backdrop { position: absolute; inset: 0; z-index: -2; pointer-events: none; will-change: transform; }
 .hero-backdrop-orb {
